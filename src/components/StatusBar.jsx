@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { STATE_TEXT, CHICK_STATE_TEXT, JUVENILE_STATE_TEXT, GROWTH_STAGE } from '../constants/gameConfig';
 import Coin from './Coin';
 
@@ -32,8 +33,10 @@ const PixelBar = ({ value, color, label }) => (
   </div>
 );
 
-const StatusBar = ({ selectedChicken, chickenCount, juvenileCount, chickCount, eggCount, deathCount, coins }) => {
-  const { hunger, happiness, health, tiredness, state, stage } = selectedChicken || {};
+const StatusBar = ({ selectedChicken, chickenCount, juvenileCount, chickCount, eggCount, deathCount, coins, onNameChange }) => {
+  const { hunger, happiness, health, tiredness, state, stage, name, id } = selectedChicken || {};
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [editName, setEditName] = useState('');
   
   const getStateText = () => {
     if (!stage) return STATE_TEXT.default;
@@ -88,9 +91,54 @@ const StatusBar = ({ selectedChicken, chickenCount, juvenileCount, chickCount, e
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
           <span style={{ fontSize: '14px' }}>{getStageIcon()}</span>
-          <span className="font-bold" style={{ color: '#5d4037', fontSize: '11px' }}>
-            {getStageName()}
-          </span>
+          
+          {/* 이름 (클릭하면 편집 가능) */}
+          {isEditingName ? (
+            <input
+              type="text"
+              value={editName}
+              onChange={(e) => setEditName(e.target.value)}
+              onBlur={() => {
+                if (editName.trim() && onNameChange && id) {
+                  onNameChange(id, editName.trim());
+                }
+                setIsEditingName(false);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  if (editName.trim() && onNameChange && id) {
+                    onNameChange(id, editName.trim());
+                  }
+                  setIsEditingName(false);
+                }
+                if (e.key === 'Escape') {
+                  setIsEditingName(false);
+                }
+              }}
+              autoFocus
+              className="font-bold px-1 rounded outline-none"
+              style={{ 
+                color: '#5d4037', 
+                fontSize: '11px',
+                backgroundColor: '#fff',
+                border: '2px solid #f59e0b',
+                width: '70px',
+              }}
+            />
+          ) : (
+            <span 
+              className="font-bold cursor-pointer hover:underline"
+              style={{ color: '#5d4037', fontSize: '11px' }}
+              onClick={() => {
+                setEditName(name || getStageName());
+                setIsEditingName(true);
+              }}
+              title="클릭해서 이름 변경"
+            >
+              {name || getStageName()}
+            </span>
+          )}
+          
           <span 
             className="px-2 py-0.5 rounded"
             style={{ 

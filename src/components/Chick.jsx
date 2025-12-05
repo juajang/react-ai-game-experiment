@@ -1,7 +1,7 @@
 import ChickSprite from './ChickSprite';
 import Plumbob from './Plumbob';
 
-const Chick = ({ x, y, frame, direction, state, growthProgress, isSelected, onClick }) => (
+const Chick = ({ x, y, frame, direction, state, growthProgress, isSelected, onClick, name }) => (
   <div 
     className="absolute transition-all duration-100 cursor-pointer"
     style={{ left: x - 21, top: y - 32 }}
@@ -24,7 +24,7 @@ const Chick = ({ x, y, frame, direction, state, growthProgress, isSelected, onCl
     )}
     
     {/* 성장 진행도 바 */}
-    {growthProgress !== undefined && (
+    {growthProgress !== undefined && !isSelected && (
       <div 
         className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-6 h-1"
         style={{ backgroundColor: '#3d3d3d', border: '1px solid #5d4037' }}
@@ -33,6 +33,22 @@ const Chick = ({ x, y, frame, direction, state, growthProgress, isSelected, onCl
           className="h-full"
           style={{ width: `${growthProgress}%`, backgroundColor: '#4caf50' }}
         />
+      </div>
+    )}
+    
+    {/* 선택 시 이름 표시 */}
+    {isSelected && name && (
+      <div 
+        className="absolute left-1/2 -translate-x-1/2 whitespace-nowrap"
+        style={{ 
+          bottom: 2,
+          color: '#5d4037',
+          fontSize: '6px',
+          fontWeight: 'bold',
+          textShadow: '0 0 2px #fff, 0 0 2px #fff',
+        }}
+      >
+        {name}
       </div>
     )}
   </div>

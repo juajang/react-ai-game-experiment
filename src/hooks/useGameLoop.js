@@ -9,11 +9,23 @@ import {
   getAnimationFrame,
 } from '../utils/gameUtils';
 
+// 닭 이름 생성용 카운터
+let chickenNameCounter = 1;
+
+// 귀여운 닭 이름 목록
+const CHICKEN_NAMES = ['꼬꼬', '삐약이', '노란이', '뽀삐', '콩이', '달이', '해피', '럭키', '초코', '모카', '밀크', '치즈', '버터', '꿀이', '별이', '구름이', '솜이', '복이', '보리', '찰스'];
+
+const getRandomChickenName = () => {
+  const baseName = CHICKEN_NAMES[Math.floor(Math.random() * CHICKEN_NAMES.length)];
+  return `${baseName}${chickenNameCounter++}`;
+};
+
 /**
  * 닭 생성
  */
 const createChicken = (x, y, stage = GROWTH_STAGE.ADULT) => ({
   id: Date.now() + Math.random(),
+  name: getRandomChickenName(),
   x,
   y,
   hunger: stage === GROWTH_STAGE.ADULT 
@@ -216,6 +228,13 @@ export const useGameLoop = (fieldSize) => {
   // 똥 치우기
   const removePoop = (poopId) => {
     setPoops(prev => prev.filter(p => p.id !== poopId));
+  };
+
+  // 닭 이름 변경
+  const updateChickenName = (chickenId, newName) => {
+    setChickens(prev => prev.map(c => 
+      c.id === chickenId ? { ...c, name: newName } : c
+    ));
   };
 
   // 가장 가까운 빈 닭집 찾기
@@ -737,6 +756,7 @@ export const useGameLoop = (fieldSize) => {
     addCoop,
     moveCoop,
     removePoop,
+    updateChickenName,
     togglePlacingCoop,
     restartGame,
     continueGame,

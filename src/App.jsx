@@ -142,6 +142,7 @@ export default function ChickenGame() {
     addCoop,
     moveCoop,
     removePoop,
+    updateChickenName,
     restartGame,
     continueGame,
     chickenCount,
@@ -287,6 +288,7 @@ export default function ChickenGame() {
             growthProgress={c.growthProgress}
             isSelected={isSelected}
             onClick={() => handleChickenClick(c.id)}
+            name={c.name}
           />
         );
       case GROWTH_STAGE.JUVENILE:
@@ -301,6 +303,7 @@ export default function ChickenGame() {
             growthProgress={c.growthProgress}
             isSelected={isSelected}
             onClick={() => handleChickenClick(c.id)}
+            name={c.name}
           />
         );
       default:
@@ -314,6 +317,7 @@ export default function ChickenGame() {
             state={c.state}
             isSelected={isSelected}
             onClick={() => handleChickenClick(c.id)}
+            name={c.name}
           />
         );
     }
@@ -420,6 +424,7 @@ export default function ChickenGame() {
               eggCount={eggs.length}
               deathCount={deathCount}
               coins={coins}
+              onNameChange={updateChickenName}
             />
             
             {/* 안내 메시지 */}
