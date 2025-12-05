@@ -1,10 +1,18 @@
 import ChickSprite from './ChickSprite';
+import Plumbob from './Plumbob';
 
-const Chick = ({ x, y, frame, direction, state, growthProgress }) => (
+const Chick = ({ x, y, frame, direction, state, growthProgress, isSelected, onClick }) => (
   <div 
-    className="absolute transition-all duration-100"
+    className="absolute transition-all duration-100 cursor-pointer"
     style={{ left: x - 21, top: y - 32 }}
+    onClick={(e) => {
+      e.stopPropagation();
+      onClick?.();
+    }}
   >
+    {/* 심즈 스타일 플럼밥 (작은 크기) */}
+    {isSelected && <Plumbob size={10} />}
+    
     <ChickSprite frame={frame} direction={direction} />
     
     {state === 'eating' && (

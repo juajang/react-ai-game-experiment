@@ -1,4 +1,4 @@
-import { STATE_TEXT } from '../constants/gameConfig';
+import { STATE_TEXT, CHICK_STATE_TEXT, JUVENILE_STATE_TEXT, GROWTH_STAGE } from '../constants/gameConfig';
 
 // 픽셀 스타일 프로그레스 바
 const PixelBar = ({ value, color, label }) => (
@@ -35,9 +35,40 @@ const PixelBar = ({ value, color, label }) => (
   </div>
 );
 
-const StatusBar = ({ chicken, chickenCount, juvenileCount, chickCount, eggCount }) => {
-  const { hunger, happiness, health, state } = chicken || {};
-  const stateText = STATE_TEXT[state] || STATE_TEXT.default;
+const StatusBar = ({ selectedChicken, chickenCount, juvenileCount, chickCount, eggCount }) => {
+  const { hunger, happiness, health, state, stage } = selectedChicken || {};
+  
+  // 단계별 상태 텍스트
+  const getStateText = () => {
+    if (!stage) return STATE_TEXT.default;
+    
+    switch (stage) {
+      case GROWTH_STAGE.CHICK:
+        return CHICK_STATE_TEXT[state] || CHICK_STATE_TEXT.default;
+      case GROWTH_STAGE.JUVENILE:
+        return JUVENILE_STATE_TEXT[state] || JUVENILE_STATE_TEXT.default;
+      default:
+        return STATE_TEXT[state] || STATE_TEXT.default;
+    }
+  };
+  
+  // 단계별 아이콘
+  const getStageIcon = () => {
+    switch (stage) {
+      case GROWTH_STAGE.CHICK: return '🐥';
+      case GROWTH_STAGE.JUVENILE: return '🐤';
+      default: return '🐔';
+    }
+  };
+  
+  // 단계별 이름
+  const getStageName = () => {
+    switch (stage) {
+      case GROWTH_STAGE.CHICK: return '병아리';
+      case GROWTH_STAGE.JUVENILE: return '청소년';
+      default: return '성체 닭';
+    }
+  };
   
   const getColor = (value, thresholds = { high: 70, low: 30 }) => {
     if (value > thresholds.high) return '#22c55e';
@@ -56,9 +87,12 @@ const StatusBar = ({ chicken, chickenCount, juvenileCount, chickCount, eggCount 
     >
       {/* 헤더 */}
       <div className="flex items-center justify-between mb-3">
-        <span className="font-bold" style={{ color: '#5d4037', fontSize: '14px' }}>
-          🐔 농장 상태
-        </span>
+        <div className="flex items-center gap-2">
+          <span style={{ fontSize: '18px' }}>{getStageIcon()}</span>
+          <span className="font-bold" style={{ color: '#5d4037', fontSize: '13px' }}>
+            {getStageName()}
+          </span>
+        </div>
         <span 
           className="px-3 py-1 rounded"
           style={{ 
@@ -68,14 +102,25 @@ const StatusBar = ({ chicken, chickenCount, juvenileCount, chickCount, eggCount 
             fontSize: '11px',
           }}
         >
-          {stateText}
+          {getStateText()}
         </span>
       </div>
       
-      {/* 스탯 바들 */}
-      <PixelBar value={hunger || 0} color={getColor(hunger)} label="🍽️ 포만감" />
-      <PixelBar value={happiness || 0} color={getColor(happiness, { high: 60, low: 40 })} label="😊 행복도" />
-      <PixelBar value={health || 0} color={getColor(health, { high: 80, low: 60 })} label="❤️ 건강" />
+      {/* 선택된 닭이 있을 때만 스탯 표시 */}
+      {selectedChicken ? (
+        <>
+          <PixelBar value={hunger || 0} color={getColor(hunger)} label="🍽️ 포만감" />
+          <PixelBar value={happiness || 0} color={getColor(happiness, { high: 60, low: 40 })} label="😊 행복도" />
+          <PixelBar value={health || 0} color={getColor(health, { high: 80, low: 60 })} label="❤️ 건강" />
+        </>
+      ) : (
+        <div 
+          className="text-center py-4"
+          style={{ color: '#8b7355', fontSize: '12px' }}
+        >
+          닭을 클릭해서 상태를 확인하세요
+        </div>
+      )}
       
       {/* 개체 수 표시 */}
       <div 

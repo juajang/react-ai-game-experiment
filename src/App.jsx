@@ -1,4 +1,4 @@
-import { useRef, useCallback } from 'react';
+import { useRef, useCallback, useState } from 'react';
 import { Chicken, Chick, Juvenile, Egg, Feed, Field, GameInfo, StatusBar } from './components';
 import { useGameLoop } from './hooks/useGameLoop';
 import { useFieldSize } from './hooks/useFieldSize';
@@ -8,7 +8,6 @@ export default function ChickenGame() {
   const fieldRef = useRef(null);
   const fieldSize = useFieldSize(fieldRef);
   const { 
-    chicken, 
     chickens, 
     eggs, 
     feeds, 
@@ -18,6 +17,15 @@ export default function ChickenGame() {
     chickCount,
   } = useGameLoop(fieldSize);
 
+  // 선택된 닭 ID
+  const [selectedId, setSelectedId] = useState(null);
+  
+  // 선택된 닭 찾기
+  const selectedChicken = chickens.find(c => c.id === selectedId);
+  
+  // 선택된 닭이 없어졌으면 첫 번째 닭 선택
+  const displayChicken = selectedChicken || chickens[0];
+
   const handleFieldClick = useCallback((e) => {
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left;
@@ -25,8 +33,14 @@ export default function ChickenGame() {
     addFeed(x, y);
   }, [addFeed]);
 
+  const handleChickenClick = useCallback((id) => {
+    setSelectedId(id);
+  }, []);
+
   // 성장 단계에 따른 컴포넌트 렌더링
   const renderChicken = (c) => {
+    const isSelected = c.id === selectedId || (!selectedId && c === chickens[0]);
+    
     switch (c.stage) {
       case GROWTH_STAGE.CHICK:
         return (
@@ -38,6 +52,8 @@ export default function ChickenGame() {
             direction={c.direction}
             state={c.state}
             growthProgress={c.growthProgress}
+            isSelected={isSelected}
+            onClick={() => handleChickenClick(c.id)}
           />
         );
       case GROWTH_STAGE.JUVENILE:
@@ -50,6 +66,8 @@ export default function ChickenGame() {
             direction={c.direction}
             state={c.state}
             growthProgress={c.growthProgress}
+            isSelected={isSelected}
+            onClick={() => handleChickenClick(c.id)}
           />
         );
       default:
@@ -61,6 +79,8 @@ export default function ChickenGame() {
             frame={c.frame}
             direction={c.direction}
             state={c.state}
+            isSelected={isSelected}
+            onClick={() => handleChickenClick(c.id)}
           />
         );
     }
@@ -97,9 +117,9 @@ export default function ChickenGame() {
           </h1>
         </div>
         
-        {/* 상태바 */}
+        {/* 상태바 - 선택된 닭 정보 */}
         <StatusBar 
-          chicken={chicken} 
+          selectedChicken={displayChicken} 
           chickenCount={chickenCount}
           juvenileCount={juvenileCount}
           chickCount={chickCount}
