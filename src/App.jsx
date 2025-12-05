@@ -1,5 +1,5 @@
 import { useRef, useCallback, useState, useEffect } from 'react';
-import { Chicken, Chick, Juvenile, Egg, Feed, Flower, Field, GameInfo, StatusBar, Coop, ItemPanel } from './components';
+import { Chicken, Chick, Juvenile, DeadChicken, Egg, Feed, Flower, Field, GameInfo, StatusBar, Coop, ItemPanel } from './components';
 import { useGameLoop } from './hooks/useGameLoop';
 import { useFieldSize } from './hooks/useFieldSize';
 import { GROWTH_STAGE, GAME_CONFIG } from './constants/gameConfig';
@@ -15,6 +15,7 @@ export default function ChickenGame() {
     coops,
     coins,
     deathCount,
+    deadChickens,
     addFeed,
     addFlower,
     addCoop,
@@ -296,6 +297,16 @@ export default function ChickenGame() {
                 
                 {/* 닭들 */}
                 {chickens.map(c => renderChicken(c))}
+                
+                {/* 사망한 닭들 (페이드아웃) */}
+                {deadChickens.map(c => (
+                  <DeadChicken
+                    key={`dead-${c.id}`}
+                    x={c.x}
+                    y={c.y}
+                    deathTime={c.deathTime}
+                  />
+                ))}
               </Field>
             </div>
             

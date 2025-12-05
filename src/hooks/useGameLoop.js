@@ -75,6 +75,7 @@ export const useGameLoop = (fieldSize) => {
   const [coins, setCoins] = useState(100); // 시작 코인
   const [placingCoop, setPlacingCoop] = useState(false);
   const [deathCount, setDeathCount] = useState(0); // 사망한 닭 수
+  const [deadChickens, setDeadChickens] = useState([]); // 사망한 닭들 (잠시 표시용)
 
   // useRef로 현재 상태 참조
   const chickensRef = useRef(chickens);
@@ -449,10 +450,20 @@ export const useGameLoop = (fieldSize) => {
       const deadChickens = allChickensWithNew.filter(c => c.health <= 0);
       const aliveChickens = allChickensWithNew.filter(c => c.health > 0);
       
-      // 사망 카운트 업데이트
+      // 사망 카운트 업데이트 및 사망 닭 표시
       if (deadChickens.length > 0) {
         setDeathCount(prev => prev + deadChickens.length);
+        
+        // 사망한 닭을 deadChickens 상태에 추가 (3초간 표시)
+        const newDeadChickens = deadChickens.map(c => ({
+          ...c,
+          deathTime: Date.now(),
+        }));
+        setDeadChickens(prev => [...prev, ...newDeadChickens]);
       }
+      
+      // 3초가 지난 사망 닭 제거
+      setDeadChickens(prev => prev.filter(c => Date.now() - c.deathTime < 3000));
 
       // 6. 상태 일괄 업데이트
       setChickens(aliveChickens);
@@ -483,6 +494,7 @@ export const useGameLoop = (fieldSize) => {
     coops,
     coins,
     deathCount,
+    deadChickens,
     placingCoop,
     addFeed,
     addFlower,
