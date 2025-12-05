@@ -15,6 +15,7 @@ export { default as Flower, FlowerPreview } from './Flower';
 export { default as FlowerBush, FlowerBushPreview } from './FlowerBush';
 export { default as Pond, PondPreview } from './Pond';
 export { default as Windmill, WindmillPreview } from './Windmill';
+export { default as Poop, PoopPreview } from './Poop';
 export { default as Field } from './Field';
 export { default as GameInfo } from './GameInfo';
 export { default as StatusBar } from './StatusBar';

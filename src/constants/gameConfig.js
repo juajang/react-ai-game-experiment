@@ -112,6 +112,15 @@ export const GAME_CONFIG = {
     HAPPINESS_BOOST: 0.2,            // 꽃보다 강한 행복도 효과
   },
   
+  // 똥 관련
+  POOP: {
+    DROP_CHANCE: 2,                  // 똥 싸는 확률 (2%)
+    EFFECT_RADIUS: 50,               // 영향 범위
+    HAPPINESS_PENALTY: 0.15,         // 주변 닭 행복도 감소
+    STINK_THRESHOLD: 50,             // 냄새나기 시작하는 나이
+    MAX_AGE: 200,                    // 최대 방치 시간 (사라지지 않음, 효과만 강해짐)
+  },
+  
   // 필드 관련
   FIELD: {
     DEFAULT_WIDTH: 400,

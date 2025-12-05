@@ -75,6 +75,7 @@ export const useGameLoop = (fieldSize) => {
   const [ponds, setPonds] = useState([]);
   const [windmills, setWindmills] = useState([]);
   const [coops, setCoops] = useState([]);
+  const [poops, setPoops] = useState([]);
   const [coins, setCoins] = useState(100); // 시작 코인
   const [placingCoop, setPlacingCoop] = useState(false);
   const [deathCount, setDeathCount] = useState(0); // 사망한 닭 수
@@ -98,6 +99,7 @@ export const useGameLoop = (fieldSize) => {
   const pondsRef = useRef(ponds);
   const windmillsRef = useRef(windmills);
   const coopsRef = useRef(coops);
+  const poopsRef = useRef(poops);
   const fieldSizeRef = useRef(fieldSize);
 
   useEffect(() => { chickensRef.current = chickens; }, [chickens]);
@@ -108,6 +110,7 @@ export const useGameLoop = (fieldSize) => {
   useEffect(() => { pondsRef.current = ponds; }, [ponds]);
   useEffect(() => { windmillsRef.current = windmills; }, [windmills]);
   useEffect(() => { coopsRef.current = coops; }, [coops]);
+  useEffect(() => { poopsRef.current = poops; }, [poops]);
   useEffect(() => { fieldSizeRef.current = fieldSize; }, [fieldSize]);
 
   // 사료 추가 (돈 필요)
@@ -210,6 +213,11 @@ export const useGameLoop = (fieldSize) => {
     ));
   };
 
+  // 똥 치우기
+  const removePoop = (poopId) => {
+    setPoops(prev => prev.filter(p => p.id !== poopId));
+  };
+
   // 가장 가까운 빈 닭집 찾기
   const findNearestAvailableCoop = (x, y, coops, chickens) => {
     let nearest = null;
@@ -243,7 +251,9 @@ export const useGameLoop = (fieldSize) => {
       const newEggPositions = [];
       const hatchingEggIds = new Set();
       const newChicks = [];
+      const newPoopPositions = [];
       let totalEarnedCoins = 0;
+      const currentPoops = poopsRef.current;
 
       // 1. 닭들 업데이트
       const updatedChickens = currentChickens.map(chicken => {
@@ -341,6 +351,14 @@ export const useGameLoop = (fieldSize) => {
           // 풍차는 아래에서 행복도도 추가
         }
         
+        // 똥 주변에 있으면 행복도 감소
+        const nearPoop = currentPoops.some(p => 
+          calculateDistance(x, y, p.x, p.y) < config.POOP.EFFECT_RADIUS
+        );
+        const nearOldPoop = currentPoops.some(p => 
+          calculateDistance(x, y, p.x, p.y) < config.POOP.EFFECT_RADIUS && p.age >= config.POOP.STINK_THRESHOLD
+        );
+        
         // 행복도는 건강해야만 상승, 아니면 감소
         if (health >= config.HEALTH.HAPPINESS_THRESHOLD) {
           // 건강하면 자연 감소
@@ -356,6 +374,14 @@ export const useGameLoop = (fieldSize) => {
           // 풍차 주변이면 모든 스탯 증가
           if (nearWindmill) {
             happinessChange += config.WINDMILL.ALL_BOOST;
+          }
+          // 똥 주변이면 행복도 감소
+          if (nearPoop) {
+            happinessChange -= config.POOP.HAPPINESS_PENALTY;
+          }
+          // 오래된 똥 주변이면 더 많이 감소
+          if (nearOldPoop) {
+            happinessChange -= config.POOP.HAPPINESS_PENALTY;
           }
           happiness = Math.min(config.HAPPINESS.MAX, Math.max(config.HAPPINESS.MIN, happiness + happinessChange));
         } else {
@@ -530,6 +556,11 @@ export const useGameLoop = (fieldSize) => {
           eggCooldown = config.EGG.LAY_COOLDOWN;
           state = 'laying';
         }
+        
+        // 똥 싸기 체크 (잠자는 중 제외)
+        if (state !== 'sleeping' && Math.random() * 100 < config.POOP.DROP_CHANCE) {
+          newPoopPositions.push({ x: x + (Math.random() - 0.5) * 10, y: y + 15 });
+        }
 
         return { ...chicken, x, y, hunger, happiness, health, tiredness, state, direction, frame, targetX, targetY, stage, growthProgress, eggCooldown, sleepTime, inCoopId };
       });
@@ -599,6 +630,18 @@ export const useGameLoop = (fieldSize) => {
         setFeeds(prev => prev.filter(f => !eatenFeedIds.has(f.id)));
       }
       
+      // 똥 업데이트 (나이 증가 및 새 똥 추가)
+      setPoops(prev => {
+        const aged = prev.map(p => ({ ...p, age: p.age + 1 }));
+        const newPoops = newPoopPositions.map(pos => ({
+          id: Date.now() + Math.random(),
+          x: pos.x,
+          y: pos.y,
+          age: 0,
+        }));
+        return [...aged, ...newPoops];
+      });
+      
       // 7. 코인 업데이트
       if (totalEarnedCoins > 0) {
         setCoins(prev => Math.floor((prev + totalEarnedCoins) * 100) / 100);
@@ -652,6 +695,7 @@ export const useGameLoop = (fieldSize) => {
     setPonds([]);
     setWindmills([]);
     setCoops([]);
+    setPoops([]);
     setCoins(100);
     setDeathCount(0);
     setDeadChickens([]);
@@ -675,6 +719,7 @@ export const useGameLoop = (fieldSize) => {
     ponds,
     windmills,
     coops,
+    poops,
     coins,
     deathCount,
     deadChickens,
@@ -691,6 +736,7 @@ export const useGameLoop = (fieldSize) => {
     moveWindmill,
     addCoop,
     moveCoop,
+    removePoop,
     togglePlacingCoop,
     restartGame,
     continueGame,
@@ -701,5 +747,6 @@ export const useGameLoop = (fieldSize) => {
     totalChickenCount,
     flowerBushCount: flowerBushes.length,
     windmillCount: windmills.length,
+    poopCount: poops.length,
   };
 };

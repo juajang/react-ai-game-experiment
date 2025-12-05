@@ -1,5 +1,5 @@
 import { useRef, useCallback, useState, useEffect } from 'react';
-import { Chicken, Chick, Juvenile, DeadChicken, Egg, Feed, Flower, FlowerBush, Pond, Windmill, Field, GameInfo, StatusBar, Coop, ItemPanel } from './components';
+import { Chicken, Chick, Juvenile, DeadChicken, Egg, Feed, Flower, FlowerBush, Pond, Windmill, Poop, Field, GameInfo, StatusBar, Coop, ItemPanel } from './components';
 import { useGameLoop } from './hooks/useGameLoop';
 import { useFieldSize } from './hooks/useFieldSize';
 import { GROWTH_STAGE, GAME_CONFIG, GAME_STATE, FARM_GRADE } from './constants/gameConfig';
@@ -125,6 +125,7 @@ export default function ChickenGame() {
     ponds,
     windmills,
     coops,
+    poops,
     coins,
     deathCount,
     deadChickens,
@@ -140,6 +141,7 @@ export default function ChickenGame() {
     moveWindmill,
     addCoop,
     moveCoop,
+    removePoop,
     restartGame,
     continueGame,
     chickenCount,
@@ -148,6 +150,7 @@ export default function ChickenGame() {
     totalChickenCount,
     flowerBushCount,
     windmillCount,
+    poopCount,
   } = useGameLoop(fieldSize);
 
   const [selectedChickenId, setSelectedChickenId] = useState(null);
@@ -525,6 +528,17 @@ export default function ChickenGame() {
                 {/* 꽃들 */}
                 {flowers.map(flower => (
                   <Flower key={flower.id} x={flower.x} y={flower.y} />
+                ))}
+                
+                {/* 똥들 */}
+                {poops.map(poop => (
+                  <Poop 
+                    key={poop.id} 
+                    x={poop.x} 
+                    y={poop.y} 
+                    age={poop.age}
+                    onClick={() => removePoop(poop.id)}
+                  />
                 ))}
                 
                 {/* 사료들 */}
