@@ -168,7 +168,7 @@ const Windmill = ({ x, y, isSelected, onMouseDown }) => {
         left: x - 40, 
         top: y - 70,
         cursor: isSelected ? 'grabbing' : 'grab',
-        zIndex: isSelected ? 100 : 12,
+        zIndex: isSelected ? 100 : 18,
         userSelect: 'none',
       }}
       onMouseDown={handleMouseDown}

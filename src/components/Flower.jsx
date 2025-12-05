@@ -73,7 +73,7 @@ const Flower = ({ x, y }) => {
       style={{ 
         left: x - 14, 
         top: y - 20,
-        zIndex: 5,
+        zIndex: 3,
       }}
     >
       <FlowerSprite />

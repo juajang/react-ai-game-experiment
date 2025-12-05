@@ -143,6 +143,7 @@ export default function ChickenGame() {
     moveCoop,
     removePoop,
     updateChickenName,
+    moveChicken,
     restartGame,
     continueGame,
     chickenCount,
@@ -159,6 +160,9 @@ export default function ChickenGame() {
   
   // 이동 중인 건물 (coop, pond, flowerBush, windmill)
   const [movingBuilding, setMovingBuilding] = useState(null);
+  
+  // 들고 있는 닭
+  const [heldChicken, setHeldChicken] = useState(null);
   
   const selectedChicken = chickens.find(c => c.id === selectedChickenId);
   const displayChicken = selectedChicken || chickens[0];
@@ -198,8 +202,35 @@ export default function ChickenGame() {
     };
   }, [movingBuilding, moveCoop, movePond, moveFlowerBush, moveWindmill]);
 
+  // 닭 들기/놓기 처리
+  useEffect(() => {
+    if (!heldChicken || !fieldRef.current) return;
+
+    const handleMouseMove = (e) => {
+      const rect = fieldRef.current.getBoundingClientRect();
+      const x = Math.max(30, Math.min(rect.width - 30, e.clientX - rect.left));
+      const y = Math.max(30, Math.min(rect.height - 30, e.clientY - rect.top));
+      setHeldChicken(prev => ({ ...prev, x, y }));
+    };
+
+    const handleMouseUp = () => {
+      if (heldChicken) {
+        moveChicken(heldChicken.id, heldChicken.x, heldChicken.y);
+        setHeldChicken(null);
+      }
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+    
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [heldChicken, moveChicken]);
+
   const handleFieldClick = useCallback((e) => {
-    if (movingBuilding || gameState !== GAME_STATE.PLAYING) return;
+    if (movingBuilding || heldChicken || gameState !== GAME_STATE.PLAYING) return;
     
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left;
@@ -226,12 +257,21 @@ export default function ChickenGame() {
     } else {
       addFeed(x, y);
     }
-  }, [addFeed, addFlower, addFlowerBush, addPond, addWindmill, addCoop, selectedItem, movingBuilding, gameState]);
+  }, [addFeed, addFlower, addFlowerBush, addPond, addWindmill, addCoop, selectedItem, movingBuilding, heldChicken, gameState]);
 
   const handleChickenClick = useCallback((id) => {
-    if (movingBuilding) return;
+    if (movingBuilding || heldChicken) return;
     setSelectedChickenId(id);
-  }, [movingBuilding]);
+  }, [movingBuilding, heldChicken]);
+
+  const handleChickenMouseDown = useCallback((chickenId, e) => {
+    if (gameState !== GAME_STATE.PLAYING || movingBuilding) return;
+    const chicken = chickens.find(c => c.id === chickenId);
+    if (chicken && chicken.state !== 'sleeping') {
+      setHeldChicken({ id: chickenId, x: chicken.x, y: chicken.y });
+      setSelectedChickenId(chickenId);
+    }
+  }, [chickens, gameState, movingBuilding]);
 
   const handleCoopMouseDown = useCallback((coopId) => {
     if (gameState !== GAME_STATE.PLAYING) return;
@@ -274,56 +314,68 @@ export default function ChickenGame() {
     if (c.state === 'sleeping') return null;
     
     const isSelected = c.id === selectedChickenId || (!selectedChickenId && c === chickens[0]);
+    const isHeld = heldChicken?.id === c.id;
+    
+    // 들고 있는 닭은 heldChicken의 좌표 사용
+    const chickenX = isHeld ? heldChicken.x : c.x;
+    const chickenY = isHeld ? heldChicken.y : c.y;
     
     switch (c.stage) {
       case GROWTH_STAGE.CHICK:
         return (
           <Chick
             key={c.id}
-            x={c.x}
-            y={c.y}
+            x={chickenX}
+            y={chickenY}
             frame={c.frame}
             direction={c.direction}
             state={c.state}
             growthProgress={c.growthProgress}
             isSelected={isSelected}
             onClick={() => handleChickenClick(c.id)}
+            onMouseDown={(e) => handleChickenMouseDown(c.id, e)}
             name={c.name}
+            isHeld={isHeld}
           />
         );
       case GROWTH_STAGE.JUVENILE:
         return (
           <Juvenile
             key={c.id}
-            x={c.x}
-            y={c.y}
+            x={chickenX}
+            y={chickenY}
             frame={c.frame}
             direction={c.direction}
             state={c.state}
             growthProgress={c.growthProgress}
             isSelected={isSelected}
             onClick={() => handleChickenClick(c.id)}
+            onMouseDown={(e) => handleChickenMouseDown(c.id, e)}
             name={c.name}
+            isHeld={isHeld}
           />
         );
       default:
         return (
           <Chicken 
             key={c.id}
-            x={c.x} 
-            y={c.y} 
+            x={chickenX} 
+            y={chickenY} 
             frame={c.frame}
             direction={c.direction}
             state={c.state}
             isSelected={isSelected}
             onClick={() => handleChickenClick(c.id)}
+            onMouseDown={(e) => handleChickenMouseDown(c.id, e)}
             name={c.name}
+            isHeld={isHeld}
           />
         );
     }
   };
 
   const getCursor = () => {
+    if (heldChicken) return 'grabbing';
     if (movingBuilding) return 'grabbing';
     if (selectedItem === 'coop' || selectedItem === 'pond' || selectedItem === 'windmill') return 'crosshair';
     if (selectedItem === 'flower' || selectedItem === 'flowerBush') return 'crosshair';
@@ -331,6 +383,10 @@ export default function ChickenGame() {
   };
 
   const getGuideMessage = () => {
+    if (heldChicken) {
+      const chicken = chickens.find(c => c.id === heldChicken.id);
+      return `✋ ${chicken?.name || '닭'}을(를) 들고 있어요! 마우스를 놓아서 내려놓으세요.`;
+    }
     if (movingBuilding) {
       const nameMap = { coop: '닭집', pond: '연못', flowerBush: '꽃덤불', windmill: '풍차' };
       return `📍 마우스를 놓아서 ${nameMap[movingBuilding.type]} 위치를 고정하세요!`;
@@ -354,6 +410,7 @@ export default function ChickenGame() {
   };
 
   const getGuideColor = () => {
+    if (heldChicken) return { bg: '#fee2e2', border: '#ef4444', text: '#991b1b' };
     if (movingBuilding) return { bg: '#fef3c7', border: '#f59e0b', text: '#92400e' };
     if (selectedItem === 'coop') return { bg: '#fef3c7', border: '#f59e0b', text: '#92400e' };
     if (selectedItem === 'pond') return { bg: '#dbeafe', border: '#3b82f6', text: '#1e40af' };

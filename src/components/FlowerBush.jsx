@@ -80,7 +80,7 @@ const FlowerBush = ({ x, y, isSelected, onMouseDown }) => {
         left: x - 24, 
         top: y - 30,
         cursor: isSelected ? 'grabbing' : 'grab',
-        zIndex: isSelected ? 100 : 8,
+        zIndex: isSelected ? 100 : 15,
         userSelect: 'none',
       }}
       onMouseDown={handleMouseDown}

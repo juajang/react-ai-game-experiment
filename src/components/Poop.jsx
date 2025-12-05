@@ -48,7 +48,7 @@ const Poop = ({ x, y, age, onClick }) => {
       style={{ 
         left: x - 7, 
         top: y - 7,
-        zIndex: 4,
+        zIndex: 1,
       }}
       onClick={(e) => {
         e.stopPropagation();

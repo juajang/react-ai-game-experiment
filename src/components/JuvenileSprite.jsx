@@ -1,11 +1,17 @@
-const JuvenileSprite = ({ frame, direction }) => {
+const JuvenileSprite = ({ frame, direction, isHeld }) => {
   // 프레임별 발 위치 (걷기 애니메이션)
   const getFootPositions = () => {
+    if (isHeld) {
+      const wiggle = Math.floor(Date.now() / 100) % 2;
+      return wiggle === 0 
+        ? { leftX: 5, rightX: 10, leftY: 10, rightY: 11, wingUp: true }
+        : { leftX: 6, rightX: 9, leftY: 11, rightY: 10, wingUp: false };
+    }
     switch (frame) {
-      case 0: return { leftX: 6, rightX: 9 };
-      case 1: return { leftX: 5, rightX: 10 };
-      case 2: return { leftX: 6, rightX: 9 };
-      default: return { leftX: 6, rightX: 9 };
+      case 0: return { leftX: 6, rightX: 9, leftY: 11, rightY: 11 };
+      case 1: return { leftX: 5, rightX: 10, leftY: 11, rightY: 11 };
+      case 2: return { leftX: 6, rightX: 9, leftY: 11, rightY: 11 };
+      default: return { leftX: 6, rightX: 9, leftY: 11, rightY: 11 };
     }
   };
 
@@ -20,7 +26,7 @@ const JuvenileSprite = ({ frame, direction }) => {
       height="52" 
       viewBox="0 0 16 16" 
       xmlns="http://www.w3.org/2000/svg"
-      style={{ transform: direction < 0 ? 'scaleX(-1)' : 'scaleX(1)' }}
+      style={{ transform: direction < 0 ? 'scaleX(-1)' : 'scaleX(1)', pointerEvents: 'none' }}
     >
       {/* Tail - 조금 더 발달 */}
       <rect x="3" y={6 + headOffset} width="1" height="3" fill="#f3e17a" />
@@ -29,17 +35,37 @@ const JuvenileSprite = ({ frame, direction }) => {
       <rect x="5" y={5 + headOffset} width="6" height="6" fill="#ffe866" />
       <rect x="4" y={6 + headOffset} width="8" height="4" fill="#ffe866" />
       
-      {/* Wings (살짝 길어짐) */}
-      <rect x="4" y={7 + headOffset} width="2" height="2" fill="#f7d94d" />
-      <rect x="10" y={7 + headOffset} width="2" height="2" fill="#f7d94d" />
+      {/* Wings - 들렸을 때 날개 퍼덕임 */}
+      {isHeld && feet.wingUp ? (
+        <>
+          <rect x="3" y={6 + headOffset} width="2" height="2" fill="#f7d94d" />
+          <rect x="11" y={6 + headOffset} width="2" height="2" fill="#f7d94d" />
+        </>
+      ) : (
+        <>
+          <rect x="4" y={7 + headOffset} width="2" height="2" fill="#f7d94d" />
+          <rect x="10" y={7 + headOffset} width="2" height="2" fill="#f7d94d" />
+        </>
+      )}
       
-      {/* Eyes */}
-      <rect x="6" y={6 + headOffset} width="1" height="1" fill="#000" />
-      <rect x="9" y={6 + headOffset} width="1" height="1" fill="#000" />
+      {/* Eyes - 들렸을 때 놀란 눈 */}
+      {isHeld ? (
+        <>
+          <rect x="6" y={5 + headOffset} width="1" height="1" fill="#000" />
+          <rect x="9" y={5 + headOffset} width="1" height="1" fill="#000" />
+          <rect x="6" y={6 + headOffset} width="1" height="1" fill="#fff" fillOpacity="0.4" />
+          <rect x="9" y={6 + headOffset} width="1" height="1" fill="#fff" fillOpacity="0.4" />
+        </>
+      ) : (
+        <>
+          <rect x="6" y={6 + headOffset} width="1" height="1" fill="#000" />
+          <rect x="9" y={6 + headOffset} width="1" height="1" fill="#000" />
+        </>
+      )}
       
       {/* Beak - 조금 길어짐 */}
       <rect x="7" y={7 + headOffset} width="2" height="1" fill="#ffb347" />
-      {frame === 2 && (
+      {(frame === 2 || isHeld) && (
         <rect x="7" y={8 + headOffset} width="2" height="1" fill="#ffb347" />
       )}
       
@@ -48,8 +74,8 @@ const JuvenileSprite = ({ frame, direction }) => {
       <rect x="8" y={3 + headOffset} width="1" height="1" fill="#ff6666" />
       
       {/* Feet */}
-      <rect x={feet.leftX} y="11" width="1" height="1" fill="#ff9933" />
-      <rect x={feet.rightX} y="11" width="1" height="1" fill="#ff9933" />
+      <rect x={feet.leftX} y={feet.leftY || 11} width="1" height="1" fill="#ff9933" />
+      <rect x={feet.rightX} y={feet.rightY || 11} width="1" height="1" fill="#ff9933" />
     </svg>
   );
 };

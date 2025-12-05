@@ -193,7 +193,7 @@ const Coop = ({ x, y, occupants = 0, capacity, isSelected, onMouseDown, gradeLev
         left: x - halfSize, 
         top: y - style.size + 10,
         cursor: isSelected ? 'grabbing' : 'grab',
-        zIndex: isSelected ? 100 : 10,
+        zIndex: isSelected ? 100 : 17,
         userSelect: 'none',
       }}
       onMouseDown={handleMouseDown}

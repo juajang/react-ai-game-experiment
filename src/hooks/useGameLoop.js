@@ -236,6 +236,13 @@ export const useGameLoop = (fieldSize) => {
     ));
   };
 
+  // 닭 위치 이동
+  const moveChicken = (chickenId, newX, newY) => {
+    setChickens(prev => prev.map(c => 
+      c.id === chickenId ? { ...c, x: newX, y: newY, targetX: null, targetY: null } : c
+    ));
+  };
+
   // 가장 가까운 빈 닭집 찾기
   const findNearestAvailableCoop = (x, y, coops, chickens) => {
     let nearest = null;
@@ -756,6 +763,7 @@ export const useGameLoop = (fieldSize) => {
     moveCoop,
     removePoop,
     updateChickenName,
+    moveChicken,
     togglePlacingCoop,
     restartGame,
     continueGame,

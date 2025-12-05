@@ -5,6 +5,7 @@ const Plumbob = ({ size = 16 }) => (
       width: size,
       height: size * 1.5,
       animation: 'plumbobFloat 1.5s ease-in-out infinite',
+      pointerEvents: 'none',
     }}
   >
     <svg 

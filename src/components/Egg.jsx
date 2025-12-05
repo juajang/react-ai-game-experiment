@@ -34,6 +34,7 @@ const Egg = ({ x, y, state, warmth }) => {
       style={{ 
         left: x - 24, 
         top: y - 24,
+        zIndex: 4,
         animation: isShaking ? 'shake 0.3s infinite' : 'none',
       }}
     >

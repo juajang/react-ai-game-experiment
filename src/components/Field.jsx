@@ -69,8 +69,6 @@ const Field = ({ children, onClick, placingCoop, cursor }) => {
       onClick={onClick}
       style={{
         cursor: cursor || (placingCoop ? 'crosshair' : 'pointer'),
-      }}
-      style={{
         backgroundColor: '#7cba5f',
         backgroundImage: `
           linear-gradient(to bottom, #8bc970 0%, #6aaa4f 50%, #5a9a3f 100%)

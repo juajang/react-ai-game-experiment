@@ -16,7 +16,7 @@ const DeadChicken = ({ x, y, deathTime }) => {
         top: y - 40 - floatY,
         opacity,
         transition: 'opacity 0.5s ease-out',
-        zIndex: 50,
+        zIndex: 8,
       }}
     >
       <DeadChickenSprite />

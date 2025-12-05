@@ -153,7 +153,7 @@ const Pond = ({ x, y, isSelected, onMouseDown, gradeLevel = 1 }) => {
         left: x - halfSize, 
         top: y - halfSize,
         cursor: isSelected ? 'grabbing' : 'grab',
-        zIndex: isSelected ? 100 : 8,
+        zIndex: isSelected ? 100 : 16,
         userSelect: 'none',
       }}
       onMouseDown={handleMouseDown}

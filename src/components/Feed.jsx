@@ -1,7 +1,7 @@
 const Feed = ({ x, y }) => (
   <div 
     className="absolute flex items-center justify-center"
-    style={{ left: x - 11, top: y - 14 }}
+    style={{ left: x - 11, top: y - 14, zIndex: 2 }}
   >
     <svg 
       width="22" 
