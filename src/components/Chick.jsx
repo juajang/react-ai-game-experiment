@@ -3,7 +3,7 @@ import ChickSprite from './ChickSprite';
 const Chick = ({ x, y, frame, direction, state, growthProgress }) => (
   <div 
     className="absolute transition-all duration-100"
-    style={{ left: x - 16, top: y - 24 }}
+    style={{ left: x - 21, top: y - 32 }}
   >
     <ChickSprite frame={frame} direction={direction} />
     

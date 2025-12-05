@@ -58,7 +58,7 @@ export const GAME_CONFIG = {
   // 병아리 관련
   CHICK: {
     SPEED: 1.2,
-    GROWTH_TIME: 300,              // 청소년이 되기까지 시간 (300 틱 = 30초)
+    GROWTH_TIME: 150,              // 청소년이 되기까지 시간 (150 틱 = 15초)
     INITIAL_HUNGER: 60,
     INITIAL_HAPPINESS: 60,
     INITIAL_HEALTH: 100,
@@ -68,7 +68,7 @@ export const GAME_CONFIG = {
   // 청소년 관련
   JUVENILE: {
     SPEED: 1.8,
-    GROWTH_TIME: 400,              // 성체가 되기까지 시간 (400 틱 = 40초)
+    GROWTH_TIME: 200,              // 성체가 되기까지 시간 (200 틱 = 20초)
     HUNGER_DECREASE_RATE: 0.10,    // 청소년은 중간 속도로 배고파짐
   },
   
