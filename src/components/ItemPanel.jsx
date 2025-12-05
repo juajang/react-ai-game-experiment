@@ -1,5 +1,6 @@
 import { GAME_CONFIG } from '../constants/gameConfig';
 import { CoopPreview } from './Coop';
+import { FlowerPreview } from './Flower';
 import Coin from './Coin';
 
 // 사료 미리보기
@@ -24,13 +25,23 @@ const ItemPanel = ({
   onSelectItem, 
   coins, 
   coopCount,
+  flowerCount,
 }) => {
   const consumables = [
     {
       id: 'feed',
       name: '벼',
       icon: <FeedPreview size={28} />,
-      cost: 0,
+      cost: GAME_CONFIG.FEED.COST,
+    },
+  ];
+
+  const decorations = [
+    {
+      id: 'flower',
+      name: '꽃',
+      icon: <FlowerPreview size={28} />,
+      cost: GAME_CONFIG.FLOWER.COST,
     },
   ];
 
@@ -51,25 +62,23 @@ const ItemPanel = ({
       <button
         key={item.id}
         onClick={() => onSelectItem(isSelected ? null : item.id)}
-        disabled={!canAfford && item.cost > 0}
+        disabled={!canAfford}
         className="flex flex-col items-center p-2 rounded transition-all w-full"
         style={{
           backgroundColor: isSelected ? '#fef3c7' : '#e8d5b7',
           border: isSelected ? '3px solid #f59e0b' : '2px solid #8b7355',
-          opacity: canAfford || item.cost === 0 ? 1 : 0.5,
-          cursor: canAfford || item.cost === 0 ? 'pointer' : 'not-allowed',
+          opacity: canAfford ? 1 : 0.5,
+          cursor: canAfford ? 'pointer' : 'not-allowed',
         }}
       >
         <div className="mb-1">{item.icon}</div>
         <div style={{ fontSize: '9px', color: '#5d4037', fontWeight: 'bold' }}>
           {item.name}
         </div>
-        {item.cost > 0 && (
-          <div className="flex items-center gap-0.5 mt-1" style={{ fontSize: '8px', color: '#8b7355' }}>
-            <Coin size={10} />
-            <span>{item.cost}</span>
-          </div>
-        )}
+        <div className="flex items-center gap-0.5 mt-1" style={{ fontSize: '8px', color: '#8b7355' }}>
+          <Coin size={10} />
+          <span>{item.cost}</span>
+        </div>
       </button>
     );
   };
@@ -99,7 +108,13 @@ const ItemPanel = ({
       {consumables.map(renderItem)}
       
       {/* 구분선 */}
-      <div style={{ borderTop: '2px solid #8b7355', margin: '2px 0' }} />
+      <div style={{ borderTop: '2px dashed #8b7355', margin: '2px 0' }} />
+      
+      {/* 장식 */}
+      {decorations.map(renderItem)}
+      
+      {/* 구분선 */}
+      <div style={{ borderTop: '2px dashed #8b7355', margin: '2px 0' }} />
       
       {/* 건물 */}
       {buildings.map(renderItem)}
@@ -113,6 +128,7 @@ const ItemPanel = ({
           color: '#8b7355',
         }}
       >
+        <div>🌸 {flowerCount || 0}개</div>
         <div>🏠 {coopCount}개</div>
       </div>
     </div>

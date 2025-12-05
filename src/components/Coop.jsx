@@ -1,6 +1,6 @@
 import { GAME_CONFIG } from '../constants/gameConfig';
 
-// 닭집 SVG 컴포넌트
+// 닭집 SVG 컴포넌트 (울타리 포함)
 const CoopSprite = () => (
   <svg 
     width="64" 
@@ -44,6 +44,18 @@ const CoopSprite = () => (
     
     {/* 지붕 마루선 */}
     <rect x="7" y="0" width="1" height="1" fill="#5c2c0f"/>
+    
+    {/* 울타리 (왼쪽 확장) */}
+    <rect x="0" y="11" width="1" height="3" fill="#8b4513"/>
+    <rect x="1" y="11" width="1" height="3" fill="#a0522d"/>
+    <rect x="0" y="12" width="2" height="1" fill="#d2b48c"/>
+    <rect x="0" y="11" width="2" height="1" fill="#8b4513"/>
+    
+    {/* 울타리 (오른쪽 확장) */}
+    <rect x="14" y="11" width="1" height="3" fill="#8b4513"/>
+    <rect x="15" y="11" width="1" height="3" fill="#a0522d"/>
+    <rect x="14" y="12" width="2" height="1" fill="#d2b48c"/>
+    <rect x="14" y="11" width="2" height="1" fill="#8b4513"/>
   </svg>
 );
 
@@ -63,6 +75,9 @@ export const CoopPreview = ({ size = 32 }) => (
     <rect x="6" y="8" width="4" height="6" fill="#8b4513"/>
     <rect x="3" y="5" width="2" height="2" fill="#87CEEB"/>
     <rect x="11" y="5" width="2" height="2" fill="#87CEEB"/>
+    {/* 울타리 */}
+    <rect x="0" y="11" width="2" height="3" fill="#8b4513"/>
+    <rect x="14" y="11" width="2" height="3" fill="#8b4513"/>
   </svg>
 );
 

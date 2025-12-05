@@ -70,6 +70,7 @@ export const useGameLoop = (fieldSize) => {
   ]);
   const [eggs, setEggs] = useState([]);
   const [feeds, setFeeds] = useState([]);
+  const [flowers, setFlowers] = useState([]);
   const [coops, setCoops] = useState([]);
   const [coins, setCoins] = useState(100); // 시작 코인
   const [placingCoop, setPlacingCoop] = useState(false);
@@ -78,18 +79,35 @@ export const useGameLoop = (fieldSize) => {
   const chickensRef = useRef(chickens);
   const eggsRef = useRef(eggs);
   const feedsRef = useRef(feeds);
+  const flowersRef = useRef(flowers);
   const coopsRef = useRef(coops);
   const fieldSizeRef = useRef(fieldSize);
 
   useEffect(() => { chickensRef.current = chickens; }, [chickens]);
   useEffect(() => { eggsRef.current = eggs; }, [eggs]);
   useEffect(() => { feedsRef.current = feeds; }, [feeds]);
+  useEffect(() => { flowersRef.current = flowers; }, [flowers]);
   useEffect(() => { coopsRef.current = coops; }, [coops]);
   useEffect(() => { fieldSizeRef.current = fieldSize; }, [fieldSize]);
 
-  // 사료 추가
+  // 사료 추가 (돈 필요)
   const addFeed = (x, y) => {
-    setFeeds(prev => [...prev, { id: Date.now(), x, y }]);
+    if (coins >= GAME_CONFIG.FEED.COST) {
+      setFeeds(prev => [...prev, { id: Date.now(), x, y }]);
+      setCoins(prev => prev - GAME_CONFIG.FEED.COST);
+      return true;
+    }
+    return false;
+  };
+
+  // 꽃 추가
+  const addFlower = (x, y) => {
+    if (coins >= GAME_CONFIG.FLOWER.COST) {
+      setFlowers(prev => [...prev, { id: Date.now(), x, y }]);
+      setCoins(prev => prev - GAME_CONFIG.FLOWER.COST);
+      return true;
+    }
+    return false;
   };
 
   // 닭집 추가
@@ -211,10 +229,21 @@ export const useGameLoop = (fieldSize) => {
         }
         health = Math.max(config.HEALTH.MIN, health - healthDecrease);
         
+        // 꽃 주변에 있으면 행복도 보너스
+        const currentFlowers = flowersRef.current;
+        const nearFlower = currentFlowers.some(f => 
+          calculateDistance(x, y, f.x, f.y) < config.FLOWER.EFFECT_RADIUS
+        );
+        
         // 행복도는 건강해야만 상승, 아니면 감소
         if (health >= config.HEALTH.HAPPINESS_THRESHOLD) {
-          // 건강하면 자연 감소만
-          happiness = Math.max(config.HAPPINESS.MIN, happiness - config.HAPPINESS.DECREASE_RATE);
+          // 건강하면 자연 감소
+          let happinessChange = -config.HAPPINESS.DECREASE_RATE;
+          // 꽃 주변이면 행복도 증가
+          if (nearFlower) {
+            happinessChange += config.FLOWER.HAPPINESS_BOOST;
+          }
+          happiness = Math.min(config.HAPPINESS.MAX, Math.max(config.HAPPINESS.MIN, happiness + happinessChange));
         } else {
           // 건강하지 않으면 더 빨리 감소
           happiness = Math.max(config.HAPPINESS.MIN, happiness - config.HAPPINESS.DECREASE_RATE * 3);
@@ -432,10 +461,12 @@ export const useGameLoop = (fieldSize) => {
     chickens, 
     eggs, 
     feeds, 
+    flowers,
     coops,
     coins,
     placingCoop,
     addFeed,
+    addFlower,
     addCoop,
     moveCoop,
     togglePlacingCoop,

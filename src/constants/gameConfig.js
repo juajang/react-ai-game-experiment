@@ -23,9 +23,10 @@ export const GAME_CONFIG = {
   
   // 행복도 관련
   HAPPINESS: {
-    DECREASE_RATE: 0.02,
+    DECREASE_RATE: 0.08,              // 더 빠르게 떨어짐
     FEED_RESTORE: 15,
     WALK_RESTORE: 0.05,
+    FLOWER_BOOST: 0.1,                // 꽃 주변에서 행복도 증가
     MAX: 100,
     MIN: 0,
     LOW_THRESHOLD: 40,
@@ -79,6 +80,14 @@ export const GAME_CONFIG = {
   FEED: {
     REACH_DISTANCE: 15,
     TARGET_REACH_DISTANCE: 10,
+    COST: 5,                          // 벼 구매 비용
+  },
+  
+  // 꽃 관련
+  FLOWER: {
+    COST: 15,                         // 꽃 구매 비용
+    EFFECT_RADIUS: 60,                // 효과 범위
+    HAPPINESS_BOOST: 0.1,             // 범위 내 행복도 증가
   },
   
   // 필드 관련

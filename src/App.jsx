@@ -1,5 +1,5 @@
 import { useRef, useCallback, useState, useEffect } from 'react';
-import { Chicken, Chick, Juvenile, Egg, Feed, Field, GameInfo, StatusBar, Coop, ItemPanel } from './components';
+import { Chicken, Chick, Juvenile, Egg, Feed, Flower, Field, GameInfo, StatusBar, Coop, ItemPanel } from './components';
 import { useGameLoop } from './hooks/useGameLoop';
 import { useFieldSize } from './hooks/useFieldSize';
 import { GROWTH_STAGE, GAME_CONFIG } from './constants/gameConfig';
@@ -11,9 +11,11 @@ export default function ChickenGame() {
     chickens, 
     eggs, 
     feeds, 
+    flowers,
     coops,
     coins,
     addFeed,
+    addFlower,
     addCoop,
     moveCoop,
     chickenCount,
@@ -69,10 +71,12 @@ export default function ChickenGame() {
       if (addCoop(x, y)) {
         setSelectedItem('feed');
       }
+    } else if (selectedItem === 'flower') {
+      addFlower(x, y);
     } else {
       addFeed(x, y);
     }
-  }, [addFeed, addCoop, selectedItem, movingCoopId]);
+  }, [addFeed, addFlower, addCoop, selectedItem, movingCoopId]);
 
   const handleChickenClick = useCallback((id) => {
     if (movingCoopId) return;
@@ -145,6 +149,7 @@ export default function ChickenGame() {
   const getCursor = () => {
     if (movingCoopId) return 'grabbing';
     if (selectedItem === 'coop') return 'crosshair';
+    if (selectedItem === 'flower') return 'crosshair';
     return 'pointer';
   };
 
@@ -153,14 +158,18 @@ export default function ChickenGame() {
       return '🏠 마우스를 놓아서 닭집 위치를 고정하세요!';
     }
     if (selectedItem === 'coop') {
-      return '🏠 필드를 클릭해서 닭집을 배치하세요!';
+      return `🏠 필드를 클릭해서 닭집을 배치하세요! (💰${GAME_CONFIG.COOP.COST})`;
     }
-    return '🌾 필드를 클릭해서 벼를 놓으세요!';
+    if (selectedItem === 'flower') {
+      return `🌸 필드를 클릭해서 꽃을 심으세요! (💰${GAME_CONFIG.FLOWER.COST})`;
+    }
+    return `🌾 필드를 클릭해서 벼를 놓으세요! (💰${GAME_CONFIG.FEED.COST})`;
   };
 
   const getGuideColor = () => {
     if (movingCoopId) return { bg: '#fef3c7', border: '#f59e0b', text: '#92400e' };
     if (selectedItem === 'coop') return { bg: '#fef3c7', border: '#f59e0b', text: '#92400e' };
+    if (selectedItem === 'flower') return { bg: '#fce7f3', border: '#ec4899', text: '#9d174d' };
     return { bg: '#dcfce7', border: '#22c55e', text: '#166534' };
   };
 
@@ -205,6 +214,7 @@ export default function ChickenGame() {
             onSelectItem={handleSelectItem}
             coins={coins}
             coopCount={coops.length}
+            flowerCount={flowers.length}
           />
           
           {/* 중앙 게임 영역 */}
@@ -260,6 +270,11 @@ export default function ChickenGame() {
                     isSelected={true}
                   />
                 )}
+                
+                {/* 꽃들 */}
+                {flowers.map(flower => (
+                  <Flower key={flower.id} x={flower.x} y={flower.y} />
+                ))}
                 
                 {/* 사료들 */}
                 {feeds.map(feed => (
