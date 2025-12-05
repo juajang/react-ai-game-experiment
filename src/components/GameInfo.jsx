@@ -13,14 +13,16 @@ const GameInfo = ({ feedCount }) => (
         className="mb-2"
         style={{ 
           color: '#5d4037',
-          fontFamily: 'monospace',
+          fontSize: '13px',
         }}
       >
         👆 <span className="font-bold">필드를 클릭</span>해서 벼를 놓아주세요!
       </p>
       <p 
-        className="text-xs"
-        style={{ color: '#8b7355' }}
+        style={{ 
+          color: '#8b7355',
+          fontSize: '11px',
+        }}
       >
         닭이 배고프면 벼를 찾아 먹어요
       </p>
@@ -37,8 +39,7 @@ const GameInfo = ({ feedCount }) => (
       <span 
         style={{ 
           color: '#5d4037',
-          fontFamily: 'monospace',
-          fontSize: '14px',
+          fontSize: '13px',
         }}
       >
         🌾 벼: <strong>{feedCount}</strong>개

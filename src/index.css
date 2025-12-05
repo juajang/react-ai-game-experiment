@@ -1,7 +1,27 @@
 @import "tailwindcss";
 
-/* 픽셀 폰트 (선택적) */
-@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+/* Galmuri 폰트 - 예쁜 한글 픽셀 폰트 */
+@font-face {
+  font-family: 'Galmuri11';
+  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2304-2@1.0/Galmuri11.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Galmuri11';
+  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2304-2@1.0/Galmuri11-Bold.woff2') format('woff2');
+  font-weight: bold;
+  font-style: normal;
+}
+
+/* 둥근모꼴 - 대안 픽셀 폰트 */
+@font-face {
+  font-family: 'DungGeunMo';
+  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_six@1.2/DungGeunMo.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
 
 /* 전역 도트 스타일 */
 * {
@@ -15,14 +35,15 @@ svg {
   shape-rendering: crispEdges;
 }
 
-/* 기본 폰트 */
+/* 기본 폰트 - Galmuri11 적용 */
 body {
-  font-family: 'Courier New', Courier, monospace;
+  font-family: 'Galmuri11', 'DungGeunMo', monospace;
   -webkit-font-smoothing: none;
   -moz-osx-font-smoothing: unset;
+  font-smooth: never;
 }
 
-/* 스크롤바 숨김 (선택적) */
+/* 스크롤바 스타일 */
 ::-webkit-scrollbar {
   width: 8px;
 }

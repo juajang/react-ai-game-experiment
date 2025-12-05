@@ -37,13 +37,12 @@ export default function ChickenGame() {
           }}
         >
           <h1 
-            className="text-xl font-bold"
+            className="font-bold"
             style={{ 
               color: '#5d4037',
-              fontFamily: '"Press Start 2P", monospace',
-              fontSize: '16px',
-              textShadow: '2px 2px 0px #8b7355',
-              letterSpacing: '2px',
+              fontSize: '18px',
+              textShadow: '2px 2px 0px #c4a574',
+              letterSpacing: '3px',
             }}
           >
             🐔 닭 시뮬레이션 🌾

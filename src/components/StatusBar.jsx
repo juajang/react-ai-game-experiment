@@ -3,7 +3,6 @@ import { getHungerColor } from '../utils/gameUtils';
 
 const StatusBar = ({ hunger, state }) => {
   const stateText = STATE_TEXT[state] || STATE_TEXT.default;
-  const hungerColorClass = getHungerColor(hunger);
   
   // 도트 스타일 배고픔 바 색상
   const getPixelHungerColor = () => {
@@ -23,22 +22,21 @@ const StatusBar = ({ hunger, state }) => {
     >
       <div className="flex items-center justify-between mb-3">
         <span 
-          className="font-bold text-lg"
+          className="font-bold"
           style={{ 
             color: '#5d4037',
-            fontFamily: '"Press Start 2P", monospace',
-            fontSize: '12px',
+            fontSize: '14px',
           }}
         >
           🐔 닭의 상태
         </span>
         <span 
-          className="text-sm px-3 py-1 rounded"
+          className="px-3 py-1 rounded"
           style={{ 
             backgroundColor: '#e8d5b7',
             border: '2px solid #8b7355',
             color: '#5d4037',
-            fontFamily: 'monospace',
+            fontSize: '12px',
           }}
         >
           {stateText}
@@ -47,10 +45,9 @@ const StatusBar = ({ hunger, state }) => {
       
       <div className="flex items-center gap-3">
         <span 
-          className="text-sm"
           style={{ 
             color: '#8b7355',
-            fontFamily: 'monospace',
+            fontSize: '12px',
           }}
         >
           포만감:
@@ -84,10 +81,10 @@ const StatusBar = ({ hunger, state }) => {
         </div>
         
         <span 
-          className="text-sm font-bold min-w-[50px] text-right"
+          className="font-bold min-w-[50px] text-right"
           style={{ 
             color: '#5d4037',
-            fontFamily: 'monospace',
+            fontSize: '12px',
           }}
         >
           {Math.round(hunger)}%
