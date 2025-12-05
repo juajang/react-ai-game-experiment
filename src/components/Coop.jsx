@@ -66,23 +66,32 @@ export const CoopPreview = ({ size = 32 }) => (
   </svg>
 );
 
-const Coop = ({ x, y, occupants = 0, capacity, isSelected, onClick }) => {
+const Coop = ({ x, y, occupants = 0, capacity, isSelected, onMouseDown }) => {
   const maxCapacity = capacity || GAME_CONFIG.COOP.CAPACITY;
   const isFull = occupants >= maxCapacity;
 
+  const handleMouseDown = (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    onMouseDown?.(e);
+  };
+
   return (
     <div 
-      className="absolute cursor-pointer"
-      style={{ left: x - 32, top: y - 56 }}
-      onClick={(e) => {
-        e.stopPropagation();
-        onClick?.();
+      className="absolute"
+      style={{ 
+        left: x - 32, 
+        top: y - 56,
+        cursor: isSelected ? 'grabbing' : 'grab',
+        zIndex: isSelected ? 100 : 10,
+        userSelect: 'none',
       }}
+      onMouseDown={handleMouseDown}
     >
-      {/* 선택 표시 */}
+      {/* 선택/이동 표시 */}
       {isSelected && (
         <div 
-          className="absolute -top-3 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded text-xs"
+          className="absolute -top-3 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded text-xs animate-pulse"
           style={{ 
             backgroundColor: '#ffd700',
             border: '2px solid #b8860b',
@@ -91,7 +100,7 @@ const Coop = ({ x, y, occupants = 0, capacity, isSelected, onClick }) => {
             zIndex: 10,
           }}
         >
-          🏠 닭집
+          📍 이동 중
         </div>
       )}
       

@@ -1,4 +1,4 @@
-import { useRef, useCallback, useState } from 'react';
+import { useRef, useCallback, useState, useEffect } from 'react';
 import { Chicken, Chick, Juvenile, Egg, Feed, Field, GameInfo, StatusBar, Coop, ItemPanel } from './components';
 import { useGameLoop } from './hooks/useGameLoop';
 import { useFieldSize } from './hooks/useFieldSize';
@@ -15,45 +15,83 @@ export default function ChickenGame() {
     coins,
     addFeed,
     addCoop,
+    moveCoop,
     chickenCount,
     juvenileCount,
     chickCount,
-    sleepingCount,
   } = useGameLoop(fieldSize);
 
-  // 선택된 닭 ID
   const [selectedChickenId, setSelectedChickenId] = useState(null);
-  // 선택된 아이템
   const [selectedItem, setSelectedItem] = useState('feed');
+  const [movingCoopId, setMovingCoopId] = useState(null);
+  const [movingCoopPos, setMovingCoopPos] = useState(null);
   
-  // 선택된 닭 찾기
   const selectedChicken = chickens.find(c => c.id === selectedChickenId);
   const displayChicken = selectedChicken || chickens[0];
 
+  // 마우스 이동 추적 (닭집 이동 중)
+  useEffect(() => {
+    if (!movingCoopId || !fieldRef.current) return;
+
+    const handleMouseMove = (e) => {
+      const rect = fieldRef.current.getBoundingClientRect();
+      const x = Math.max(40, Math.min(rect.width - 40, e.clientX - rect.left));
+      const y = Math.max(60, Math.min(rect.height - 20, e.clientY - rect.top));
+      setMovingCoopPos({ x, y });
+    };
+
+    const handleMouseUp = (e) => {
+      if (movingCoopId && movingCoopPos) {
+        moveCoop(movingCoopId, movingCoopPos.x, movingCoopPos.y);
+        setMovingCoopId(null);
+        setMovingCoopPos(null);
+      }
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+    
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [movingCoopId, movingCoopPos, moveCoop]);
+
   const handleFieldClick = useCallback((e) => {
+    // 이동 중이면 무시 (mouseup에서 처리)
+    if (movingCoopId) return;
+    
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
     
     if (selectedItem === 'coop') {
       if (addCoop(x, y)) {
-        // 성공하면 사료 모드로 돌아감
         setSelectedItem('feed');
       }
     } else {
       addFeed(x, y);
     }
-  }, [addFeed, addCoop, selectedItem]);
+  }, [addFeed, addCoop, selectedItem, movingCoopId]);
 
   const handleChickenClick = useCallback((id) => {
+    if (movingCoopId) return;
     setSelectedChickenId(id);
-  }, []);
+  }, [movingCoopId]);
+
+  const handleCoopMouseDown = useCallback((coopId) => {
+    const coop = coops.find(c => c.id === coopId);
+    if (coop) {
+      setMovingCoopId(coopId);
+      setMovingCoopPos({ x: coop.x, y: coop.y });
+    }
+  }, [coops]);
 
   const handleSelectItem = useCallback((itemId) => {
+    if (movingCoopId) return;
     setSelectedItem(itemId || 'feed');
-  }, []);
+  }, [movingCoopId]);
 
-  // 성장 단계에 따른 컴포넌트 렌더링
   const renderChicken = (c) => {
     if (c.state === 'sleeping') return null;
     
@@ -104,11 +142,29 @@ export default function ChickenGame() {
     }
   };
 
-  // 커서 스타일
   const getCursor = () => {
+    if (movingCoopId) return 'grabbing';
     if (selectedItem === 'coop') return 'crosshair';
     return 'pointer';
   };
+
+  const getGuideMessage = () => {
+    if (movingCoopId) {
+      return '🏠 마우스를 놓아서 닭집 위치를 고정하세요!';
+    }
+    if (selectedItem === 'coop') {
+      return '🏠 필드를 클릭해서 닭집을 배치하세요!';
+    }
+    return '🌾 필드를 클릭해서 벼를 놓으세요!';
+  };
+
+  const getGuideColor = () => {
+    if (movingCoopId) return { bg: '#fef3c7', border: '#f59e0b', text: '#92400e' };
+    if (selectedItem === 'coop') return { bg: '#fef3c7', border: '#f59e0b', text: '#92400e' };
+    return { bg: '#dcfce7', border: '#22c55e', text: '#166534' };
+  };
+
+  const guideColor = getGuideColor();
 
   return (
     <div 
@@ -160,43 +216,50 @@ export default function ChickenGame() {
               juvenileCount={juvenileCount}
               chickCount={chickCount}
               eggCount={eggs.length}
-              coopCount={coops.length}
-              sleepingCount={sleepingCount}
               coins={coins}
             />
             
-            {/* 선택된 아이템 안내 */}
+            {/* 안내 메시지 */}
             <div 
               className="mt-2 p-2 rounded text-center"
               style={{
-                backgroundColor: selectedItem === 'coop' ? '#fef3c7' : '#dcfce7',
-                border: `3px solid ${selectedItem === 'coop' ? '#f59e0b' : '#22c55e'}`,
-                color: selectedItem === 'coop' ? '#92400e' : '#166534',
+                backgroundColor: guideColor.bg,
+                border: `3px solid ${guideColor.border}`,
+                color: guideColor.text,
                 fontSize: '11px',
               }}
             >
-              {selectedItem === 'coop' 
-                ? '🏠 필드를 클릭해서 닭집을 배치하세요!' 
-                : '🌾 필드를 클릭해서 벼를 놓으세요!'}
+              {getGuideMessage()}
             </div>
             
             {/* 플레이 필드 */}
             <div className="mt-2" ref={fieldRef}>
               <Field 
                 onClick={handleFieldClick} 
-                placingCoop={selectedItem === 'coop'}
                 cursor={getCursor()}
               >
-                {/* 닭집들 */}
-                {coops.map(coop => (
+                {/* 닭집들 (이동 중이 아닌 것) */}
+                {coops.filter(coop => coop.id !== movingCoopId).map(coop => (
                   <Coop 
                     key={coop.id}
                     x={coop.x}
                     y={coop.y}
                     occupants={chickens.filter(c => c.inCoopId === coop.id).length}
                     capacity={coop.capacity}
+                    onMouseDown={() => handleCoopMouseDown(coop.id)}
                   />
                 ))}
+                
+                {/* 이동 중인 닭집 */}
+                {movingCoopId && movingCoopPos && (
+                  <Coop 
+                    x={movingCoopPos.x}
+                    y={movingCoopPos.y}
+                    occupants={chickens.filter(c => c.inCoopId === movingCoopId).length}
+                    capacity={coops.find(c => c.id === movingCoopId)?.capacity}
+                    isSelected={true}
+                  />
+                )}
                 
                 {/* 사료들 */}
                 {feeds.map(feed => (

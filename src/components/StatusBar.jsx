@@ -32,7 +32,7 @@ const PixelBar = ({ value, color, label }) => (
   </div>
 );
 
-const StatusBar = ({ selectedChicken, chickenCount, juvenileCount, chickCount, eggCount, coopCount, sleepingCount, coins }) => {
+const StatusBar = ({ selectedChicken, chickenCount, juvenileCount, chickCount, eggCount, coins }) => {
   const { hunger, happiness, health, tiredness, state, stage } = selectedChicken || {};
   
   const getStateText = () => {
@@ -132,28 +132,20 @@ const StatusBar = ({ selectedChicken, chickenCount, juvenileCount, chickCount, e
         style={{ borderTop: '2px dashed #8b7355' }}
       >
         <div className="text-center">
-          <div style={{ fontSize: '12px' }}>🐔</div>
-          <div style={{ color: '#5d4037', fontSize: '9px' }}>{chickenCount || 0}</div>
-        </div>
-        <div className="text-center">
-          <div style={{ fontSize: '12px' }}>🐤</div>
-          <div style={{ color: '#5d4037', fontSize: '9px' }}>{juvenileCount || 0}</div>
+          <div style={{ fontSize: '12px' }}>🥚</div>
+          <div style={{ color: '#5d4037', fontSize: '9px' }}>{eggCount || 0}</div>
         </div>
         <div className="text-center">
           <div style={{ fontSize: '12px' }}>🐥</div>
           <div style={{ color: '#5d4037', fontSize: '9px' }}>{chickCount || 0}</div>
         </div>
         <div className="text-center">
-          <div style={{ fontSize: '12px' }}>🥚</div>
-          <div style={{ color: '#5d4037', fontSize: '9px' }}>{eggCount || 0}</div>
+          <div style={{ fontSize: '12px' }}>🐤</div>
+          <div style={{ color: '#5d4037', fontSize: '9px' }}>{juvenileCount || 0}</div>
         </div>
         <div className="text-center">
-          <div style={{ fontSize: '12px' }}>🏠</div>
-          <div style={{ color: '#5d4037', fontSize: '9px' }}>{coopCount || 0}</div>
-        </div>
-        <div className="text-center">
-          <div style={{ fontSize: '12px' }}>💤</div>
-          <div style={{ color: '#5d4037', fontSize: '9px' }}>{sleepingCount || 0}</div>
+          <div style={{ fontSize: '12px' }}>🐔</div>
+          <div style={{ color: '#5d4037', fontSize: '9px' }}>{chickenCount || 0}</div>
         </div>
       </div>
     </div>

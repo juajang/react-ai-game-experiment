@@ -110,6 +110,13 @@ export const useGameLoop = (fieldSize) => {
     }
   };
 
+  // 닭집 이동
+  const moveCoop = (coopId, newX, newY) => {
+    setCoops(prev => prev.map(coop => 
+      coop.id === coopId ? { ...coop, x: newX, y: newY } : coop
+    ));
+  };
+
   // 가장 가까운 빈 닭집 찾기
   const findNearestAvailableCoop = (x, y, coops, chickens) => {
     let nearest = null;
@@ -430,6 +437,7 @@ export const useGameLoop = (fieldSize) => {
     placingCoop,
     addFeed,
     addCoop,
+    moveCoop,
     togglePlacingCoop,
     chickenCount: chickens.filter(c => c.stage === GROWTH_STAGE.ADULT).length,
     juvenileCount: chickens.filter(c => c.stage === GROWTH_STAGE.JUVENILE).length,

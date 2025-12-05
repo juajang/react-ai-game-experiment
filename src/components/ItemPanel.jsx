@@ -25,22 +25,54 @@ const ItemPanel = ({
   coins, 
   coopCount,
 }) => {
-  const items = [
+  const consumables = [
     {
       id: 'feed',
       name: '벼',
       icon: <FeedPreview size={28} />,
       cost: 0,
-      description: '닭에게 먹이를 줍니다',
     },
+  ];
+
+  const buildings = [
     {
       id: 'coop',
       name: '닭집',
       icon: <CoopPreview size={28} />,
       cost: GAME_CONFIG.COOP.COST,
-      description: `닭이 휴식합니다 (${GAME_CONFIG.COOP.CAPACITY}마리)`,
     },
   ];
+
+  const renderItem = (item) => {
+    const canAfford = coins >= item.cost;
+    const isSelected = selectedItem === item.id;
+    
+    return (
+      <button
+        key={item.id}
+        onClick={() => onSelectItem(isSelected ? null : item.id)}
+        disabled={!canAfford && item.cost > 0}
+        className="flex flex-col items-center p-2 rounded transition-all w-full"
+        style={{
+          backgroundColor: isSelected ? '#fef3c7' : '#e8d5b7',
+          border: isSelected ? '3px solid #f59e0b' : '2px solid #8b7355',
+          opacity: canAfford || item.cost === 0 ? 1 : 0.5,
+          cursor: canAfford || item.cost === 0 ? 'pointer' : 'not-allowed',
+        }}
+      >
+        <div className="mb-1">{item.icon}</div>
+        <div style={{ fontSize: '9px', color: '#5d4037', fontWeight: 'bold' }}>
+          {item.name}
+        </div>
+        {item.cost > 0 && (
+          <div className="flex items-center gap-0.5 mt-1" style={{ fontSize: '8px', color: '#8b7355' }}>
+            <Coin size={10} />
+            <span>{item.cost}</span>
+          </div>
+        )}
+      </button>
+    );
+  };
 
   return (
     <div 
@@ -53,7 +85,7 @@ const ItemPanel = ({
     >
       {/* 타이틀 */}
       <div 
-        className="text-center font-bold pb-2"
+        className="text-center font-bold pb-1"
         style={{ 
           color: '#5d4037', 
           fontSize: '10px',
@@ -63,58 +95,18 @@ const ItemPanel = ({
         🛠️ 아이템
       </div>
       
-      {/* 아이템 목록 */}
-      {items.map(item => {
-        const canAfford = coins >= item.cost;
-        const isSelected = selectedItem === item.id;
-        
-        return (
-          <button
-            key={item.id}
-            onClick={() => onSelectItem(isSelected ? null : item.id)}
-            disabled={!canAfford && item.cost > 0}
-            className="flex flex-col items-center p-2 rounded transition-all"
-            style={{
-              backgroundColor: isSelected ? '#fef3c7' : '#e8d5b7',
-              border: isSelected ? '3px solid #f59e0b' : '2px solid #8b7355',
-              opacity: canAfford || item.cost === 0 ? 1 : 0.5,
-              cursor: canAfford || item.cost === 0 ? 'pointer' : 'not-allowed',
-            }}
-            title={item.description}
-          >
-            {/* 아이콘 */}
-            <div className="mb-1">
-              {item.icon}
-            </div>
-            
-            {/* 이름 */}
-            <div 
-              style={{ 
-                fontSize: '9px', 
-                color: '#5d4037',
-                fontWeight: 'bold',
-              }}
-            >
-              {item.name}
-            </div>
-            
-            {/* 가격 */}
-            {item.cost > 0 && (
-              <div 
-                className="flex items-center gap-0.5 mt-1"
-                style={{ fontSize: '8px', color: '#8b7355' }}
-              >
-                <Coin size={10} />
-                <span>{item.cost}</span>
-              </div>
-            )}
-          </button>
-        );
-      })}
+      {/* 소모품 */}
+      {consumables.map(renderItem)}
+      
+      {/* 구분선 */}
+      <div style={{ borderTop: '2px solid #8b7355', margin: '2px 0' }} />
+      
+      {/* 건물 */}
+      {buildings.map(renderItem)}
       
       {/* 보유 개수 */}
       <div 
-        className="mt-2 pt-2 text-center"
+        className="mt-1 pt-1 text-center"
         style={{ 
           borderTop: '2px dashed #8b7355',
           fontSize: '9px',
@@ -128,4 +120,3 @@ const ItemPanel = ({
 };
 
 export default ItemPanel;
-
