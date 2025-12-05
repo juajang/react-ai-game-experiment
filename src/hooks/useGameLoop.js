@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { GAME_CONFIG, EGG_STATE, GROWTH_STAGE } from '../constants/gameConfig';
+import { GAME_CONFIG, EGG_STATE, GROWTH_STAGE, FARM_GRADE, GAME_STATE } from '../constants/gameConfig';
 import {
   findClosestFeed,
   getRandomPosition,
@@ -77,6 +77,15 @@ export const useGameLoop = (fieldSize) => {
   const [placingCoop, setPlacingCoop] = useState(false);
   const [deathCount, setDeathCount] = useState(0); // 사망한 닭 수
   const [deadChickens, setDeadChickens] = useState([]); // 사망한 닭들 (잠시 표시용)
+  const [gameState, setGameState] = useState(GAME_STATE.PLAYING); // 게임 상태
+  const [maxChickenCount, setMaxChickenCount] = useState(1); // 최대 닭 수 (게임 클리어 체크용)
+  const [hasCleared, setHasCleared] = useState(false); // 클리어한 적 있는지
+  
+  // gameState ref (게임 루프에서 최신 상태 참조용)
+  const gameStateRef = useRef(gameState);
+  useEffect(() => { gameStateRef.current = gameState; }, [gameState]);
+  const hasClearedRef = useRef(hasCleared);
+  useEffect(() => { hasClearedRef.current = hasCleared; }, [hasCleared]);
 
   // useRef로 현재 상태 참조
   const chickensRef = useRef(chickens);
@@ -414,6 +423,28 @@ export const useGameLoop = (fieldSize) => {
           }
         }
 
+        // 다른 닭들과의 충돌 회피 (밀어내기)
+        const PUSH_DISTANCE = 25; // 이 거리 이내면 밀어냄
+        const PUSH_FORCE = 3;     // 밀어내는 힘
+        
+        for (const other of currentChickens) {
+          if (other.id === chicken.id) continue;
+          if (other.state === 'sleeping') continue;
+          
+          const dist = calculateDistance(x, y, other.x, other.y);
+          if (dist < PUSH_DISTANCE && dist > 0) {
+            // 반대 방향으로 밀어내기
+            const pushX = (x - other.x) / dist * PUSH_FORCE;
+            const pushY = (y - other.y) / dist * PUSH_FORCE;
+            x += pushX;
+            y += pushY;
+          } else if (dist === 0) {
+            // 완전히 겹쳤으면 랜덤 방향으로 밀어내기
+            x += (Math.random() - 0.5) * PUSH_FORCE * 2;
+            y += (Math.random() - 0.5) * PUSH_FORCE * 2;
+          }
+        }
+
         // 경계 체크
         const clamped = clampPosition(x, y, currentFieldSize.width, currentFieldSize.height);
         x = clamped.x;
@@ -506,6 +537,27 @@ export const useGameLoop = (fieldSize) => {
       if (totalEarnedCoins > 0) {
         setCoins(prev => Math.floor((prev + totalEarnedCoins) * 100) / 100);
       }
+      
+      // 8. 게임 상태 체크
+      const totalChickens = aliveChickens.length;
+      const currentGameState = gameStateRef.current;
+      const currentHasCleared = hasClearedRef.current;
+      
+      // 최대 닭 수 업데이트
+      setMaxChickenCount(prev => Math.max(prev, totalChickens));
+      
+      // 게임 오버 체크 (닭이 모두 죽고, 알도 없음)
+      if (totalChickens === 0 && allEggs.length === 0 && currentGameState !== GAME_STATE.GAME_CLEAR) {
+        setGameState(GAME_STATE.GAME_OVER);
+      }
+      
+      // 게임 클리어 체크 (황금 닭 농장 달성: 10마리 이상) - 처음 한번만 표시
+      if (totalChickens >= FARM_GRADE.GOLDEN_FARM.minChickens && 
+          currentGameState === GAME_STATE.PLAYING && 
+          !currentHasCleared) {
+        setGameState(GAME_STATE.GAME_CLEAR);
+        setHasCleared(true);
+      }
 
     }, GAME_CONFIG.GAME_LOOP_INTERVAL);
 
@@ -513,6 +565,37 @@ export const useGameLoop = (fieldSize) => {
   }, []);
 
   const mainChicken = chickens.find(c => c.stage === GROWTH_STAGE.ADULT) || chickens[0];
+  
+  // 농장 등급 계산
+  const totalChickenCount = chickens.length;
+  const getFarmGrade = () => {
+    if (totalChickenCount >= FARM_GRADE.GOLDEN_FARM.minChickens) return FARM_GRADE.GOLDEN_FARM;
+    if (totalChickenCount >= FARM_GRADE.CHICKEN_FARM.minChickens) return FARM_GRADE.CHICKEN_FARM;
+    return FARM_GRADE.CHICK_FARM;
+  };
+  
+  const farmGrade = getFarmGrade();
+  
+  // 게임 재시작
+  const restartGame = () => {
+    setChickens([createChicken(GAME_CONFIG.CHICKEN.INITIAL_X, GAME_CONFIG.CHICKEN.INITIAL_Y, GROWTH_STAGE.ADULT)]);
+    setEggs([]);
+    setFeeds([]);
+    setFlowers([]);
+    setPonds([]);
+    setCoops([]);
+    setCoins(100);
+    setDeathCount(0);
+    setDeadChickens([]);
+    setGameState(GAME_STATE.PLAYING);
+    setMaxChickenCount(1);
+    setHasCleared(false);
+  };
+  
+  // 게임 계속하기 (클리어 후)
+  const continueGame = () => {
+    setGameState(GAME_STATE.PLAYING);
+  };
 
   return { 
     chicken: mainChicken,
@@ -525,6 +608,8 @@ export const useGameLoop = (fieldSize) => {
     coins,
     deathCount,
     deadChickens,
+    farmGrade,
+    gameState,
     placingCoop,
     addFeed,
     addFlower,
@@ -533,9 +618,12 @@ export const useGameLoop = (fieldSize) => {
     addCoop,
     moveCoop,
     togglePlacingCoop,
+    restartGame,
+    continueGame,
     chickenCount: chickens.filter(c => c.stage === GROWTH_STAGE.ADULT).length,
     juvenileCount: chickens.filter(c => c.stage === GROWTH_STAGE.JUVENILE).length,
     chickCount: chickens.filter(c => c.stage === GROWTH_STAGE.CHICK).length,
     sleepingCount: chickens.filter(c => c.state === 'sleeping').length,
+    totalChickenCount,
   };
 };

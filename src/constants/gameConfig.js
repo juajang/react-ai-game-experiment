@@ -189,3 +189,35 @@ export const EGG_STATE = {
   WARM: 'warm',
   HATCHING: 'hatching',
 };
+
+// 농장 등급
+export const FARM_GRADE = {
+  CHICK_FARM: {
+    level: 1,
+    name: '🐥 병아리 농장',
+    minChickens: 0,
+    maxChickens: 4,
+    color: '#fef3c7',
+  },
+  CHICKEN_FARM: {
+    level: 2,
+    name: '🐔 닭 농장',
+    minChickens: 5,
+    maxChickens: 9,
+    color: '#fed7aa',
+  },
+  GOLDEN_FARM: {
+    level: 3,
+    name: '✨ 황금 닭 농장',
+    minChickens: 10,
+    maxChickens: Infinity,
+    color: '#fef08a',
+  },
+};
+
+// 게임 상태
+export const GAME_STATE = {
+  PLAYING: 'playing',
+  GAME_OVER: 'gameOver',
+  GAME_CLEAR: 'gameClear',
+};
