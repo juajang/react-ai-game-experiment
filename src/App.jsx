@@ -14,6 +14,7 @@ export default function ChickenGame() {
     flowers,
     coops,
     coins,
+    deathCount,
     addFeed,
     addFlower,
     addCoop,
@@ -226,6 +227,7 @@ export default function ChickenGame() {
               juvenileCount={juvenileCount}
               chickCount={chickCount}
               eggCount={eggs.length}
+              deathCount={deathCount}
               coins={coins}
             />
             

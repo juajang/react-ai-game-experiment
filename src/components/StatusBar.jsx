@@ -32,7 +32,7 @@ const PixelBar = ({ value, color, label }) => (
   </div>
 );
 
-const StatusBar = ({ selectedChicken, chickenCount, juvenileCount, chickCount, eggCount, coins }) => {
+const StatusBar = ({ selectedChicken, chickenCount, juvenileCount, chickCount, eggCount, deathCount, coins }) => {
   const { hunger, happiness, health, tiredness, state, stage } = selectedChicken || {};
   
   const getStateText = () => {
@@ -146,6 +146,10 @@ const StatusBar = ({ selectedChicken, chickenCount, juvenileCount, chickCount, e
         <div className="text-center">
           <div style={{ fontSize: '12px' }}>🐔</div>
           <div style={{ color: '#5d4037', fontSize: '9px' }}>{chickenCount || 0}</div>
+        </div>
+        <div className="text-center">
+          <div style={{ fontSize: '12px' }}>💀</div>
+          <div style={{ color: '#ef4444', fontSize: '9px', fontWeight: 'bold' }}>{deathCount || 0}</div>
         </div>
       </div>
     </div>

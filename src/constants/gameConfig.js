@@ -4,7 +4,7 @@ export const GAME_CONFIG = {
   CHICKEN: {
     INITIAL_X: 200,
     INITIAL_Y: 160,
-    INITIAL_HUNGER: 80,
+    INITIAL_HUNGER: 70,              // 시작 포만감 감소 (80 → 70)
     INITIAL_HAPPINESS: 50,
     INITIAL_HEALTH: 100,
     SPEED: 2,
@@ -14,19 +14,19 @@ export const GAME_CONFIG = {
   
   // 배고픔 관련
   HUNGER: {
-    DECREASE_RATE: 0.15,
+    DECREASE_RATE: 0.25,             // 더 빨리 배고파짐 (0.15 → 0.25)
     FEED_RESTORE: 25,
-    HUNGRY_THRESHOLD: 30,
+    HUNGRY_THRESHOLD: 35,            // 배고픔 임계값 상승 (30 → 35)
     MAX: 100,
     MIN: 0,
   },
   
   // 행복도 관련
   HAPPINESS: {
-    DECREASE_RATE: 0.08,              // 더 빠르게 떨어짐
-    FEED_RESTORE: 15,
-    WALK_RESTORE: 0.05,
-    FLOWER_BOOST: 0.1,                // 꽃 주변에서 행복도 증가
+    DECREASE_RATE: 0.15,             // 더 빨리 떨어짐 (0.08 → 0.15)
+    FEED_RESTORE: 12,                // 먹이로 회복량 감소 (15 → 12)
+    WALK_RESTORE: 0.03,              // 산책 회복량 감소 (0.05 → 0.03)
+    FLOWER_BOOST: 0.12,              // 꽃 효과 약간 증가 (0.1 → 0.12)
     MAX: 100,
     MIN: 0,
     LOW_THRESHOLD: 40,
@@ -34,60 +34,61 @@ export const GAME_CONFIG = {
   
   // 건강 관련
   HEALTH: {
-    DECREASE_RATE: 0,              // 기본 감소 없음 (조건에 따라 감소)
-    HUNGRY_DECREASE_RATE: 0.15,    // 배고프면 건강 감소
-    TIRED_DECREASE_RATE: 0.1,      // 피곤하면 건강 감소
-    FEED_RESTORE: 5,
+    DECREASE_RATE: 0,                // 기본 감소 없음 (조건에 따라 감소)
+    HUNGRY_DECREASE_RATE: 0.3,       // 배고프면 건강 더 빨리 감소 (0.15 → 0.3)
+    TIRED_DECREASE_RATE: 0.2,        // 피곤하면 건강 더 빨리 감소 (0.1 → 0.2)
+    UNHAPPY_DECREASE_RATE: 0.1,      // 불행하면 건강 감소 (NEW)
+    FEED_RESTORE: 3,                 // 먹이로 건강 회복 감소 (5 → 3)
     MAX: 100,
     MIN: 0,
-    LOW_THRESHOLD: 60,
-    HAPPINESS_THRESHOLD: 50,       // 건강이 이 이상이어야 행복도 상승
+    LOW_THRESHOLD: 50,               // 낮은 건강 임계값 낮춤 (60 → 50)
+    HAPPINESS_THRESHOLD: 50,         // 건강이 이 이상이어야 행복도 상승
   },
   
   // 알 관련
   EGG: {
-    LAY_CHANCE: 3,                 // 알 낳을 확률 3% (매 틱마다 체크)
-    LAY_COOLDOWN: 100,             // 쿨다운 (100 틱 = 10초)
-    HATCH_TIME: 150,               // 부화까지 필요한 시간 (150 틱 = 15초)
-    WARM_DISTANCE: 40,             // 닭이 이 거리 안에 있으면 알이 따뜻해짐
-    WARM_RATE: 1,                  // 따뜻해지는 속도
-    COOL_RATE: 0.5,                // 식는 속도
-    HATCH_WARMTH: 100,             // 부화에 필요한 따뜻함
-    // 알 낳기 조건
-    MIN_HUNGER: 50,
-    MIN_HAPPINESS: 40,
-    MIN_HEALTH: 60,
+    LAY_CHANCE: 2,                   // 알 낳을 확률 감소 (3 → 2)
+    LAY_COOLDOWN: 150,               // 쿨다운 증가 (100 → 150)
+    HATCH_TIME: 150,                 // 부화까지 필요한 시간 (150 틱 = 15초)
+    WARM_DISTANCE: 40,               // 닭이 이 거리 안에 있으면 알이 따뜻해짐
+    WARM_RATE: 1,                    // 따뜻해지는 속도
+    COOL_RATE: 0.8,                  // 더 빨리 식음 (0.5 → 0.8)
+    HATCH_WARMTH: 100,               // 부화에 필요한 따뜻함
+    // 알 낳기 조건 (더 어려움)
+    MIN_HUNGER: 60,                  // (50 → 60)
+    MIN_HAPPINESS: 50,               // (40 → 50)
+    MIN_HEALTH: 70,                  // (60 → 70)
   },
   
   // 병아리 관련
   CHICK: {
     SPEED: 1.2,
-    GROWTH_TIME: 150,              // 청소년이 되기까지 시간 (150 틱 = 15초)
-    INITIAL_HUNGER: 60,
-    INITIAL_HAPPINESS: 60,
-    INITIAL_HEALTH: 100,
-    HUNGER_DECREASE_RATE: 0.12,    // 병아리는 더 빨리 배고파짐
+    GROWTH_TIME: 200,                // 성장 시간 증가 (150 → 200)
+    INITIAL_HUNGER: 50,              // 시작 포만감 감소 (60 → 50)
+    INITIAL_HAPPINESS: 50,           // 시작 행복도 감소 (60 → 50)
+    INITIAL_HEALTH: 80,              // 시작 건강 감소 (100 → 80)
+    HUNGER_DECREASE_RATE: 0.2,       // 더 빨리 배고파짐 (0.12 → 0.2)
   },
   
   // 청소년 관련
   JUVENILE: {
     SPEED: 1.8,
-    GROWTH_TIME: 200,              // 성체가 되기까지 시간 (200 틱 = 20초)
-    HUNGER_DECREASE_RATE: 0.10,    // 청소년은 중간 속도로 배고파짐
+    GROWTH_TIME: 250,                // 성장 시간 증가 (200 → 250)
+    HUNGER_DECREASE_RATE: 0.18,      // 더 빨리 배고파짐 (0.10 → 0.18)
   },
   
   // 사료 관련
   FEED: {
     REACH_DISTANCE: 15,
     TARGET_REACH_DISTANCE: 10,
-    COST: 5,                          // 벼 구매 비용
+    COST: 8,                         // 가격 인상 (5 → 8)
   },
   
   // 꽃 관련
   FLOWER: {
-    COST: 15,                         // 꽃 구매 비용
-    EFFECT_RADIUS: 60,                // 효과 범위
-    HAPPINESS_BOOST: 0.1,             // 범위 내 행복도 증가
+    COST: 20,                        // 가격 인상 (15 → 20)
+    EFFECT_RADIUS: 50,               // 효과 범위 감소 (60 → 50)
+    HAPPINESS_BOOST: 0.12,           // 범위 내 행복도 증가
   },
   
   // 필드 관련
@@ -105,31 +106,31 @@ export const GAME_CONFIG = {
   
   // 화폐 관련
   COIN: {
-    HAPPINESS_THRESHOLD: 30,       // 이 행복도 이상이면 돈 획득 가능
-    EARN_CHANCE: 15,               // 돈 획득 확률 (틱당 15%)
-    EARN_AMOUNT: 1,                // 획득 금액
-    ADULT_MULTIPLIER: 1,           // 성체 배율
-    JUVENILE_MULTIPLIER: 0.5,      // 청소년 배율
-    CHICK_MULTIPLIER: 0,           // 병아리는 돈 못 벌어요
+    HAPPINESS_THRESHOLD: 40,         // 더 높은 행복도 필요 (30 → 40)
+    EARN_CHANCE: 10,                 // 돈 획득 확률 감소 (15 → 10)
+    EARN_AMOUNT: 1,                  // 획득 금액
+    ADULT_MULTIPLIER: 1,             // 성체 배율
+    JUVENILE_MULTIPLIER: 0.5,        // 청소년 배율
+    CHICK_MULTIPLIER: 0,             // 병아리는 돈 못 벌어요
   },
   
   // 피로 관련
   TIREDNESS: {
-    INCREASE_RATE: 0.15,           // 피로 증가 속도 (더 빠르게)
-    TIRED_THRESHOLD: 70,           // 이 피로도 이상이면 피곤한 상태
-    EXHAUSTED_THRESHOLD: 90,       // 이 피로도 이상이면 탈진 상태
+    INCREASE_RATE: 0.25,             // 더 빨리 피곤해짐 (0.15 → 0.25)
+    TIRED_THRESHOLD: 60,             // 더 빨리 피곤 상태 (70 → 60)
+    EXHAUSTED_THRESHOLD: 80,         // 더 빨리 탈진 (90 → 80)
     MAX: 100,
     MIN: 0,
   },
   
   // 닭집 관련
   COOP: {
-    CAPACITY: 3,                   // 닭집당 수용 가능 닭 수
-    SLEEP_RECOVERY_RATE: 2,        // 잠잘 때 피로 회복 속도
-    HEALTH_RECOVERY_RATE: 0.5,     // 잠잘 때 건강 회복 속도
-    MIN_SLEEP_TIME: 50,            // 최소 수면 시간 (50틱 = 5초)
-    ENTER_DISTANCE: 30,            // 닭집 입장 거리
-    COST: 50,                      // 닭집 구매 비용
+    CAPACITY: 3,                     // 닭집당 수용 가능 닭 수
+    SLEEP_RECOVERY_RATE: 1.5,        // 피로 회복 속도 감소 (2 → 1.5)
+    HEALTH_RECOVERY_RATE: 0.3,       // 건강 회복 속도 감소 (0.5 → 0.3)
+    MIN_SLEEP_TIME: 60,              // 최소 수면 시간 증가 (50 → 60)
+    ENTER_DISTANCE: 30,              // 닭집 입장 거리
+    COST: 60,                        // 가격 인상 (50 → 60)
   },
 };
 
@@ -144,6 +145,7 @@ export const STATE_TEXT = {
   tired: '😪 피곤해요',
   goingToCoop: '🏠 닭집 가는 중',
   sleeping: '😴 잠자는 중',
+  dying: '💀 위험!',
   default: '🐔',
 };
 
@@ -153,6 +155,7 @@ export const CHICK_STATE_TEXT = {
   seeking: '🔍 먹이 찾는 중',
   eating: '🍽️ 쪼아쪼아',
   hungry: '😢 배고파요!',
+  dying: '💀 위험!',
   default: '🐥',
 };
 
@@ -162,6 +165,7 @@ export const JUVENILE_STATE_TEXT = {
   seeking: '🔍 먹이 찾는 중',
   eating: '🍽️ 냠냠',
   hungry: '😢 배고파요!',
+  dying: '💀 위험!',
   default: '🐤',
 };
 

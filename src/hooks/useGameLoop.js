@@ -74,6 +74,7 @@ export const useGameLoop = (fieldSize) => {
   const [coops, setCoops] = useState([]);
   const [coins, setCoins] = useState(100); // 시작 코인
   const [placingCoop, setPlacingCoop] = useState(false);
+  const [deathCount, setDeathCount] = useState(0); // 사망한 닭 수
 
   // useRef로 현재 상태 참조
   const chickensRef = useRef(chickens);
@@ -219,7 +220,7 @@ export const useGameLoop = (fieldSize) => {
         hunger = Math.max(config.HUNGER.MIN, hunger - hungerDecreaseRate);
         tiredness = Math.min(config.TIREDNESS.MAX, tiredness + config.TIREDNESS.INCREASE_RATE);
         
-        // 건강 감소 (배고프거나 피곤할 때)
+        // 건강 감소 (배고프거나 피곤하거나 불행할 때)
         let healthDecrease = 0;
         if (hunger < config.HUNGER.HUNGRY_THRESHOLD) {
           healthDecrease += config.HEALTH.HUNGRY_DECREASE_RATE;
@@ -227,7 +228,15 @@ export const useGameLoop = (fieldSize) => {
         if (tiredness >= config.TIREDNESS.TIRED_THRESHOLD) {
           healthDecrease += config.HEALTH.TIRED_DECREASE_RATE;
         }
+        if (happiness < config.HAPPINESS.LOW_THRESHOLD) {
+          healthDecrease += config.HEALTH.UNHAPPY_DECREASE_RATE;
+        }
         health = Math.max(config.HEALTH.MIN, health - healthDecrease);
+        
+        // 건강이 낮으면 dying 상태 표시
+        if (health < 20 && state !== 'sleeping') {
+          state = 'dying';
+        }
         
         // 꽃 주변에 있으면 행복도 보너스
         const currentFlowers = flowersRef.current;
@@ -434,17 +443,26 @@ export const useGameLoop = (fieldSize) => {
       const allEggs = [...updatedEggs, ...newEggPositions.map(pos => createEgg(pos.x, pos.y))];
 
       // 4. 새 병아리 추가
-      const allChickens = [...updatedChickens, ...newChicks.map(pos => createChicken(pos.x, pos.y, GROWTH_STAGE.CHICK))];
+      const allChickensWithNew = [...updatedChickens, ...newChicks.map(pos => createChicken(pos.x, pos.y, GROWTH_STAGE.CHICK))];
+      
+      // 5. 사망한 닭 제거 (건강이 0 이하)
+      const deadChickens = allChickensWithNew.filter(c => c.health <= 0);
+      const aliveChickens = allChickensWithNew.filter(c => c.health > 0);
+      
+      // 사망 카운트 업데이트
+      if (deadChickens.length > 0) {
+        setDeathCount(prev => prev + deadChickens.length);
+      }
 
-      // 5. 상태 일괄 업데이트
-      setChickens(allChickens);
+      // 6. 상태 일괄 업데이트
+      setChickens(aliveChickens);
       setEggs(allEggs);
       
       if (eatenFeedIds.size > 0) {
         setFeeds(prev => prev.filter(f => !eatenFeedIds.has(f.id)));
       }
       
-      // 6. 코인 업데이트
+      // 7. 코인 업데이트
       if (totalEarnedCoins > 0) {
         setCoins(prev => Math.floor((prev + totalEarnedCoins) * 100) / 100);
       }
@@ -464,6 +482,7 @@ export const useGameLoop = (fieldSize) => {
     flowers,
     coops,
     coins,
+    deathCount,
     placingCoop,
     addFeed,
     addFlower,
