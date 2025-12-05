@@ -17,12 +17,38 @@ export default function ChickenGame() {
   }, [addFeed]);
 
   return (
-    <div className="min-h-screen bg-amber-50 p-4">
+    <div 
+      className="min-h-screen p-4"
+      style={{
+        backgroundColor: '#87ceeb',
+        backgroundImage: `
+          linear-gradient(to bottom, #87ceeb 0%, #98d8ef 50%, #b8e4f0 100%)
+        `,
+      }}
+    >
       <div className="max-w-lg mx-auto">
         {/* 타이틀 */}
-        <h1 className="text-2xl font-bold text-center text-amber-800 mb-4">
-          🐔 닭 시뮬레이션 🌾
-        </h1>
+        <div 
+          className="text-center mb-4 py-3 px-4 rounded-lg"
+          style={{
+            backgroundColor: '#f5e6c8',
+            border: '4px solid #8b7355',
+            boxShadow: '4px 4px 0px #5d4037',
+          }}
+        >
+          <h1 
+            className="text-xl font-bold"
+            style={{ 
+              color: '#5d4037',
+              fontFamily: '"Press Start 2P", monospace',
+              fontSize: '16px',
+              textShadow: '2px 2px 0px #8b7355',
+              letterSpacing: '2px',
+            }}
+          >
+            🐔 닭 시뮬레이션 🌾
+          </h1>
+        </div>
         
         {/* 상태바 */}
         <StatusBar hunger={chicken.hunger} state={chicken.state} />
