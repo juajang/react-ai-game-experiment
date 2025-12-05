@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { GAME_CONFIG, EGG_STATE } from '../constants/gameConfig';
+import { GAME_CONFIG, EGG_STATE, GROWTH_STAGE } from '../constants/gameConfig';
 import {
   findClosestFeed,
   getRandomPosition,
@@ -10,22 +10,28 @@ import {
 } from '../utils/gameUtils';
 
 /**
- * 닭의 초기 상태
+ * 닭 생성
  */
-const createChicken = (x, y, isAdult = true) => ({
+const createChicken = (x, y, stage = GROWTH_STAGE.ADULT) => ({
   id: Date.now() + Math.random(),
   x,
   y,
-  hunger: isAdult ? GAME_CONFIG.CHICKEN.INITIAL_HUNGER : GAME_CONFIG.CHICK.INITIAL_HUNGER,
-  happiness: isAdult ? GAME_CONFIG.CHICKEN.INITIAL_HAPPINESS : GAME_CONFIG.CHICK.INITIAL_HAPPINESS,
-  health: isAdult ? GAME_CONFIG.CHICKEN.INITIAL_HEALTH : GAME_CONFIG.CHICK.INITIAL_HEALTH,
+  hunger: stage === GROWTH_STAGE.ADULT 
+    ? GAME_CONFIG.CHICKEN.INITIAL_HUNGER 
+    : GAME_CONFIG.CHICK.INITIAL_HUNGER,
+  happiness: stage === GROWTH_STAGE.ADULT 
+    ? GAME_CONFIG.CHICKEN.INITIAL_HAPPINESS 
+    : GAME_CONFIG.CHICK.INITIAL_HAPPINESS,
+  health: stage === GROWTH_STAGE.ADULT 
+    ? GAME_CONFIG.CHICKEN.INITIAL_HEALTH 
+    : GAME_CONFIG.CHICK.INITIAL_HEALTH,
   state: 'idle',
   direction: 1,
   frame: 0,
   targetX: null,
   targetY: null,
-  isAdult,
-  growthProgress: isAdult ? 100 : 0,
+  stage,
+  growthProgress: stage === GROWTH_STAGE.ADULT ? 100 : 0,
   eggCooldown: 0,
 });
 
@@ -46,18 +52,17 @@ const createEgg = (x, y) => ({
  */
 export const useGameLoop = (fieldSize) => {
   const [chickens, setChickens] = useState([
-    createChicken(GAME_CONFIG.CHICKEN.INITIAL_X, GAME_CONFIG.CHICKEN.INITIAL_Y, true)
+    createChicken(GAME_CONFIG.CHICKEN.INITIAL_X, GAME_CONFIG.CHICKEN.INITIAL_Y, GROWTH_STAGE.ADULT)
   ]);
   const [eggs, setEggs] = useState([]);
   const [feeds, setFeeds] = useState([]);
 
-  // useRef로 현재 상태 참조 (게임 루프에서 최신 값 사용)
+  // useRef로 현재 상태 참조
   const chickensRef = useRef(chickens);
   const eggsRef = useRef(eggs);
   const feedsRef = useRef(feeds);
   const fieldSizeRef = useRef(fieldSize);
 
-  // 상태 변경 시 ref 업데이트
   useEffect(() => { chickensRef.current = chickens; }, [chickens]);
   useEffect(() => { eggsRef.current = eggs; }, [eggs]);
   useEffect(() => { feedsRef.current = feeds; }, [feeds]);
@@ -68,7 +73,7 @@ export const useGameLoop = (fieldSize) => {
     setFeeds(prev => [...prev, { id: Date.now(), x, y }]);
   }, []);
 
-  // 게임 루프 (의존성 없이 ref 사용)
+  // 게임 루프
   useEffect(() => {
     const gameLoop = setInterval(() => {
       const currentFeeds = feedsRef.current;
@@ -77,21 +82,30 @@ export const useGameLoop = (fieldSize) => {
       const currentFieldSize = fieldSizeRef.current;
       const config = GAME_CONFIG;
 
-      // 먹은 사료 ID 추적
       const eatenFeedIds = new Set();
-      // 새로 낳은 알 위치
       const newEggPositions = [];
-      // 부화할 알
       const hatchingEggIds = new Set();
-      // 새 병아리
       const newChicks = [];
 
       // 1. 닭들 업데이트
       const updatedChickens = currentChickens.map(chicken => {
-        let { x, y, hunger, happiness, health, state, direction, frame, targetX, targetY, isAdult, growthProgress, eggCooldown } = chicken;
+        let { x, y, hunger, happiness, health, state, direction, frame, targetX, targetY, stage, growthProgress, eggCooldown } = chicken;
         
-        const speed = isAdult ? config.CHICKEN.SPEED : config.CHICK.SPEED;
-        const hungerDecreaseRate = isAdult ? config.HUNGER.DECREASE_RATE : config.CHICK.HUNGER_DECREASE_RATE;
+        // 단계별 속도 및 배고픔 감소율
+        let speed, hungerDecreaseRate;
+        switch (stage) {
+          case GROWTH_STAGE.CHICK:
+            speed = config.CHICK.SPEED;
+            hungerDecreaseRate = config.CHICK.HUNGER_DECREASE_RATE;
+            break;
+          case GROWTH_STAGE.JUVENILE:
+            speed = config.JUVENILE.SPEED;
+            hungerDecreaseRate = config.JUVENILE.HUNGER_DECREASE_RATE;
+            break;
+          default:
+            speed = config.CHICKEN.SPEED;
+            hungerDecreaseRate = config.HUNGER.DECREASE_RATE;
+        }
 
         // 스탯 감소
         hunger = Math.max(config.HUNGER.MIN, hunger - hungerDecreaseRate);
@@ -101,11 +115,17 @@ export const useGameLoop = (fieldSize) => {
         // 쿨다운 감소
         if (eggCooldown > 0) eggCooldown--;
 
-        // 병아리 성장
-        if (!isAdult) {
+        // 성장 처리
+        if (stage === GROWTH_STAGE.CHICK) {
           growthProgress += (100 / config.CHICK.GROWTH_TIME);
           if (growthProgress >= 100) {
-            isAdult = true;
+            stage = GROWTH_STAGE.JUVENILE;
+            growthProgress = 0;
+          }
+        } else if (stage === GROWTH_STAGE.JUVENILE) {
+          growthProgress += (100 / config.JUVENILE.GROWTH_TIME);
+          if (growthProgress >= 100) {
+            stage = GROWTH_STAGE.ADULT;
             growthProgress = 100;
           }
         }
@@ -122,7 +142,6 @@ export const useGameLoop = (fieldSize) => {
             targetY = closest.feed.y;
             state = 'seeking';
 
-            // 사료에 도달했는지 확인
             if (closest.distance < config.FEED.REACH_DISTANCE) {
               eatenFeedIds.add(closest.feed.id);
               hunger = Math.min(config.HUNGER.MAX, hunger + config.HUNGER.FEED_RESTORE);
@@ -131,7 +150,7 @@ export const useGameLoop = (fieldSize) => {
               state = 'eating';
               frame = 2;
               
-              return { ...chicken, x, y, hunger, happiness, health, state, direction, frame, targetX: null, targetY: null, isAdult, growthProgress, eggCooldown };
+              return { ...chicken, x, y, hunger, happiness, health, state, direction, frame, targetX: null, targetY: null, stage, growthProgress, eggCooldown };
             }
           }
         } else if (hunger < config.HUNGER.HUNGRY_THRESHOLD) {
@@ -143,7 +162,7 @@ export const useGameLoop = (fieldSize) => {
           }
         } else {
           // 알 품기 체크 (성체만)
-          if (isAdult && currentEggs.length > 0) {
+          if (stage === GROWTH_STAGE.ADULT && currentEggs.length > 0) {
             const nearEgg = currentEggs.find(egg => 
               calculateDistance(x, y, egg.x, egg.y) < config.EGG.WARM_DISTANCE
             );
@@ -156,7 +175,6 @@ export const useGameLoop = (fieldSize) => {
             state = 'idle';
           }
           
-          // 랜덤 목표 설정
           if (!targetX || calculateDistance(x, y, targetX, targetY) < config.FEED.TARGET_REACH_DISTANCE || Math.random() < config.RANDOM_MOVE_CHANCE) {
             const newPos = getRandomPosition(currentFieldSize.width, currentFieldSize.height);
             targetX = newPos.x;
@@ -171,7 +189,6 @@ export const useGameLoop = (fieldSize) => {
           x = movement.x;
           y = movement.y;
           direction = movement.direction;
-          
           happiness = Math.min(config.HAPPINESS.MAX, happiness + config.HAPPINESS.WALK_RESTORE);
         }
 
@@ -183,8 +200,8 @@ export const useGameLoop = (fieldSize) => {
         // 애니메이션 프레임
         frame = getAnimationFrame(state, frame);
 
-        // 알 낳기 체크
-        if (isAdult && eggCooldown <= 0 && 
+        // 알 낳기 체크 (성체만)
+        if (stage === GROWTH_STAGE.ADULT && eggCooldown <= 0 && 
             hunger >= config.EGG.MIN_HUNGER && 
             happiness >= config.EGG.MIN_HAPPINESS && 
             health >= config.EGG.MIN_HEALTH &&
@@ -194,7 +211,7 @@ export const useGameLoop = (fieldSize) => {
           state = 'laying';
         }
 
-        return { ...chicken, x, y, hunger, happiness, health, state, direction, frame, targetX, targetY, isAdult, growthProgress, eggCooldown };
+        return { ...chicken, x, y, hunger, happiness, health, state, direction, frame, targetX, targetY, stage, growthProgress, eggCooldown };
       });
 
       // 2. 알 업데이트
@@ -204,9 +221,8 @@ export const useGameLoop = (fieldSize) => {
         
         age++;
         
-        // 닭이 근처에 있으면 따뜻해짐
         const nearChicken = updatedChickens.find(c => 
-          c.isAdult && calculateDistance(c.x, c.y, egg.x, egg.y) < eggConfig.WARM_DISTANCE
+          c.stage === GROWTH_STAGE.ADULT && calculateDistance(c.x, c.y, egg.x, egg.y) < eggConfig.WARM_DISTANCE
         );
         
         if (nearChicken) {
@@ -215,7 +231,6 @@ export const useGameLoop = (fieldSize) => {
           warmth = Math.max(0, warmth - eggConfig.COOL_RATE);
         }
         
-        // 상태 업데이트
         if (warmth >= eggConfig.HATCH_WARMTH && age >= eggConfig.HATCH_TIME) {
           state = EGG_STATE.HATCHING;
           hatchingEggIds.add(egg.id);
@@ -233,7 +248,7 @@ export const useGameLoop = (fieldSize) => {
       const allEggs = [...updatedEggs, ...newEggPositions.map(pos => createEgg(pos.x, pos.y))];
 
       // 4. 새 병아리 추가
-      const allChickens = [...updatedChickens, ...newChicks.map(pos => createChicken(pos.x, pos.y, false))];
+      const allChickens = [...updatedChickens, ...newChicks.map(pos => createChicken(pos.x, pos.y, GROWTH_STAGE.CHICK))];
 
       // 5. 상태 일괄 업데이트
       setChickens(allChickens);
@@ -246,10 +261,9 @@ export const useGameLoop = (fieldSize) => {
     }, GAME_CONFIG.GAME_LOOP_INTERVAL);
 
     return () => clearInterval(gameLoop);
-  }, []); // 의존성 배열 비움 - ref 사용으로 최신 상태 참조
+  }, []);
 
-  // 첫 번째 닭의 정보 (메인 닭으로 사용)
-  const mainChicken = chickens.find(c => c.isAdult) || chickens[0];
+  const mainChicken = chickens.find(c => c.stage === GROWTH_STAGE.ADULT) || chickens[0];
 
   return { 
     chicken: mainChicken,
@@ -257,7 +271,8 @@ export const useGameLoop = (fieldSize) => {
     eggs, 
     feeds, 
     addFeed,
-    chickenCount: chickens.filter(c => c.isAdult).length,
-    chickCount: chickens.filter(c => !c.isAdult).length,
+    chickenCount: chickens.filter(c => c.stage === GROWTH_STAGE.ADULT).length,
+    juvenileCount: chickens.filter(c => c.stage === GROWTH_STAGE.JUVENILE).length,
+    chickCount: chickens.filter(c => c.stage === GROWTH_STAGE.CHICK).length,
   };
 };

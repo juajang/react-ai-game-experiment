@@ -1,7 +1,8 @@
 import { useRef, useCallback } from 'react';
-import { Chicken, Chick, Egg, Feed, Field, GameInfo, StatusBar } from './components';
+import { Chicken, Chick, Juvenile, Egg, Feed, Field, GameInfo, StatusBar } from './components';
 import { useGameLoop } from './hooks/useGameLoop';
 import { useFieldSize } from './hooks/useFieldSize';
+import { GROWTH_STAGE } from './constants/gameConfig';
 
 export default function ChickenGame() {
   const fieldRef = useRef(null);
@@ -13,10 +14,10 @@ export default function ChickenGame() {
     feeds, 
     addFeed,
     chickenCount,
+    juvenileCount,
     chickCount,
   } = useGameLoop(fieldSize);
 
-  // 사료 배치 핸들러
   const handleFieldClick = useCallback((e) => {
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left;
@@ -24,14 +25,53 @@ export default function ChickenGame() {
     addFeed(x, y);
   }, [addFeed]);
 
+  // 성장 단계에 따른 컴포넌트 렌더링
+  const renderChicken = (c) => {
+    switch (c.stage) {
+      case GROWTH_STAGE.CHICK:
+        return (
+          <Chick
+            key={c.id}
+            x={c.x}
+            y={c.y}
+            frame={c.frame}
+            direction={c.direction}
+            state={c.state}
+            growthProgress={c.growthProgress}
+          />
+        );
+      case GROWTH_STAGE.JUVENILE:
+        return (
+          <Juvenile
+            key={c.id}
+            x={c.x}
+            y={c.y}
+            frame={c.frame}
+            direction={c.direction}
+            state={c.state}
+            growthProgress={c.growthProgress}
+          />
+        );
+      default:
+        return (
+          <Chicken 
+            key={c.id}
+            x={c.x} 
+            y={c.y} 
+            frame={c.frame}
+            direction={c.direction}
+            state={c.state}
+          />
+        );
+    }
+  };
+
   return (
     <div 
       className="min-h-screen p-4"
       style={{
         backgroundColor: '#87ceeb',
-        backgroundImage: `
-          linear-gradient(to bottom, #87ceeb 0%, #98d8ef 50%, #b8e4f0 100%)
-        `,
+        backgroundImage: 'linear-gradient(to bottom, #87ceeb 0%, #98d8ef 50%, #b8e4f0 100%)',
       }}
     >
       <div className="max-w-lg mx-auto">
@@ -61,6 +101,7 @@ export default function ChickenGame() {
         <StatusBar 
           chicken={chicken} 
           chickenCount={chickenCount}
+          juvenileCount={juvenileCount}
           chickCount={chickCount}
           eggCount={eggs.length}
         />
@@ -84,29 +125,8 @@ export default function ChickenGame() {
               />
             ))}
             
-            {/* 닭들과 병아리들 */}
-            {chickens.map(c => (
-              c.isAdult ? (
-                <Chicken 
-                  key={c.id}
-                  x={c.x} 
-                  y={c.y} 
-                  frame={c.frame}
-                  direction={c.direction}
-                  state={c.state}
-                />
-              ) : (
-                <Chick
-                  key={c.id}
-                  x={c.x}
-                  y={c.y}
-                  frame={c.frame}
-                  direction={c.direction}
-                  state={c.state}
-                  growthProgress={c.growthProgress}
-                />
-              )
-            ))}
+            {/* 닭들 (모든 성장 단계) */}
+            {chickens.map(c => renderChicken(c))}
           </Field>
         </div>
         

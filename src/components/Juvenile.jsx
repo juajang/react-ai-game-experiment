@@ -1,11 +1,11 @@
-import ChickSprite from './ChickSprite';
+import JuvenileSprite from './JuvenileSprite';
 
-const Chick = ({ x, y, frame, direction, state, growthProgress }) => (
+const Juvenile = ({ x, y, frame, direction, state, growthProgress }) => (
   <div 
     className="absolute transition-all duration-100"
-    style={{ left: x - 16, top: y - 24 }}
+    style={{ left: x - 26, top: y - 40 }}
   >
-    <ChickSprite frame={frame} direction={direction} />
+    <JuvenileSprite frame={frame} direction={direction} />
     
     {state === 'eating' && (
       <div className="absolute -top-1 left-1/2 -translate-x-1/2 text-xs">😋</div>
@@ -14,16 +14,17 @@ const Chick = ({ x, y, frame, direction, state, growthProgress }) => (
     {/* 성장 진행도 바 */}
     {growthProgress !== undefined && (
       <div 
-        className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-6 h-1"
+        className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-8 h-1"
         style={{ backgroundColor: '#3d3d3d', border: '1px solid #5d4037' }}
       >
         <div 
           className="h-full"
-          style={{ width: `${growthProgress}%`, backgroundColor: '#4caf50' }}
+          style={{ width: `${growthProgress}%`, backgroundColor: '#ff9800' }}
         />
       </div>
     )}
   </div>
 );
 
-export default Chick;
+export default Juvenile;
+

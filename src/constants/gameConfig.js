@@ -57,12 +57,19 @@ export const GAME_CONFIG = {
   
   // 병아리 관련
   CHICK: {
-    SPEED: 1.5,
-    GROWTH_TIME: 500,              // 성체가 되기까지 시간 (500 틱 = 50초)
+    SPEED: 1.2,
+    GROWTH_TIME: 300,              // 청소년이 되기까지 시간 (300 틱 = 30초)
     INITIAL_HUNGER: 60,
-    INITIAL_HAPPINESS: 80,
+    INITIAL_HAPPINESS: 60,
     INITIAL_HEALTH: 100,
-    HUNGER_DECREASE_RATE: 0.08,    // 병아리는 더 빨리 배고파짐
+    HUNGER_DECREASE_RATE: 0.12,    // 병아리는 더 빨리 배고파짐
+  },
+  
+  // 청소년 관련
+  JUVENILE: {
+    SPEED: 1.8,
+    GROWTH_TIME: 400,              // 성체가 되기까지 시간 (400 틱 = 40초)
+    HUNGER_DECREASE_RATE: 0.10,    // 청소년은 중간 속도로 배고파짐
   },
   
   // 사료 관련
@@ -103,6 +110,22 @@ export const CHICK_STATE_TEXT = {
   eating: '🍽️ 쪼아쪼아',
   hungry: '😢 배고파요!',
   default: '🐥',
+};
+
+// 청소년 상태 텍스트
+export const JUVENILE_STATE_TEXT = {
+  idle: '🐤 산책 중',
+  seeking: '🔍 먹이 찾는 중',
+  eating: '🍽️ 냠냠',
+  hungry: '😢 배고파요!',
+  default: '🐤',
+};
+
+// 성장 단계
+export const GROWTH_STAGE = {
+  CHICK: 'chick',
+  JUVENILE: 'juvenile',
+  ADULT: 'adult',
 };
 
 // 알 상태

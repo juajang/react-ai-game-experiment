@@ -5,19 +5,13 @@ const PixelBar = ({ value, color, label }) => (
   <div className="flex items-center gap-2 mb-2">
     <span 
       className="min-w-[60px]"
-      style={{ 
-        color: '#8b7355',
-        fontSize: '11px',
-      }}
+      style={{ color: '#8b7355', fontSize: '11px' }}
     >
       {label}
     </span>
     <div 
       className="flex-1 h-4 overflow-hidden relative"
-      style={{
-        backgroundColor: '#3d3d3d',
-        border: '2px solid #5d4037',
-      }}
+      style={{ backgroundColor: '#3d3d3d', border: '2px solid #5d4037' }}
     >
       <div 
         className="h-full transition-all duration-300"
@@ -29,29 +23,22 @@ const PixelBar = ({ value, color, label }) => (
       />
       <div 
         className="absolute top-0 left-0 h-1"
-        style={{
-          backgroundColor: 'rgba(255,255,255,0.3)',
-          width: `${value}%`,
-        }}
+        style={{ backgroundColor: 'rgba(255,255,255,0.3)', width: `${value}%` }}
       />
     </div>
     <span 
       className="font-bold min-w-[40px] text-right"
-      style={{ 
-        color: '#5d4037',
-        fontSize: '11px',
-      }}
+      style={{ color: '#5d4037', fontSize: '11px' }}
     >
       {Math.round(value)}%
     </span>
   </div>
 );
 
-const StatusBar = ({ chicken, chickenCount, chickCount, eggCount }) => {
+const StatusBar = ({ chicken, chickenCount, juvenileCount, chickCount, eggCount }) => {
   const { hunger, happiness, health, state } = chicken || {};
   const stateText = STATE_TEXT[state] || STATE_TEXT.default;
   
-  // 색상 결정 함수
   const getColor = (value, thresholds = { high: 70, low: 30 }) => {
     if (value > thresholds.high) return '#22c55e';
     if (value > thresholds.low) return '#eab308';
@@ -69,13 +56,7 @@ const StatusBar = ({ chicken, chickenCount, chickCount, eggCount }) => {
     >
       {/* 헤더 */}
       <div className="flex items-center justify-between mb-3">
-        <span 
-          className="font-bold"
-          style={{ 
-            color: '#5d4037',
-            fontSize: '14px',
-          }}
-        >
+        <span className="font-bold" style={{ color: '#5d4037', fontSize: '14px' }}>
           🐔 농장 상태
         </span>
         <span 
@@ -92,21 +73,9 @@ const StatusBar = ({ chicken, chickenCount, chickCount, eggCount }) => {
       </div>
       
       {/* 스탯 바들 */}
-      <PixelBar 
-        value={hunger || 0} 
-        color={getColor(hunger)} 
-        label="🍽️ 포만감" 
-      />
-      <PixelBar 
-        value={happiness || 0} 
-        color={getColor(happiness, { high: 60, low: 40 })} 
-        label="😊 행복도" 
-      />
-      <PixelBar 
-        value={health || 0} 
-        color={getColor(health, { high: 80, low: 60 })} 
-        label="❤️ 건강" 
-      />
+      <PixelBar value={hunger || 0} color={getColor(hunger)} label="🍽️ 포만감" />
+      <PixelBar value={happiness || 0} color={getColor(happiness, { high: 60, low: 40 })} label="😊 행복도" />
+      <PixelBar value={health || 0} color={getColor(health, { high: 80, low: 60 })} label="❤️ 건강" />
       
       {/* 개체 수 표시 */}
       <div 
@@ -115,15 +84,19 @@ const StatusBar = ({ chicken, chickenCount, chickCount, eggCount }) => {
       >
         <div className="text-center">
           <div style={{ fontSize: '16px' }}>🐔</div>
-          <div style={{ color: '#5d4037', fontSize: '12px' }}>{chickenCount || 1}</div>
+          <div style={{ color: '#5d4037', fontSize: '11px' }}>{chickenCount || 0}</div>
+        </div>
+        <div className="text-center">
+          <div style={{ fontSize: '16px' }}>🐤</div>
+          <div style={{ color: '#5d4037', fontSize: '11px' }}>{juvenileCount || 0}</div>
         </div>
         <div className="text-center">
           <div style={{ fontSize: '16px' }}>🐥</div>
-          <div style={{ color: '#5d4037', fontSize: '12px' }}>{chickCount || 0}</div>
+          <div style={{ color: '#5d4037', fontSize: '11px' }}>{chickCount || 0}</div>
         </div>
         <div className="text-center">
           <div style={{ fontSize: '16px' }}>🥚</div>
-          <div style={{ color: '#5d4037', fontSize: '12px' }}>{eggCount || 0}</div>
+          <div style={{ color: '#5d4037', fontSize: '11px' }}>{eggCount || 0}</div>
         </div>
       </div>
     </div>
