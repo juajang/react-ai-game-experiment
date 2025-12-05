@@ -4,8 +4,8 @@ export const GAME_CONFIG = {
   CHICKEN: {
     INITIAL_X: 200,
     INITIAL_Y: 160,
-    INITIAL_HUNGER: 70,              // 시작 포만감 감소 (80 → 70)
-    INITIAL_HAPPINESS: 50,
+    INITIAL_HUNGER: 80,              // 시작 포만감 (70 → 80)
+    INITIAL_HAPPINESS: 60,           // 시작 행복도 (50 → 60)
     INITIAL_HEALTH: 100,
     SPEED: 2,
     HUNGRY_SPEED_MULTIPLIER: 1.5,
@@ -14,88 +14,88 @@ export const GAME_CONFIG = {
   
   // 배고픔 관련
   HUNGER: {
-    DECREASE_RATE: 0.25,             // 더 빨리 배고파짐 (0.15 → 0.25)
-    FEED_RESTORE: 25,
-    HUNGRY_THRESHOLD: 35,            // 배고픔 임계값 상승 (30 → 35)
+    DECREASE_RATE: 0.12,             // 천천히 배고파짐 (0.25 → 0.12)
+    FEED_RESTORE: 30,                // 먹이 회복량 증가 (25 → 30)
+    HUNGRY_THRESHOLD: 30,            // 배고픔 임계값 (35 → 30)
     MAX: 100,
     MIN: 0,
   },
   
   // 행복도 관련
   HAPPINESS: {
-    DECREASE_RATE: 0.15,             // 더 빨리 떨어짐 (0.08 → 0.15)
-    FEED_RESTORE: 12,                // 먹이로 회복량 감소 (15 → 12)
-    WALK_RESTORE: 0.03,              // 산책 회복량 감소 (0.05 → 0.03)
-    FLOWER_BOOST: 0.12,              // 꽃 효과 약간 증가 (0.1 → 0.12)
+    DECREASE_RATE: 0.06,             // 천천히 떨어짐 (0.15 → 0.06)
+    FEED_RESTORE: 15,                // 먹이로 회복량 (12 → 15)
+    WALK_RESTORE: 0.05,              // 산책 회복량 (0.03 → 0.05)
+    FLOWER_BOOST: 0.15,              // 꽃 효과 증가 (0.12 → 0.15)
     MAX: 100,
     MIN: 0,
-    LOW_THRESHOLD: 40,
+    LOW_THRESHOLD: 30,               // 낮은 행복 임계값 (40 → 30)
   },
   
   // 건강 관련
   HEALTH: {
-    DECREASE_RATE: 0,                // 기본 감소 없음 (조건에 따라 감소)
-    HUNGRY_DECREASE_RATE: 0.3,       // 배고프면 건강 더 빨리 감소 (0.15 → 0.3)
-    TIRED_DECREASE_RATE: 0.2,        // 피곤하면 건강 더 빨리 감소 (0.1 → 0.2)
-    UNHAPPY_DECREASE_RATE: 0.1,      // 불행하면 건강 감소 (NEW)
-    FEED_RESTORE: 3,                 // 먹이로 건강 회복 감소 (5 → 3)
+    DECREASE_RATE: 0,                // 기본 감소 없음
+    HUNGRY_DECREASE_RATE: 0.12,      // 배고프면 건강 감소 (0.3 → 0.12)
+    TIRED_DECREASE_RATE: 0.08,       // 피곤하면 건강 감소 (0.2 → 0.08)
+    UNHAPPY_DECREASE_RATE: 0.05,     // 불행하면 건강 감소 (0.1 → 0.05)
+    FEED_RESTORE: 5,                 // 먹이로 건강 회복 (3 → 5)
     MAX: 100,
     MIN: 0,
-    LOW_THRESHOLD: 50,               // 낮은 건강 임계값 낮춤 (60 → 50)
-    HAPPINESS_THRESHOLD: 50,         // 건강이 이 이상이어야 행복도 상승
+    LOW_THRESHOLD: 40,               // 낮은 건강 임계값 (50 → 40)
+    HAPPINESS_THRESHOLD: 40,         // 행복도 상승 임계값 (50 → 40)
   },
   
   // 알 관련
   EGG: {
-    LAY_CHANCE: 2,                   // 알 낳을 확률 감소 (3 → 2)
-    LAY_COOLDOWN: 150,               // 쿨다운 증가 (100 → 150)
-    HATCH_TIME: 150,                 // 부화까지 필요한 시간 (150 틱 = 15초)
-    WARM_DISTANCE: 40,               // 닭이 이 거리 안에 있으면 알이 따뜻해짐
-    WARM_RATE: 1,                    // 따뜻해지는 속도
-    COOL_RATE: 0.8,                  // 더 빨리 식음 (0.5 → 0.8)
-    HATCH_WARMTH: 100,               // 부화에 필요한 따뜻함
-    // 알 낳기 조건 (더 어려움)
-    MIN_HUNGER: 60,                  // (50 → 60)
-    MIN_HAPPINESS: 50,               // (40 → 50)
-    MIN_HEALTH: 70,                  // (60 → 70)
+    LAY_CHANCE: 4,                   // 알 낳을 확률 증가 (2 → 4)
+    LAY_COOLDOWN: 80,                // 쿨다운 감소 (150 → 80)
+    HATCH_TIME: 120,                 // 부화 시간 감소 (150 → 120)
+    WARM_DISTANCE: 50,               // 따뜻해지는 거리 증가 (40 → 50)
+    WARM_RATE: 1.5,                  // 따뜻해지는 속도 (1 → 1.5)
+    COOL_RATE: 0.3,                  // 천천히 식음 (0.8 → 0.3)
+    HATCH_WARMTH: 100,
+    // 알 낳기 조건 (완화)
+    MIN_HUNGER: 40,                  // (60 → 40)
+    MIN_HAPPINESS: 35,               // (50 → 35)
+    MIN_HEALTH: 50,                  // (70 → 50)
   },
   
   // 병아리 관련
   CHICK: {
     SPEED: 1.2,
-    GROWTH_TIME: 200,                // 성장 시간 증가 (150 → 200)
-    INITIAL_HUNGER: 50,              // 시작 포만감 감소 (60 → 50)
-    INITIAL_HAPPINESS: 50,           // 시작 행복도 감소 (60 → 50)
-    INITIAL_HEALTH: 80,              // 시작 건강 감소 (100 → 80)
-    HUNGER_DECREASE_RATE: 0.2,       // 더 빨리 배고파짐 (0.12 → 0.2)
+    GROWTH_TIME: 120,                // 성장 시간 감소 (200 → 120)
+    INITIAL_HUNGER: 70,              // 시작 포만감 (50 → 70)
+    INITIAL_HAPPINESS: 70,           // 시작 행복도 (50 → 70)
+    INITIAL_HEALTH: 100,             // 시작 건강 (80 → 100)
+    HUNGER_DECREASE_RATE: 0.1,       // 천천히 배고파짐 (0.2 → 0.1)
   },
   
   // 청소년 관련
   JUVENILE: {
     SPEED: 1.8,
-    GROWTH_TIME: 250,                // 성장 시간 증가 (200 → 250)
-    HUNGER_DECREASE_RATE: 0.18,      // 더 빨리 배고파짐 (0.10 → 0.18)
+    GROWTH_TIME: 150,                // 성장 시간 감소 (250 → 150)
+    HUNGER_DECREASE_RATE: 0.08,      // 천천히 배고파짐 (0.18 → 0.08)
   },
   
   // 사료 관련
   FEED: {
     REACH_DISTANCE: 15,
     TARGET_REACH_DISTANCE: 10,
-    COST: 8,                         // 가격 인상 (5 → 8)
+    COST: 3,                         // 가격 인하 (8 → 3)
   },
   
   // 꽃 관련
   FLOWER: {
-    COST: 20,                        // 가격 인상 (15 → 20)
-    EFFECT_RADIUS: 50,               // 효과 범위 감소 (60 → 50)
-    HAPPINESS_BOOST: 0.12,           // 범위 내 행복도 증가
+    COST: 10,                        // 가격 인하 (20 → 10)
+    EFFECT_RADIUS: 70,               // 효과 범위 증가 (50 → 70)
+    HAPPINESS_BOOST: 0.15,           // 효과 증가
   },
   
   // 연못 관련
   POND: {
-    COST: 40,                        // 연못 구매 비용
-    EFFECT_RADIUS: 60,               // 효과 범위
-    HEALTH_BOOST: 0.15,              // 범위 내 건강 회복
+    COST: 25,                        // 가격 인하 (40 → 25)
+    EFFECT_RADIUS: 80,               // 효과 범위 증가 (60 → 80)
+    HEALTH_BOOST: 0.2,               // 효과 증가 (0.15 → 0.2)
   },
   
   // 필드 관련
@@ -113,31 +113,31 @@ export const GAME_CONFIG = {
   
   // 화폐 관련
   COIN: {
-    HAPPINESS_THRESHOLD: 40,         // 더 높은 행복도 필요 (30 → 40)
-    EARN_CHANCE: 10,                 // 돈 획득 확률 감소 (15 → 10)
-    EARN_AMOUNT: 1,                  // 획득 금액
-    ADULT_MULTIPLIER: 1,             // 성체 배율
-    JUVENILE_MULTIPLIER: 0.5,        // 청소년 배율
-    CHICK_MULTIPLIER: 0,             // 병아리는 돈 못 벌어요
+    HAPPINESS_THRESHOLD: 30,         // 낮은 행복도에서도 획득 (40 → 30)
+    EARN_CHANCE: 20,                 // 돈 획득 확률 증가 (10 → 20)
+    EARN_AMOUNT: 2,                  // 획득 금액 증가 (1 → 2)
+    ADULT_MULTIPLIER: 1,
+    JUVENILE_MULTIPLIER: 0.5,
+    CHICK_MULTIPLIER: 0,
   },
   
   // 피로 관련
   TIREDNESS: {
-    INCREASE_RATE: 0.25,             // 더 빨리 피곤해짐 (0.15 → 0.25)
-    TIRED_THRESHOLD: 60,             // 더 빨리 피곤 상태 (70 → 60)
-    EXHAUSTED_THRESHOLD: 80,         // 더 빨리 탈진 (90 → 80)
+    INCREASE_RATE: 0.1,              // 천천히 피곤해짐 (0.25 → 0.1)
+    TIRED_THRESHOLD: 75,             // 늦게 피곤 상태 (60 → 75)
+    EXHAUSTED_THRESHOLD: 90,         // 늦게 탈진 (80 → 90)
     MAX: 100,
     MIN: 0,
   },
   
   // 닭집 관련
   COOP: {
-    CAPACITY: 3,                     // 닭집당 수용 가능 닭 수
-    SLEEP_RECOVERY_RATE: 1.5,        // 피로 회복 속도 감소 (2 → 1.5)
-    HEALTH_RECOVERY_RATE: 0.3,       // 건강 회복 속도 감소 (0.5 → 0.3)
-    MIN_SLEEP_TIME: 60,              // 최소 수면 시간 증가 (50 → 60)
-    ENTER_DISTANCE: 30,              // 닭집 입장 거리
-    COST: 60,                        // 가격 인상 (50 → 60)
+    CAPACITY: 4,                     // 수용 인원 증가 (3 → 4)
+    SLEEP_RECOVERY_RATE: 3,          // 피로 회복 속도 증가 (1.5 → 3)
+    HEALTH_RECOVERY_RATE: 1,         // 건강 회복 속도 증가 (0.3 → 1)
+    MIN_SLEEP_TIME: 30,              // 최소 수면 시간 감소 (60 → 30)
+    ENTER_DISTANCE: 40,              // 닭집 입장 거리 (30 → 40)
+    COST: 35,                        // 가격 인하 (60 → 35)
   },
 };
 
