@@ -33,11 +33,14 @@ export const GAME_CONFIG = {
   
   // 건강 관련
   HEALTH: {
-    DECREASE_RATE: 0.01,
+    DECREASE_RATE: 0,              // 기본 감소 없음 (조건에 따라 감소)
+    HUNGRY_DECREASE_RATE: 0.15,    // 배고프면 건강 감소
+    TIRED_DECREASE_RATE: 0.1,      // 피곤하면 건강 감소
     FEED_RESTORE: 5,
     MAX: 100,
     MIN: 0,
     LOW_THRESHOLD: 60,
+    HAPPINESS_THRESHOLD: 50,       // 건강이 이 이상이어야 행복도 상승
   },
   
   // 알 관련
@@ -103,7 +106,7 @@ export const GAME_CONFIG = {
   
   // 피로 관련
   TIREDNESS: {
-    INCREASE_RATE: 0.08,           // 피로 증가 속도
+    INCREASE_RATE: 0.15,           // 피로 증가 속도 (더 빠르게)
     TIRED_THRESHOLD: 70,           // 이 피로도 이상이면 피곤한 상태
     EXHAUSTED_THRESHOLD: 90,       // 이 피로도 이상이면 탈진 상태
     MAX: 100,

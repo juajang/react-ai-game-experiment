@@ -192,9 +192,26 @@ export const useGameLoop = (fieldSize) => {
 
         // 스탯 변화
         hunger = Math.max(config.HUNGER.MIN, hunger - hungerDecreaseRate);
-        happiness = Math.max(config.HAPPINESS.MIN, happiness - config.HAPPINESS.DECREASE_RATE);
-        health = Math.max(config.HEALTH.MIN, health - config.HEALTH.DECREASE_RATE);
         tiredness = Math.min(config.TIREDNESS.MAX, tiredness + config.TIREDNESS.INCREASE_RATE);
+        
+        // 건강 감소 (배고프거나 피곤할 때)
+        let healthDecrease = 0;
+        if (hunger < config.HUNGER.HUNGRY_THRESHOLD) {
+          healthDecrease += config.HEALTH.HUNGRY_DECREASE_RATE;
+        }
+        if (tiredness >= config.TIREDNESS.TIRED_THRESHOLD) {
+          healthDecrease += config.HEALTH.TIRED_DECREASE_RATE;
+        }
+        health = Math.max(config.HEALTH.MIN, health - healthDecrease);
+        
+        // 행복도는 건강해야만 상승, 아니면 감소
+        if (health >= config.HEALTH.HAPPINESS_THRESHOLD) {
+          // 건강하면 자연 감소만
+          happiness = Math.max(config.HAPPINESS.MIN, happiness - config.HAPPINESS.DECREASE_RATE);
+        } else {
+          // 건강하지 않으면 더 빨리 감소
+          happiness = Math.max(config.HAPPINESS.MIN, happiness - config.HAPPINESS.DECREASE_RATE * 3);
+        }
         
         // 쿨다운 감소
         if (eggCooldown > 0) eggCooldown--;
@@ -265,8 +282,11 @@ export const useGameLoop = (fieldSize) => {
               if (closest.distance < config.FEED.REACH_DISTANCE) {
                 eatenFeedIds.add(closest.feed.id);
                 hunger = Math.min(config.HUNGER.MAX, hunger + config.HUNGER.FEED_RESTORE);
-                happiness = Math.min(config.HAPPINESS.MAX, happiness + config.HAPPINESS.FEED_RESTORE);
                 health = Math.min(config.HEALTH.MAX, health + config.HEALTH.FEED_RESTORE);
+                // 행복도는 건강해야만 회복
+                if (health >= config.HEALTH.HAPPINESS_THRESHOLD) {
+                  happiness = Math.min(config.HAPPINESS.MAX, happiness + config.HAPPINESS.FEED_RESTORE);
+                }
                 state = 'eating';
                 frame = 2;
                 
@@ -313,7 +333,10 @@ export const useGameLoop = (fieldSize) => {
           x = movement.x;
           y = movement.y;
           direction = movement.direction;
-          happiness = Math.min(config.HAPPINESS.MAX, happiness + config.HAPPINESS.WALK_RESTORE);
+          // 행복도는 건강해야만 회복
+          if (health >= config.HEALTH.HAPPINESS_THRESHOLD) {
+            happiness = Math.min(config.HAPPINESS.MAX, happiness + config.HAPPINESS.WALK_RESTORE);
+          }
         }
 
         // 경계 체크

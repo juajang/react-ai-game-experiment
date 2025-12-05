@@ -1,5 +1,5 @@
 import { useRef, useCallback, useState } from 'react';
-import { Chicken, Chick, Juvenile, Egg, Feed, Field, GameInfo, StatusBar, Coop } from './components';
+import { Chicken, Chick, Juvenile, Egg, Feed, Field, GameInfo, StatusBar, Coop, ItemPanel } from './components';
 import { useGameLoop } from './hooks/useGameLoop';
 import { useFieldSize } from './hooks/useFieldSize';
 import { GROWTH_STAGE, GAME_CONFIG } from './constants/gameConfig';
@@ -13,10 +13,8 @@ export default function ChickenGame() {
     feeds, 
     coops,
     coins,
-    placingCoop,
     addFeed,
     addCoop,
-    togglePlacingCoop,
     chickenCount,
     juvenileCount,
     chickCount,
@@ -24,12 +22,12 @@ export default function ChickenGame() {
   } = useGameLoop(fieldSize);
 
   // 선택된 닭 ID
-  const [selectedId, setSelectedId] = useState(null);
+  const [selectedChickenId, setSelectedChickenId] = useState(null);
+  // 선택된 아이템
+  const [selectedItem, setSelectedItem] = useState('feed');
   
   // 선택된 닭 찾기
-  const selectedChicken = chickens.find(c => c.id === selectedId);
-  
-  // 선택된 닭이 없어졌으면 첫 번째 닭 선택
+  const selectedChicken = chickens.find(c => c.id === selectedChickenId);
   const displayChicken = selectedChicken || chickens[0];
 
   const handleFieldClick = useCallback((e) => {
@@ -37,23 +35,29 @@ export default function ChickenGame() {
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
     
-    if (placingCoop) {
-      addCoop(x, y);
+    if (selectedItem === 'coop') {
+      if (addCoop(x, y)) {
+        // 성공하면 사료 모드로 돌아감
+        setSelectedItem('feed');
+      }
     } else {
       addFeed(x, y);
     }
-  }, [addFeed, addCoop, placingCoop]);
+  }, [addFeed, addCoop, selectedItem]);
 
   const handleChickenClick = useCallback((id) => {
-    setSelectedId(id);
+    setSelectedChickenId(id);
+  }, []);
+
+  const handleSelectItem = useCallback((itemId) => {
+    setSelectedItem(itemId || 'feed');
   }, []);
 
   // 성장 단계에 따른 컴포넌트 렌더링
   const renderChicken = (c) => {
-    // 잠자는 중이면 렌더링하지 않음 (닭집 안에 있음)
     if (c.state === 'sleeping') return null;
     
-    const isSelected = c.id === selectedId || (!selectedId && c === chickens[0]);
+    const isSelected = c.id === selectedChickenId || (!selectedChickenId && c === chickens[0]);
     
     switch (c.stage) {
       case GROWTH_STAGE.CHICK:
@@ -100,6 +104,12 @@ export default function ChickenGame() {
     }
   };
 
+  // 커서 스타일
+  const getCursor = () => {
+    if (selectedItem === 'coop') return 'crosshair';
+    return 'pointer';
+  };
+
   return (
     <div 
       className="min-h-screen p-4"
@@ -108,7 +118,7 @@ export default function ChickenGame() {
         backgroundImage: 'linear-gradient(to bottom, #87ceeb 0%, #98d8ef 50%, #b8e4f0 100%)',
       }}
     >
-      <div className="max-w-lg mx-auto">
+      <div className="max-w-2xl mx-auto">
         {/* 타이틀 */}
         <div 
           className="text-center mb-4 py-3 px-4 rounded-lg"
@@ -131,72 +141,88 @@ export default function ChickenGame() {
           </h1>
         </div>
         
-        {/* 상태바 */}
-        <StatusBar 
-          selectedChicken={displayChicken} 
-          chickenCount={chickenCount}
-          juvenileCount={juvenileCount}
-          chickCount={chickCount}
-          eggCount={eggs.length}
-          coopCount={coops.length}
-          sleepingCount={sleepingCount}
-          coins={coins}
-          onBuyCoop={togglePlacingCoop}
-          canBuyCoop={coins >= GAME_CONFIG.COOP.COST}
-        />
-        
-        {/* 닭집 배치 모드 안내 */}
-        {placingCoop && (
-          <div 
-            className="mt-2 p-2 rounded text-center"
-            style={{
-              backgroundColor: '#fef3c7',
-              border: '3px solid #f59e0b',
-              color: '#92400e',
-              fontSize: '12px',
-            }}
-          >
-            🏠 필드를 클릭해서 닭집을 배치하세요!
+        {/* 메인 레이아웃 */}
+        <div className="flex gap-4">
+          {/* 좌측 아이템 패널 */}
+          <ItemPanel 
+            selectedItem={selectedItem}
+            onSelectItem={handleSelectItem}
+            coins={coins}
+            coopCount={coops.length}
+          />
+          
+          {/* 중앙 게임 영역 */}
+          <div className="flex-1">
+            {/* 상태바 */}
+            <StatusBar 
+              selectedChicken={displayChicken} 
+              chickenCount={chickenCount}
+              juvenileCount={juvenileCount}
+              chickCount={chickCount}
+              eggCount={eggs.length}
+              coopCount={coops.length}
+              sleepingCount={sleepingCount}
+              coins={coins}
+            />
+            
+            {/* 선택된 아이템 안내 */}
+            <div 
+              className="mt-2 p-2 rounded text-center"
+              style={{
+                backgroundColor: selectedItem === 'coop' ? '#fef3c7' : '#dcfce7',
+                border: `3px solid ${selectedItem === 'coop' ? '#f59e0b' : '#22c55e'}`,
+                color: selectedItem === 'coop' ? '#92400e' : '#166534',
+                fontSize: '11px',
+              }}
+            >
+              {selectedItem === 'coop' 
+                ? '🏠 필드를 클릭해서 닭집을 배치하세요!' 
+                : '🌾 필드를 클릭해서 벼를 놓으세요!'}
+            </div>
+            
+            {/* 플레이 필드 */}
+            <div className="mt-2" ref={fieldRef}>
+              <Field 
+                onClick={handleFieldClick} 
+                placingCoop={selectedItem === 'coop'}
+                cursor={getCursor()}
+              >
+                {/* 닭집들 */}
+                {coops.map(coop => (
+                  <Coop 
+                    key={coop.id}
+                    x={coop.x}
+                    y={coop.y}
+                    occupants={chickens.filter(c => c.inCoopId === coop.id).length}
+                    capacity={coop.capacity}
+                  />
+                ))}
+                
+                {/* 사료들 */}
+                {feeds.map(feed => (
+                  <Feed key={feed.id} x={feed.x} y={feed.y} />
+                ))}
+                
+                {/* 알들 */}
+                {eggs.map(egg => (
+                  <Egg 
+                    key={egg.id} 
+                    x={egg.x} 
+                    y={egg.y} 
+                    state={egg.state}
+                    warmth={egg.warmth}
+                  />
+                ))}
+                
+                {/* 닭들 */}
+                {chickens.map(c => renderChicken(c))}
+              </Field>
+            </div>
+            
+            {/* 게임 안내 */}
+            <GameInfo feedCount={feeds.length} />
           </div>
-        )}
-        
-        {/* 플레이 필드 */}
-        <div className="mt-4" ref={fieldRef}>
-          <Field onClick={handleFieldClick} placingCoop={placingCoop}>
-            {/* 닭집들 */}
-            {coops.map(coop => (
-              <Coop 
-                key={coop.id}
-                x={coop.x}
-                y={coop.y}
-                occupants={chickens.filter(c => c.inCoopId === coop.id).length}
-                capacity={coop.capacity}
-              />
-            ))}
-            
-            {/* 사료들 */}
-            {feeds.map(feed => (
-              <Feed key={feed.id} x={feed.x} y={feed.y} />
-            ))}
-            
-            {/* 알들 */}
-            {eggs.map(egg => (
-              <Egg 
-                key={egg.id} 
-                x={egg.x} 
-                y={egg.y} 
-                state={egg.state}
-                warmth={egg.warmth}
-              />
-            ))}
-            
-            {/* 닭들 (모든 성장 단계) */}
-            {chickens.map(c => renderChicken(c))}
-          </Field>
         </div>
-        
-        {/* 게임 안내 */}
-        <GameInfo feedCount={feeds.length} />
       </div>
     </div>
   );
