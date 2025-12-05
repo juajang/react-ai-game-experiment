@@ -45,17 +45,17 @@ const CoopSprite = () => (
     {/* 지붕 마루선 */}
     <rect x="7" y="0" width="1" height="1" fill="#5c2c0f"/>
     
-    {/* 울타리 (왼쪽 확장) */}
-    <rect x="0" y="11" width="1" height="3" fill="#8b4513"/>
-    <rect x="1" y="11" width="1" height="3" fill="#a0522d"/>
-    <rect x="0" y="12" width="2" height="1" fill="#d2b48c"/>
-    <rect x="0" y="11" width="2" height="1" fill="#8b4513"/>
+    {/* 울타리 (왼쪽, 높이 증가) */}
+    <rect x="0" y="10" width="1" height="4" fill="#8b4513"/>
+    <rect x="1" y="10" width="1" height="4" fill="#a0522d"/>
+    <rect x="0" y="11" width="2" height="1" fill="#d2b48c"/>
+    <rect x="0" y="10" width="2" height="1" fill="#8b4513"/>
     
-    {/* 울타리 (오른쪽 확장) */}
-    <rect x="14" y="11" width="1" height="3" fill="#8b4513"/>
-    <rect x="15" y="11" width="1" height="3" fill="#a0522d"/>
-    <rect x="14" y="12" width="2" height="1" fill="#d2b48c"/>
-    <rect x="14" y="11" width="2" height="1" fill="#8b4513"/>
+    {/* 울타리 (오른쪽, 높이 증가) */}
+    <rect x="14" y="10" width="1" height="4" fill="#8b4513"/>
+    <rect x="15" y="10" width="1" height="4" fill="#a0522d"/>
+    <rect x="14" y="11" width="2" height="1" fill="#d2b48c"/>
+    <rect x="14" y="10" width="2" height="1" fill="#8b4513"/>
   </svg>
 );
 
@@ -75,10 +75,31 @@ export const CoopPreview = ({ size = 32 }) => (
     <rect x="6" y="8" width="4" height="6" fill="#8b4513"/>
     <rect x="3" y="5" width="2" height="2" fill="#87CEEB"/>
     <rect x="11" y="5" width="2" height="2" fill="#87CEEB"/>
-    {/* 울타리 */}
-    <rect x="0" y="11" width="2" height="3" fill="#8b4513"/>
-    <rect x="14" y="11" width="2" height="3" fill="#8b4513"/>
+    {/* 울타리 (높이 증가) */}
+    <rect x="0" y="10" width="2" height="4" fill="#8b4513"/>
+    <rect x="14" y="10" width="2" height="4" fill="#8b4513"/>
   </svg>
+);
+
+// ZZZ 애니메이션 컴포넌트
+const SleepingZzz = ({ delay = 0 }) => (
+  <div 
+    className="absolute"
+    style={{
+      animation: `floatUp 2s ease-out infinite`,
+      animationDelay: `${delay}s`,
+      opacity: 0,
+    }}
+  >
+    <span style={{ 
+      fontSize: '12px', 
+      fontWeight: 'bold',
+      color: '#6366f1',
+      textShadow: '1px 1px 0px white',
+    }}>
+      z
+    </span>
+  </div>
 );
 
 const Coop = ({ x, y, occupants = 0, capacity, isSelected, onMouseDown }) => {
@@ -103,6 +124,23 @@ const Coop = ({ x, y, occupants = 0, capacity, isSelected, onMouseDown }) => {
       }}
       onMouseDown={handleMouseDown}
     >
+      {/* CSS 애니메이션 정의 */}
+      <style>{`
+        @keyframes floatUp {
+          0% {
+            transform: translateY(0) translateX(0) scale(0.5);
+            opacity: 0;
+          }
+          20% {
+            opacity: 1;
+          }
+          100% {
+            transform: translateY(-30px) translateX(10px) scale(1.2);
+            opacity: 0;
+          }
+        }
+      `}</style>
+      
       {/* 선택/이동 표시 */}
       {isSelected && (
         <div 
@@ -134,13 +172,33 @@ const Coop = ({ x, y, occupants = 0, capacity, isSelected, onMouseDown }) => {
         {occupants}/{maxCapacity}
       </div>
       
-      {/* 잠자는 닭 표시 */}
+      {/* 잠자는 ZZZ 애니메이션 */}
       {occupants > 0 && (
         <div 
-          className="absolute top-6 left-1/2 -translate-x-1/2"
-          style={{ fontSize: '10px' }}
+          className="absolute"
+          style={{ 
+            top: -5,
+            right: -5,
+            zIndex: 20,
+          }}
         >
-          {'💤'.repeat(Math.min(occupants, 3))}
+          <SleepingZzz delay={0} />
+          <SleepingZzz delay={0.5} />
+          <SleepingZzz delay={1} />
+          {occupants >= 2 && (
+            <>
+              <div style={{ position: 'absolute', left: -20 }}>
+                <SleepingZzz delay={0.3} />
+                <SleepingZzz delay={0.8} />
+              </div>
+            </>
+          )}
+          {occupants >= 3 && (
+            <div style={{ position: 'absolute', left: -40 }}>
+              <SleepingZzz delay={0.6} />
+              <SleepingZzz delay={1.1} />
+            </div>
+          )}
         </div>
       )}
     </div>
