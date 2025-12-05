@@ -7,19 +7,20 @@ import { WindmillPreview } from './Windmill';
 import Coin from './Coin';
 
 // 사료 미리보기
-const FeedPreview = ({ size = 32 }) => (
+const FeedPreview = ({ size = 28 }) => (
   <svg 
     width={size} 
     height={size} 
-    viewBox="0 0 16 16" 
+    viewBox="0 0 16 20" 
     xmlns="http://www.w3.org/2000/svg"
   >
-    <rect x="7" y="5" width="2" height="6" fill="#c0a848" />
-    <rect x="6" y="6" width="1" height="1" fill="#f5d879" />
-    <rect x="9" y="7" width="1" height="1" fill="#f5d879" />
-    <rect x="6" y="8" width="1" height="1" fill="#f5d879" />
-    <rect x="9" y="9" width="1" height="1" fill="#f5d879" />
-    <rect x="7" y="10" width="2" height="1" fill="#f1cf5e" />
+    {/* 줄기 */}
+    <rect x="7" y="10" width="2" height="8" fill="#7CB342"/>
+    
+    {/* 벼 이삭 */}
+    <rect x="4" y="4" width="2" height="3" fill="#FFD54F"/>
+    <rect x="7" y="2" width="2" height="4" fill="#FFD54F"/>
+    <rect x="10" y="4" width="2" height="3" fill="#FFD54F"/>
   </svg>
 );
 
