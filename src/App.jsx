@@ -39,13 +39,14 @@ const GameOverlay = ({ type, farmGrade, deathCount, onRestart, onContinue }) => 
         >
           {isGameOver ? (
             <>
-              <p>모든 닭이 사망했습니다</p>
+              <p>모든 닭이 사망했습니다...</p>
               <p className="mt-1">총 사망: {deathCount}마리</p>
             </>
           ) : (
             <>
-              <p>🏆 황금 닭 농장 달성!</p>
-              <p className="mt-1">10마리 이상 달성!</p>
+              <p>🏆 황금 닭 농장을 달성했어요!</p>
+              <p className="mt-1">10마리 이상의 닭을 키워냈어요.</p>
+              <p className="mt-2" style={{ fontSize: '14px' }}>🐔🐔🐔🐔🐔🐔🐔🐔🐔🐔</p>
             </>
           )}
         </div>
