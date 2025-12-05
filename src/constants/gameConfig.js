@@ -42,9 +42,9 @@ export const GAME_CONFIG = {
   
   // 알 관련
   EGG: {
-    LAY_CHANCE: 0.15,              // 알 낳을 확률 15%
-    LAY_COOLDOWN: 300,             // 쿨다운 (300 틱 = 30초)
-    HATCH_TIME: 200,               // 부화까지 필요한 시간 (200 틱 = 20초)
+    LAY_CHANCE: 3,                 // 알 낳을 확률 3% (매 틱마다 체크)
+    LAY_COOLDOWN: 100,             // 쿨다운 (100 틱 = 10초)
+    HATCH_TIME: 150,               // 부화까지 필요한 시간 (150 틱 = 15초)
     WARM_DISTANCE: 40,             // 닭이 이 거리 안에 있으면 알이 따뜻해짐
     WARM_RATE: 1,                  // 따뜻해지는 속도
     COOL_RATE: 0.5,                // 식는 속도
