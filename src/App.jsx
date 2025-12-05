@@ -11,6 +11,7 @@ export default function ChickenGame() {
     chickens, 
     eggs, 
     feeds, 
+    coins,
     addFeed,
     chickenCount,
     juvenileCount,
@@ -117,13 +118,14 @@ export default function ChickenGame() {
           </h1>
         </div>
         
-        {/* 상태바 - 선택된 닭 정보 */}
+        {/* 상태바 - 코인 추가 */}
         <StatusBar 
           selectedChicken={displayChicken} 
           chickenCount={chickenCount}
           juvenileCount={juvenileCount}
           chickCount={chickCount}
           eggCount={eggs.length}
+          coins={coins}
         />
         
         {/* 플레이 필드 */}

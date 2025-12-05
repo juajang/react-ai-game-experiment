@@ -10,8 +10,12 @@ const Chick = ({ x, y, frame, direction, state, growthProgress, isSelected, onCl
       onClick?.();
     }}
   >
-    {/* 심즈 스타일 플럼밥 (작은 크기) */}
-    {isSelected && <Plumbob size={10} />}
+    {/* 심즈 스타일 플럼밥 - 중앙 정렬 */}
+    {isSelected && (
+      <div className="absolute" style={{ left: '50%', top: -14, transform: 'translateX(-50%)' }}>
+        <Plumbob size={10} />
+      </div>
+    )}
     
     <ChickSprite frame={frame} direction={direction} />
     

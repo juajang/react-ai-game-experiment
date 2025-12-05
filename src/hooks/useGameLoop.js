@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { GAME_CONFIG, EGG_STATE, GROWTH_STAGE } from '../constants/gameConfig';
 import {
   findClosestFeed,
@@ -56,22 +56,25 @@ export const useGameLoop = (fieldSize) => {
   ]);
   const [eggs, setEggs] = useState([]);
   const [feeds, setFeeds] = useState([]);
+  const [coins, setCoins] = useState(0);
 
   // useRef로 현재 상태 참조
   const chickensRef = useRef(chickens);
   const eggsRef = useRef(eggs);
   const feedsRef = useRef(feeds);
   const fieldSizeRef = useRef(fieldSize);
+  const coinsRef = useRef(coins);
 
   useEffect(() => { chickensRef.current = chickens; }, [chickens]);
   useEffect(() => { eggsRef.current = eggs; }, [eggs]);
   useEffect(() => { feedsRef.current = feeds; }, [feeds]);
   useEffect(() => { fieldSizeRef.current = fieldSize; }, [fieldSize]);
+  useEffect(() => { coinsRef.current = coins; }, [coins]);
 
   // 사료 추가
-  const addFeed = useCallback((x, y) => {
+  const addFeed = (x, y) => {
     setFeeds(prev => [...prev, { id: Date.now(), x, y }]);
-  }, []);
+  };
 
   // 게임 루프
   useEffect(() => {
@@ -86,25 +89,29 @@ export const useGameLoop = (fieldSize) => {
       const newEggPositions = [];
       const hatchingEggIds = new Set();
       const newChicks = [];
+      let totalEarnedCoins = 0;
 
       // 1. 닭들 업데이트
       const updatedChickens = currentChickens.map(chicken => {
         let { x, y, hunger, happiness, health, state, direction, frame, targetX, targetY, stage, growthProgress, eggCooldown } = chicken;
         
         // 단계별 속도 및 배고픔 감소율
-        let speed, hungerDecreaseRate;
+        let speed, hungerDecreaseRate, coinMultiplier;
         switch (stage) {
           case GROWTH_STAGE.CHICK:
             speed = config.CHICK.SPEED;
             hungerDecreaseRate = config.CHICK.HUNGER_DECREASE_RATE;
+            coinMultiplier = config.COIN.CHICK_MULTIPLIER;
             break;
           case GROWTH_STAGE.JUVENILE:
             speed = config.JUVENILE.SPEED;
             hungerDecreaseRate = config.JUVENILE.HUNGER_DECREASE_RATE;
+            coinMultiplier = config.COIN.JUVENILE_MULTIPLIER;
             break;
           default:
             speed = config.CHICKEN.SPEED;
             hungerDecreaseRate = config.HUNGER.DECREASE_RATE;
+            coinMultiplier = config.COIN.ADULT_MULTIPLIER;
         }
 
         // 스탯 감소
@@ -114,6 +121,15 @@ export const useGameLoop = (fieldSize) => {
         
         // 쿨다운 감소
         if (eggCooldown > 0) eggCooldown--;
+
+        // 화폐 획득 체크 (행복도 기반)
+        const happinessCheck = happiness >= config.COIN.HAPPINESS_THRESHOLD;
+        const multiplierCheck = coinMultiplier > 0;
+        const randomCheck = Math.random() * 100 < config.COIN.EARN_CHANCE;
+        
+        if (happinessCheck && multiplierCheck && randomCheck) {
+          totalEarnedCoins += config.COIN.EARN_AMOUNT * coinMultiplier;
+        }
 
         // 성장 처리
         if (stage === GROWTH_STAGE.CHICK) {
@@ -205,7 +221,7 @@ export const useGameLoop = (fieldSize) => {
             hunger >= config.EGG.MIN_HUNGER && 
             happiness >= config.EGG.MIN_HAPPINESS && 
             health >= config.EGG.MIN_HEALTH &&
-            Math.random() < config.EGG.LAY_CHANCE / 100) {
+            Math.random() * 100 < config.EGG.LAY_CHANCE) {
           newEggPositions.push({ x, y: y + 20 });
           eggCooldown = config.EGG.LAY_COOLDOWN;
           state = 'laying';
@@ -257,6 +273,11 @@ export const useGameLoop = (fieldSize) => {
       if (eatenFeedIds.size > 0) {
         setFeeds(prev => prev.filter(f => !eatenFeedIds.has(f.id)));
       }
+      
+      // 6. 코인 업데이트
+      if (totalEarnedCoins > 0) {
+        setCoins(prev => Math.floor((prev + totalEarnedCoins) * 100) / 100);
+      }
 
     }, GAME_CONFIG.GAME_LOOP_INTERVAL);
 
@@ -270,6 +291,7 @@ export const useGameLoop = (fieldSize) => {
     chickens, 
     eggs, 
     feeds, 
+    coins,
     addFeed,
     chickenCount: chickens.filter(c => c.stage === GROWTH_STAGE.ADULT).length,
     juvenileCount: chickens.filter(c => c.stage === GROWTH_STAGE.JUVENILE).length,

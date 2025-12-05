@@ -1,4 +1,5 @@
 import { STATE_TEXT, CHICK_STATE_TEXT, JUVENILE_STATE_TEXT, GROWTH_STAGE } from '../constants/gameConfig';
+import Coin from './Coin';
 
 // 픽셀 스타일 프로그레스 바
 const PixelBar = ({ value, color, label }) => (
@@ -35,7 +36,7 @@ const PixelBar = ({ value, color, label }) => (
   </div>
 );
 
-const StatusBar = ({ selectedChicken, chickenCount, juvenileCount, chickCount, eggCount }) => {
+const StatusBar = ({ selectedChicken, chickenCount, juvenileCount, chickCount, eggCount, coins }) => {
   const { hunger, happiness, health, state, stage } = selectedChicken || {};
   
   // 단계별 상태 텍스트
@@ -85,7 +86,7 @@ const StatusBar = ({ selectedChicken, chickenCount, juvenileCount, chickCount, e
         boxShadow: '4px 4px 0px #5d4037',
       }}
     >
-      {/* 헤더 */}
+      {/* 헤더 - 코인 표시 추가 */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <span style={{ fontSize: '18px' }}>{getStageIcon()}</span>
@@ -93,17 +94,33 @@ const StatusBar = ({ selectedChicken, chickenCount, juvenileCount, chickCount, e
             {getStageName()}
           </span>
         </div>
-        <span 
-          className="px-3 py-1 rounded"
+        
+        {/* 코인 표시 */}
+        <div 
+          className="flex items-center gap-1 px-2 py-1 rounded"
           style={{ 
             backgroundColor: '#e8d5b7',
             border: '2px solid #8b7355',
-            color: '#5d4037',
-            fontSize: '11px',
           }}
         >
-          {getStateText()}
-        </span>
+          <Coin size={16} />
+          <span style={{ color: '#5d4037', fontSize: '12px', fontWeight: 'bold' }}>
+            {Math.floor(coins)}
+          </span>
+        </div>
+      </div>
+      
+      {/* 상태 표시 */}
+      <div 
+        className="mb-3 px-2 py-1 rounded text-center"
+        style={{ 
+          backgroundColor: '#e8d5b7',
+          border: '2px solid #8b7355',
+          color: '#5d4037',
+          fontSize: '11px',
+        }}
+      >
+        {getStateText()}
       </div>
       
       {/* 선택된 닭이 있을 때만 스탯 표시 */}

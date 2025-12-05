@@ -1,9 +1,9 @@
 // 심즈 스타일 플럼밥 (초록 다이아몬드)
 const Plumbob = ({ size = 16 }) => (
   <div 
-    className="absolute left-1/2 -translate-x-1/2"
     style={{ 
-      top: -size - 8,
+      width: size,
+      height: size * 1.5,
       animation: 'plumbobFloat 1.5s ease-in-out infinite',
     }}
   >
@@ -34,12 +34,11 @@ const Plumbob = ({ size = 16 }) => (
     
     <style>{`
       @keyframes plumbobFloat {
-        0%, 100% { transform: translateX(-50%) translateY(0) rotate(0deg); }
-        50% { transform: translateX(-50%) translateY(-4px) rotate(5deg); }
+        0%, 100% { transform: translateY(0) rotate(0deg); }
+        50% { transform: translateY(-4px) rotate(5deg); }
       }
     `}</style>
   </div>
 );
 
 export default Plumbob;
-

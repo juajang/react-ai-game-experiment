@@ -24,8 +24,8 @@ export const GAME_CONFIG = {
   // 행복도 관련
   HAPPINESS: {
     DECREASE_RATE: 0.02,
-    FEED_RESTORE: 10,
-    WALK_RESTORE: 0.01,
+    FEED_RESTORE: 15,
+    WALK_RESTORE: 0.05,
     MAX: 100,
     MIN: 0,
     LOW_THRESHOLD: 40,
@@ -90,6 +90,16 @@ export const GAME_CONFIG = {
   
   // 랜덤 이동 확률
   RANDOM_MOVE_CHANCE: 0.01,
+  
+  // 화폐 관련
+  COIN: {
+    HAPPINESS_THRESHOLD: 30,       // 이 행복도 이상이면 돈 획득 가능
+    EARN_CHANCE: 15,               // 돈 획득 확률 (틱당 15%)
+    EARN_AMOUNT: 1,                // 획득 금액
+    ADULT_MULTIPLIER: 1,           // 성체 배율
+    JUVENILE_MULTIPLIER: 0.5,      // 청소년 배율
+    CHICK_MULTIPLIER: 0,           // 병아리는 돈 못 벌어요
+  },
 };
 
 // 상태 텍스트
