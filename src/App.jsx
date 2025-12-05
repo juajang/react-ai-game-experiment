@@ -1,5 +1,5 @@
 import { useRef, useCallback, useState, useEffect } from 'react';
-import { Chicken, Chick, Juvenile, DeadChicken, Egg, Feed, Flower, Field, GameInfo, StatusBar, Coop, ItemPanel } from './components';
+import { Chicken, Chick, Juvenile, DeadChicken, Egg, Feed, Flower, Pond, Field, GameInfo, StatusBar, Coop, ItemPanel } from './components';
 import { useGameLoop } from './hooks/useGameLoop';
 import { useFieldSize } from './hooks/useFieldSize';
 import { GROWTH_STAGE, GAME_CONFIG } from './constants/gameConfig';
@@ -12,12 +12,15 @@ export default function ChickenGame() {
     eggs, 
     feeds, 
     flowers,
+    ponds,
     coops,
     coins,
     deathCount,
     deadChickens,
     addFeed,
     addFlower,
+    addPond,
+    movePond,
     addCoop,
     moveCoop,
     chickenCount,
@@ -27,28 +30,32 @@ export default function ChickenGame() {
 
   const [selectedChickenId, setSelectedChickenId] = useState(null);
   const [selectedItem, setSelectedItem] = useState('feed');
-  const [movingCoopId, setMovingCoopId] = useState(null);
-  const [movingCoopPos, setMovingCoopPos] = useState(null);
+  
+  // 이동 중인 건물 (coop 또는 pond)
+  const [movingBuilding, setMovingBuilding] = useState(null); // { type: 'coop' | 'pond', id, x, y }
   
   const selectedChicken = chickens.find(c => c.id === selectedChickenId);
   const displayChicken = selectedChicken || chickens[0];
 
-  // 마우스 이동 추적 (닭집 이동 중)
+  // 마우스 이동 추적 (건물 이동 중)
   useEffect(() => {
-    if (!movingCoopId || !fieldRef.current) return;
+    if (!movingBuilding || !fieldRef.current) return;
 
     const handleMouseMove = (e) => {
       const rect = fieldRef.current.getBoundingClientRect();
       const x = Math.max(40, Math.min(rect.width - 40, e.clientX - rect.left));
       const y = Math.max(60, Math.min(rect.height - 20, e.clientY - rect.top));
-      setMovingCoopPos({ x, y });
+      setMovingBuilding(prev => ({ ...prev, x, y }));
     };
 
-    const handleMouseUp = (e) => {
-      if (movingCoopId && movingCoopPos) {
-        moveCoop(movingCoopId, movingCoopPos.x, movingCoopPos.y);
-        setMovingCoopId(null);
-        setMovingCoopPos(null);
+    const handleMouseUp = () => {
+      if (movingBuilding) {
+        if (movingBuilding.type === 'coop') {
+          moveCoop(movingBuilding.id, movingBuilding.x, movingBuilding.y);
+        } else if (movingBuilding.type === 'pond') {
+          movePond(movingBuilding.id, movingBuilding.x, movingBuilding.y);
+        }
+        setMovingBuilding(null);
       }
     };
 
@@ -59,11 +66,10 @@ export default function ChickenGame() {
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [movingCoopId, movingCoopPos, moveCoop]);
+  }, [movingBuilding, moveCoop, movePond]);
 
   const handleFieldClick = useCallback((e) => {
-    // 이동 중이면 무시 (mouseup에서 처리)
-    if (movingCoopId) return;
+    if (movingBuilding) return;
     
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left;
@@ -73,30 +79,40 @@ export default function ChickenGame() {
       if (addCoop(x, y)) {
         setSelectedItem('feed');
       }
+    } else if (selectedItem === 'pond') {
+      if (addPond(x, y)) {
+        setSelectedItem('feed');
+      }
     } else if (selectedItem === 'flower') {
       addFlower(x, y);
     } else {
       addFeed(x, y);
     }
-  }, [addFeed, addFlower, addCoop, selectedItem, movingCoopId]);
+  }, [addFeed, addFlower, addPond, addCoop, selectedItem, movingBuilding]);
 
   const handleChickenClick = useCallback((id) => {
-    if (movingCoopId) return;
+    if (movingBuilding) return;
     setSelectedChickenId(id);
-  }, [movingCoopId]);
+  }, [movingBuilding]);
 
   const handleCoopMouseDown = useCallback((coopId) => {
     const coop = coops.find(c => c.id === coopId);
     if (coop) {
-      setMovingCoopId(coopId);
-      setMovingCoopPos({ x: coop.x, y: coop.y });
+      setMovingBuilding({ type: 'coop', id: coopId, x: coop.x, y: coop.y });
     }
   }, [coops]);
 
+  const handlePondMouseDown = useCallback((pondId) => {
+    const pond = ponds.find(p => p.id === pondId);
+    if (pond) {
+      setMovingBuilding({ type: 'pond', id: pondId, x: pond.x, y: pond.y });
+    }
+  }, [ponds]);
+
   const handleSelectItem = useCallback((itemId) => {
-    if (movingCoopId) return;
+    if (movingBuilding) return;
     setSelectedItem(itemId || 'feed');
-  }, [movingCoopId]);
+  }, [movingBuilding]);
 
   const renderChicken = (c) => {
     if (c.state === 'sleeping') return null;
@@ -149,18 +165,22 @@ export default function ChickenGame() {
   };
 
   const getCursor = () => {
-    if (movingCoopId) return 'grabbing';
-    if (selectedItem === 'coop') return 'crosshair';
+    if (movingBuilding) return 'grabbing';
+    if (selectedItem === 'coop' || selectedItem === 'pond') return 'crosshair';
     if (selectedItem === 'flower') return 'crosshair';
     return 'pointer';
   };
 
   const getGuideMessage = () => {
-    if (movingCoopId) {
-      return '🏠 마우스를 놓아서 닭집 위치를 고정하세요!';
+    if (movingBuilding) {
+      const name = movingBuilding.type === 'coop' ? '닭집' : '연못';
+      return `📍 마우스를 놓아서 ${name} 위치를 고정하세요!`;
     }
     if (selectedItem === 'coop') {
       return `🏠 필드를 클릭해서 닭집을 배치하세요! (💰${GAME_CONFIG.COOP.COST})`;
+    }
+    if (selectedItem === 'pond') {
+      return `💧 필드를 클릭해서 연못을 배치하세요! (💰${GAME_CONFIG.POND.COST})`;
     }
     if (selectedItem === 'flower') {
       return `🌸 필드를 클릭해서 꽃을 심으세요! (💰${GAME_CONFIG.FLOWER.COST})`;
@@ -169,8 +189,9 @@ export default function ChickenGame() {
   };
 
   const getGuideColor = () => {
-    if (movingCoopId) return { bg: '#fef3c7', border: '#f59e0b', text: '#92400e' };
+    if (movingBuilding) return { bg: '#fef3c7', border: '#f59e0b', text: '#92400e' };
     if (selectedItem === 'coop') return { bg: '#fef3c7', border: '#f59e0b', text: '#92400e' };
+    if (selectedItem === 'pond') return { bg: '#dbeafe', border: '#3b82f6', text: '#1e40af' };
     if (selectedItem === 'flower') return { bg: '#fce7f3', border: '#ec4899', text: '#9d174d' };
     return { bg: '#dcfce7', border: '#22c55e', text: '#166534' };
   };
@@ -216,6 +237,7 @@ export default function ChickenGame() {
             onSelectItem={handleSelectItem}
             coins={coins}
             coopCount={coops.length}
+            pondCount={ponds.length}
             flowerCount={flowers.length}
           />
           
@@ -251,8 +273,27 @@ export default function ChickenGame() {
                 onClick={handleFieldClick} 
                 cursor={getCursor()}
               >
+                {/* 연못들 (이동 중이 아닌 것) */}
+                {ponds.filter(pond => !(movingBuilding?.type === 'pond' && movingBuilding?.id === pond.id)).map(pond => (
+                  <Pond 
+                    key={pond.id}
+                    x={pond.x}
+                    y={pond.y}
+                    onMouseDown={() => handlePondMouseDown(pond.id)}
+                  />
+                ))}
+                
+                {/* 이동 중인 연못 */}
+                {movingBuilding?.type === 'pond' && (
+                  <Pond 
+                    x={movingBuilding.x}
+                    y={movingBuilding.y}
+                    isSelected={true}
+                  />
+                )}
+                
                 {/* 닭집들 (이동 중이 아닌 것) */}
-                {coops.filter(coop => coop.id !== movingCoopId).map(coop => (
+                {coops.filter(coop => !(movingBuilding?.type === 'coop' && movingBuilding?.id === coop.id)).map(coop => (
                   <Coop 
                     key={coop.id}
                     x={coop.x}
@@ -264,12 +305,12 @@ export default function ChickenGame() {
                 ))}
                 
                 {/* 이동 중인 닭집 */}
-                {movingCoopId && movingCoopPos && (
+                {movingBuilding?.type === 'coop' && (
                   <Coop 
-                    x={movingCoopPos.x}
-                    y={movingCoopPos.y}
-                    occupants={chickens.filter(c => c.inCoopId === movingCoopId).length}
-                    capacity={coops.find(c => c.id === movingCoopId)?.capacity}
+                    x={movingBuilding.x}
+                    y={movingBuilding.y}
+                    occupants={chickens.filter(c => c.inCoopId === movingBuilding.id).length}
+                    capacity={coops.find(c => c.id === movingBuilding.id)?.capacity}
                     isSelected={true}
                   />
                 )}

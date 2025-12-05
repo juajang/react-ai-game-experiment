@@ -71,6 +71,7 @@ export const useGameLoop = (fieldSize) => {
   const [eggs, setEggs] = useState([]);
   const [feeds, setFeeds] = useState([]);
   const [flowers, setFlowers] = useState([]);
+  const [ponds, setPonds] = useState([]);
   const [coops, setCoops] = useState([]);
   const [coins, setCoins] = useState(100); // 시작 코인
   const [placingCoop, setPlacingCoop] = useState(false);
@@ -82,6 +83,7 @@ export const useGameLoop = (fieldSize) => {
   const eggsRef = useRef(eggs);
   const feedsRef = useRef(feeds);
   const flowersRef = useRef(flowers);
+  const pondsRef = useRef(ponds);
   const coopsRef = useRef(coops);
   const fieldSizeRef = useRef(fieldSize);
 
@@ -89,6 +91,7 @@ export const useGameLoop = (fieldSize) => {
   useEffect(() => { eggsRef.current = eggs; }, [eggs]);
   useEffect(() => { feedsRef.current = feeds; }, [feeds]);
   useEffect(() => { flowersRef.current = flowers; }, [flowers]);
+  useEffect(() => { pondsRef.current = ponds; }, [ponds]);
   useEffect(() => { coopsRef.current = coops; }, [coops]);
   useEffect(() => { fieldSizeRef.current = fieldSize; }, [fieldSize]);
 
@@ -110,6 +113,23 @@ export const useGameLoop = (fieldSize) => {
       return true;
     }
     return false;
+  };
+
+  // 연못 추가
+  const addPond = (x, y) => {
+    if (coins >= GAME_CONFIG.POND.COST) {
+      setPonds(prev => [...prev, { id: Date.now(), x, y }]);
+      setCoins(prev => prev - GAME_CONFIG.POND.COST);
+      return true;
+    }
+    return false;
+  };
+
+  // 연못 이동
+  const movePond = (pondId, newX, newY) => {
+    setPonds(prev => prev.map(pond => 
+      pond.id === pondId ? { ...pond, x: newX, y: newY } : pond
+    ));
   };
 
   // 닭집 추가
@@ -244,6 +264,15 @@ export const useGameLoop = (fieldSize) => {
         const nearFlower = currentFlowers.some(f => 
           calculateDistance(x, y, f.x, f.y) < config.FLOWER.EFFECT_RADIUS
         );
+        
+        // 연못 주변에 있으면 건강 회복
+        const currentPonds = pondsRef.current;
+        const nearPond = currentPonds.some(p => 
+          calculateDistance(x, y, p.x, p.y) < config.POND.EFFECT_RADIUS
+        );
+        if (nearPond) {
+          health = Math.min(config.HEALTH.MAX, health + config.POND.HEALTH_BOOST);
+        }
         
         // 행복도는 건강해야만 상승, 아니면 감소
         if (health >= config.HEALTH.HAPPINESS_THRESHOLD) {
@@ -491,6 +520,7 @@ export const useGameLoop = (fieldSize) => {
     eggs, 
     feeds, 
     flowers,
+    ponds,
     coops,
     coins,
     deathCount,
@@ -498,6 +528,8 @@ export const useGameLoop = (fieldSize) => {
     placingCoop,
     addFeed,
     addFlower,
+    addPond,
+    movePond,
     addCoop,
     moveCoop,
     togglePlacingCoop,

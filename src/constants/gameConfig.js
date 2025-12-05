@@ -91,6 +91,13 @@ export const GAME_CONFIG = {
     HAPPINESS_BOOST: 0.12,           // 범위 내 행복도 증가
   },
   
+  // 연못 관련
+  POND: {
+    COST: 40,                        // 연못 구매 비용
+    EFFECT_RADIUS: 60,               // 효과 범위
+    HEALTH_BOOST: 0.15,              // 범위 내 건강 회복
+  },
+  
   // 필드 관련
   FIELD: {
     DEFAULT_WIDTH: 400,

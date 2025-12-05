@@ -12,6 +12,7 @@ export { default as Coop, CoopPreview } from './Coop';
 export { default as Egg } from './Egg';
 export { default as Feed } from './Feed';
 export { default as Flower, FlowerPreview } from './Flower';
+export { default as Pond, PondPreview } from './Pond';
 export { default as Field } from './Field';
 export { default as GameInfo } from './GameInfo';
 export { default as StatusBar } from './StatusBar';

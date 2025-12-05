@@ -1,6 +1,7 @@
 import { GAME_CONFIG } from '../constants/gameConfig';
 import { CoopPreview } from './Coop';
 import { FlowerPreview } from './Flower';
+import { PondPreview } from './Pond';
 import Coin from './Coin';
 
 // 사료 미리보기
@@ -25,6 +26,7 @@ const ItemPanel = ({
   onSelectItem, 
   coins, 
   coopCount,
+  pondCount,
   flowerCount,
 }) => {
   const consumables = [
@@ -46,6 +48,12 @@ const ItemPanel = ({
   ];
 
   const buildings = [
+    {
+      id: 'pond',
+      name: '연못',
+      icon: <PondPreview size={28} />,
+      cost: GAME_CONFIG.POND.COST,
+    },
     {
       id: 'coop',
       name: '닭집',
@@ -129,6 +137,7 @@ const ItemPanel = ({
         }}
       >
         <div>🌸 {flowerCount || 0}개</div>
+        <div>💧 {pondCount || 0}개</div>
         <div>🏠 {coopCount}개</div>
       </div>
     </div>
