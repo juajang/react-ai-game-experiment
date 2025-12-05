@@ -130,9 +130,11 @@ export const useGameLoop = (fieldSize) => {
     return false;
   };
 
-  // 꽃덤불 추가
+  // 꽃덤불 추가 (황금 농장 전용)
   const addFlowerBush = (x, y) => {
-    if (coins >= GAME_CONFIG.FLOWER_BUSH.COST) {
+    const totalChickens = chickensRef.current.length;
+    const isGoldenFarm = totalChickens >= FARM_GRADE.GOLDEN_FARM.minChickens;
+    if (coins >= GAME_CONFIG.FLOWER_BUSH.COST && isGoldenFarm) {
       setFlowerBushes(prev => [...prev, { id: Date.now(), x, y }]);
       setCoins(prev => prev - GAME_CONFIG.FLOWER_BUSH.COST);
       return true;

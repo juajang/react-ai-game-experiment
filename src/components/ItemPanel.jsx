@@ -51,12 +51,6 @@ const ItemPanel = ({
       icon: <FlowerPreview size={28} />,
       cost: GAME_CONFIG.FLOWER.COST,
     },
-    {
-      id: 'flowerBush',
-      name: '꽃덤불',
-      icon: <FlowerBushPreview size={28} />,
-      cost: GAME_CONFIG.FLOWER_BUSH.COST,
-    },
   ];
 
   const buildings = [
@@ -76,6 +70,13 @@ const ItemPanel = ({
 
   // 황금 농장 전용 아이템
   const goldenItems = [
+    {
+      id: 'flowerBush',
+      name: '꽃덤불',
+      icon: <FlowerBushPreview size={28} />,
+      cost: GAME_CONFIG.FLOWER_BUSH.COST,
+      goldenOnly: true,
+    },
     {
       id: 'windmill',
       name: '풍차',
