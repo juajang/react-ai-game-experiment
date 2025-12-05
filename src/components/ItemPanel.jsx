@@ -1,7 +1,9 @@
-import { GAME_CONFIG } from '../constants/gameConfig';
+import { GAME_CONFIG, FARM_GRADE } from '../constants/gameConfig';
 import { CoopPreview } from './Coop';
 import { FlowerPreview } from './Flower';
+import { FlowerBushPreview } from './FlowerBush';
 import { PondPreview } from './Pond';
+import { WindmillPreview } from './Windmill';
 import Coin from './Coin';
 
 // 사료 미리보기
@@ -28,7 +30,11 @@ const ItemPanel = ({
   coopCount,
   pondCount,
   flowerCount,
+  flowerBushCount,
+  windmillCount,
+  farmGrade,
 }) => {
+  const isGoldenFarm = farmGrade?.level === FARM_GRADE.GOLDEN_FARM.level;
   const consumables = [
     {
       id: 'feed',
@@ -44,6 +50,12 @@ const ItemPanel = ({
       name: '꽃',
       icon: <FlowerPreview size={28} />,
       cost: GAME_CONFIG.FLOWER.COST,
+    },
+    {
+      id: 'flowerBush',
+      name: '꽃덤불',
+      icon: <FlowerBushPreview size={28} />,
+      cost: GAME_CONFIG.FLOWER_BUSH.COST,
     },
   ];
 
@@ -62,28 +74,57 @@ const ItemPanel = ({
     },
   ];
 
-  const renderItem = (item) => {
+  // 황금 농장 전용 아이템
+  const goldenItems = [
+    {
+      id: 'windmill',
+      name: '풍차',
+      icon: <WindmillPreview size={28} />,
+      cost: GAME_CONFIG.WINDMILL.COST,
+      goldenOnly: true,
+    },
+  ];
+
+  const renderItem = (item, isGoldenItem = false) => {
     const canAfford = coins >= item.cost;
+    const isLocked = isGoldenItem && !isGoldenFarm;
     const isSelected = selectedItem === item.id;
+    const isDisabled = !canAfford || isLocked;
     
     return (
       <button
         key={item.id}
-        onClick={() => onSelectItem(isSelected ? null : item.id)}
-        disabled={!canAfford}
-        className="flex flex-col items-center p-2 rounded transition-all w-full"
+        onClick={() => !isDisabled && onSelectItem(isSelected ? null : item.id)}
+        disabled={isDisabled}
+        className="flex flex-col items-center p-2 rounded transition-all w-full relative"
         style={{
-          backgroundColor: isSelected ? '#fef3c7' : '#e8d5b7',
-          border: isSelected ? '3px solid #f59e0b' : '2px solid #8b7355',
-          opacity: canAfford ? 1 : 0.5,
-          cursor: canAfford ? 'pointer' : 'not-allowed',
+          backgroundColor: isSelected ? '#fef3c7' : isGoldenItem ? '#fef08a' : '#e8d5b7',
+          border: isSelected ? '3px solid #f59e0b' : isGoldenItem ? '2px solid #eab308' : '2px solid #8b7355',
+          opacity: isDisabled ? 0.5 : 1,
+          cursor: isDisabled ? 'not-allowed' : 'pointer',
         }}
       >
+        {isLocked && (
+          <div 
+            className="absolute -top-1 -right-1 text-xs"
+            title="황금 닭 농장에서만 사용 가능"
+          >
+            🔒
+          </div>
+        )}
+        {isGoldenItem && !isLocked && (
+          <div 
+            className="absolute -top-1 -right-1 text-xs"
+            title="황금 닭 농장 전용"
+          >
+            ✨
+          </div>
+        )}
         <div className="mb-1">{item.icon}</div>
-        <div style={{ fontSize: '9px', color: '#5d4037', fontWeight: 'bold' }}>
+        <div style={{ fontSize: '9px', color: isGoldenItem ? '#854d0e' : '#5d4037', fontWeight: 'bold' }}>
           {item.name}
         </div>
-        <div className="flex items-center gap-0.5 mt-1" style={{ fontSize: '8px', color: '#8b7355' }}>
+        <div className="flex items-center gap-0.5 mt-1" style={{ fontSize: '8px', color: isGoldenItem ? '#a16207' : '#8b7355' }}>
           <Coin size={10} />
           <span>{item.cost}</span>
         </div>
@@ -113,19 +154,32 @@ const ItemPanel = ({
       </div>
       
       {/* 소모품 */}
-      {consumables.map(renderItem)}
+      {consumables.map(item => renderItem(item))}
       
       {/* 구분선 */}
       <div style={{ borderTop: '2px dashed #8b7355', margin: '2px 0' }} />
       
       {/* 장식 */}
-      {decorations.map(renderItem)}
+      {decorations.map(item => renderItem(item))}
       
       {/* 구분선 */}
       <div style={{ borderTop: '2px dashed #8b7355', margin: '2px 0' }} />
       
       {/* 건물 */}
-      {buildings.map(renderItem)}
+      {buildings.map(item => renderItem(item))}
+      
+      {/* 황금 농장 전용 구분선 */}
+      <div 
+        className="flex items-center gap-1" 
+        style={{ margin: '2px 0' }}
+      >
+        <div style={{ borderTop: '2px dashed #eab308', flex: 1 }} />
+        <span style={{ fontSize: '8px', color: '#eab308' }}>✨</span>
+        <div style={{ borderTop: '2px dashed #eab308', flex: 1 }} />
+      </div>
+      
+      {/* 황금 농장 전용 아이템 */}
+      {goldenItems.map(item => renderItem(item, true))}
       
       {/* 보유 개수 */}
       <div 
@@ -136,9 +190,10 @@ const ItemPanel = ({
           color: '#8b7355',
         }}
       >
-        <div>🌸 {flowerCount || 0}개</div>
+        <div>🌸 {(flowerCount || 0) + (flowerBushCount || 0)}개</div>
         <div>💧 {pondCount || 0}개</div>
         <div>🏠 {coopCount}개</div>
+        {windmillCount > 0 && <div>🌀 {windmillCount}개</div>}
       </div>
     </div>
   );

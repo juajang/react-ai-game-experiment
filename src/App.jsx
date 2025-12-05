@@ -1,5 +1,5 @@
 import { useRef, useCallback, useState, useEffect } from 'react';
-import { Chicken, Chick, Juvenile, DeadChicken, Egg, Feed, Flower, Pond, Field, GameInfo, StatusBar, Coop, ItemPanel } from './components';
+import { Chicken, Chick, Juvenile, DeadChicken, Egg, Feed, Flower, FlowerBush, Pond, Windmill, Field, GameInfo, StatusBar, Coop, ItemPanel } from './components';
 import { useGameLoop } from './hooks/useGameLoop';
 import { useFieldSize } from './hooks/useFieldSize';
 import { GROWTH_STAGE, GAME_CONFIG, GAME_STATE, FARM_GRADE } from './constants/gameConfig';
@@ -121,7 +121,9 @@ export default function ChickenGame() {
     eggs, 
     feeds, 
     flowers,
+    flowerBushes,
     ponds,
+    windmills,
     coops,
     coins,
     deathCount,
@@ -130,8 +132,12 @@ export default function ChickenGame() {
     gameState,
     addFeed,
     addFlower,
+    addFlowerBush,
+    moveFlowerBush,
     addPond,
     movePond,
+    addWindmill,
+    moveWindmill,
     addCoop,
     moveCoop,
     restartGame,
@@ -140,12 +146,14 @@ export default function ChickenGame() {
     juvenileCount,
     chickCount,
     totalChickenCount,
+    flowerBushCount,
+    windmillCount,
   } = useGameLoop(fieldSize);
 
   const [selectedChickenId, setSelectedChickenId] = useState(null);
   const [selectedItem, setSelectedItem] = useState('feed');
   
-  // 이동 중인 건물 (coop 또는 pond)
+  // 이동 중인 건물 (coop, pond, flowerBush, windmill)
   const [movingBuilding, setMovingBuilding] = useState(null);
   
   const selectedChicken = chickens.find(c => c.id === selectedChickenId);
@@ -168,6 +176,10 @@ export default function ChickenGame() {
           moveCoop(movingBuilding.id, movingBuilding.x, movingBuilding.y);
         } else if (movingBuilding.type === 'pond') {
           movePond(movingBuilding.id, movingBuilding.x, movingBuilding.y);
+        } else if (movingBuilding.type === 'flowerBush') {
+          moveFlowerBush(movingBuilding.id, movingBuilding.x, movingBuilding.y);
+        } else if (movingBuilding.type === 'windmill') {
+          moveWindmill(movingBuilding.id, movingBuilding.x, movingBuilding.y);
         }
         setMovingBuilding(null);
       }
@@ -180,7 +192,7 @@ export default function ChickenGame() {
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [movingBuilding, moveCoop, movePond]);
+  }, [movingBuilding, moveCoop, movePond, moveFlowerBush, moveWindmill]);
 
   const handleFieldClick = useCallback((e) => {
     if (movingBuilding || gameState !== GAME_STATE.PLAYING) return;
@@ -197,12 +209,20 @@ export default function ChickenGame() {
       if (addPond(x, y)) {
         setSelectedItem('feed');
       }
+    } else if (selectedItem === 'windmill') {
+      if (addWindmill(x, y)) {
+        setSelectedItem('feed');
+      }
+    } else if (selectedItem === 'flowerBush') {
+      if (addFlowerBush(x, y)) {
+        // 꽃덤불은 계속 배치 가능
+      }
     } else if (selectedItem === 'flower') {
       addFlower(x, y);
     } else {
       addFeed(x, y);
     }
-  }, [addFeed, addFlower, addPond, addCoop, selectedItem, movingBuilding, gameState]);
+  }, [addFeed, addFlower, addFlowerBush, addPond, addWindmill, addCoop, selectedItem, movingBuilding, gameState]);
 
   const handleChickenClick = useCallback((id) => {
     if (movingBuilding) return;
@@ -224,6 +244,22 @@ export default function ChickenGame() {
       setMovingBuilding({ type: 'pond', id: pondId, x: pond.x, y: pond.y });
     }
   }, [ponds, gameState]);
+
+  const handleFlowerBushMouseDown = useCallback((bushId) => {
+    if (gameState !== GAME_STATE.PLAYING) return;
+    const bush = flowerBushes.find(b => b.id === bushId);
+    if (bush) {
+      setMovingBuilding({ type: 'flowerBush', id: bushId, x: bush.x, y: bush.y });
+    }
+  }, [flowerBushes, gameState]);
+
+  const handleWindmillMouseDown = useCallback((windmillId) => {
+    if (gameState !== GAME_STATE.PLAYING) return;
+    const windmill = windmills.find(w => w.id === windmillId);
+    if (windmill) {
+      setMovingBuilding({ type: 'windmill', id: windmillId, x: windmill.x, y: windmill.y });
+    }
+  }, [windmills, gameState]);
 
   const handleSelectItem = useCallback((itemId) => {
     if (movingBuilding) return;
@@ -282,21 +318,27 @@ export default function ChickenGame() {
 
   const getCursor = () => {
     if (movingBuilding) return 'grabbing';
-    if (selectedItem === 'coop' || selectedItem === 'pond') return 'crosshair';
-    if (selectedItem === 'flower') return 'crosshair';
+    if (selectedItem === 'coop' || selectedItem === 'pond' || selectedItem === 'windmill') return 'crosshair';
+    if (selectedItem === 'flower' || selectedItem === 'flowerBush') return 'crosshair';
     return 'pointer';
   };
 
   const getGuideMessage = () => {
     if (movingBuilding) {
-      const name = movingBuilding.type === 'coop' ? '닭집' : '연못';
-      return `📍 마우스를 놓아서 ${name} 위치를 고정하세요!`;
+      const nameMap = { coop: '닭집', pond: '연못', flowerBush: '꽃덤불', windmill: '풍차' };
+      return `📍 마우스를 놓아서 ${nameMap[movingBuilding.type]} 위치를 고정하세요!`;
     }
     if (selectedItem === 'coop') {
       return `🏠 필드를 클릭해서 닭집을 배치하세요! (💰${GAME_CONFIG.COOP.COST})`;
     }
     if (selectedItem === 'pond') {
       return `💧 필드를 클릭해서 연못을 배치하세요! (💰${GAME_CONFIG.POND.COST})`;
+    }
+    if (selectedItem === 'windmill') {
+      return `🌀 필드를 클릭해서 풍차를 배치하세요! (💰${GAME_CONFIG.WINDMILL.COST}) ✨황금농장 전용`;
+    }
+    if (selectedItem === 'flowerBush') {
+      return `🌸 필드를 클릭해서 꽃덤불을 심으세요! (💰${GAME_CONFIG.FLOWER_BUSH.COST})`;
     }
     if (selectedItem === 'flower') {
       return `🌸 필드를 클릭해서 꽃을 심으세요! (💰${GAME_CONFIG.FLOWER.COST})`;
@@ -308,7 +350,8 @@ export default function ChickenGame() {
     if (movingBuilding) return { bg: '#fef3c7', border: '#f59e0b', text: '#92400e' };
     if (selectedItem === 'coop') return { bg: '#fef3c7', border: '#f59e0b', text: '#92400e' };
     if (selectedItem === 'pond') return { bg: '#dbeafe', border: '#3b82f6', text: '#1e40af' };
-    if (selectedItem === 'flower') return { bg: '#fce7f3', border: '#ec4899', text: '#9d174d' };
+    if (selectedItem === 'windmill') return { bg: '#fef9c3', border: '#eab308', text: '#854d0e' };
+    if (selectedItem === 'flower' || selectedItem === 'flowerBush') return { bg: '#fce7f3', border: '#ec4899', text: '#9d174d' };
     return { bg: '#dcfce7', border: '#22c55e', text: '#166534' };
   };
 
@@ -358,6 +401,9 @@ export default function ChickenGame() {
             coopCount={coops.length}
             pondCount={ponds.length}
             flowerCount={flowers.length}
+            flowerBushCount={flowerBushCount}
+            windmillCount={windmillCount}
+            farmGrade={farmGrade}
           />
           
           {/* 중앙 게임 영역 */}
@@ -434,6 +480,44 @@ export default function ChickenGame() {
                     occupants={chickens.filter(c => c.inCoopId === movingBuilding.id).length}
                     capacity={coops.find(c => c.id === movingBuilding.id)?.capacity}
                     gradeLevel={farmGrade.level}
+                    isSelected={true}
+                  />
+                )}
+                
+                {/* 풍차들 (이동 중이 아닌 것) */}
+                {windmills.filter(wm => !(movingBuilding?.type === 'windmill' && movingBuilding?.id === wm.id)).map(windmill => (
+                  <Windmill 
+                    key={windmill.id}
+                    x={windmill.x}
+                    y={windmill.y}
+                    onMouseDown={() => handleWindmillMouseDown(windmill.id)}
+                  />
+                ))}
+                
+                {/* 이동 중인 풍차 */}
+                {movingBuilding?.type === 'windmill' && (
+                  <Windmill 
+                    x={movingBuilding.x}
+                    y={movingBuilding.y}
+                    isSelected={true}
+                  />
+                )}
+                
+                {/* 꽃덤불들 (이동 중이 아닌 것) */}
+                {flowerBushes.filter(fb => !(movingBuilding?.type === 'flowerBush' && movingBuilding?.id === fb.id)).map(bush => (
+                  <FlowerBush 
+                    key={bush.id}
+                    x={bush.x}
+                    y={bush.y}
+                    onMouseDown={() => handleFlowerBushMouseDown(bush.id)}
+                  />
+                ))}
+                
+                {/* 이동 중인 꽃덤불 */}
+                {movingBuilding?.type === 'flowerBush' && (
+                  <FlowerBush 
+                    x={movingBuilding.x}
+                    y={movingBuilding.y}
                     isSelected={true}
                   />
                 )}

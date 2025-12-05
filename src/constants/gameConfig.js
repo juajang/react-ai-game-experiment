@@ -98,6 +98,20 @@ export const GAME_CONFIG = {
     HEALTH_BOOST: 0.2,               // 효과 증가 (0.15 → 0.2)
   },
   
+  // 풍차 관련 (황금 농장 전용)
+  WINDMILL: {
+    COST: 100,                       // 높은 가격 (황금 농장 전용)
+    EFFECT_RADIUS: 100,              // 넓은 효과 범위
+    ALL_BOOST: 0.1,                  // 모든 스탯 소폭 증가
+  },
+  
+  // 꽃덤불 관련
+  FLOWER_BUSH: {
+    COST: 20,                        // 중간 가격
+    EFFECT_RADIUS: 55,               // 효과 범위
+    HAPPINESS_BOOST: 0.2,            // 꽃보다 강한 행복도 효과
+  },
+  
   // 필드 관련
   FIELD: {
     DEFAULT_WIDTH: 400,

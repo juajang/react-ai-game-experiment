@@ -71,7 +71,9 @@ export const useGameLoop = (fieldSize) => {
   const [eggs, setEggs] = useState([]);
   const [feeds, setFeeds] = useState([]);
   const [flowers, setFlowers] = useState([]);
+  const [flowerBushes, setFlowerBushes] = useState([]);
   const [ponds, setPonds] = useState([]);
+  const [windmills, setWindmills] = useState([]);
   const [coops, setCoops] = useState([]);
   const [coins, setCoins] = useState(100); // 시작 코인
   const [placingCoop, setPlacingCoop] = useState(false);
@@ -92,7 +94,9 @@ export const useGameLoop = (fieldSize) => {
   const eggsRef = useRef(eggs);
   const feedsRef = useRef(feeds);
   const flowersRef = useRef(flowers);
+  const flowerBushesRef = useRef(flowerBushes);
   const pondsRef = useRef(ponds);
+  const windmillsRef = useRef(windmills);
   const coopsRef = useRef(coops);
   const fieldSizeRef = useRef(fieldSize);
 
@@ -100,7 +104,9 @@ export const useGameLoop = (fieldSize) => {
   useEffect(() => { eggsRef.current = eggs; }, [eggs]);
   useEffect(() => { feedsRef.current = feeds; }, [feeds]);
   useEffect(() => { flowersRef.current = flowers; }, [flowers]);
+  useEffect(() => { flowerBushesRef.current = flowerBushes; }, [flowerBushes]);
   useEffect(() => { pondsRef.current = ponds; }, [ponds]);
+  useEffect(() => { windmillsRef.current = windmills; }, [windmills]);
   useEffect(() => { coopsRef.current = coops; }, [coops]);
   useEffect(() => { fieldSizeRef.current = fieldSize; }, [fieldSize]);
 
@@ -124,6 +130,23 @@ export const useGameLoop = (fieldSize) => {
     return false;
   };
 
+  // 꽃덤불 추가
+  const addFlowerBush = (x, y) => {
+    if (coins >= GAME_CONFIG.FLOWER_BUSH.COST) {
+      setFlowerBushes(prev => [...prev, { id: Date.now(), x, y }]);
+      setCoins(prev => prev - GAME_CONFIG.FLOWER_BUSH.COST);
+      return true;
+    }
+    return false;
+  };
+
+  // 꽃덤불 이동
+  const moveFlowerBush = (bushId, newX, newY) => {
+    setFlowerBushes(prev => prev.map(bush => 
+      bush.id === bushId ? { ...bush, x: newX, y: newY } : bush
+    ));
+  };
+
   // 연못 추가
   const addPond = (x, y) => {
     if (coins >= GAME_CONFIG.POND.COST) {
@@ -138,6 +161,25 @@ export const useGameLoop = (fieldSize) => {
   const movePond = (pondId, newX, newY) => {
     setPonds(prev => prev.map(pond => 
       pond.id === pondId ? { ...pond, x: newX, y: newY } : pond
+    ));
+  };
+
+  // 풍차 추가 (황금 농장 전용)
+  const addWindmill = (x, y) => {
+    const totalChickens = chickensRef.current.length;
+    const isGoldenFarm = totalChickens >= FARM_GRADE.GOLDEN_FARM.minChickens;
+    if (coins >= GAME_CONFIG.WINDMILL.COST && isGoldenFarm) {
+      setWindmills(prev => [...prev, { id: Date.now(), x, y }]);
+      setCoins(prev => prev - GAME_CONFIG.WINDMILL.COST);
+      return true;
+    }
+    return false;
+  };
+
+  // 풍차 이동
+  const moveWindmill = (windmillId, newX, newY) => {
+    setWindmills(prev => prev.map(wm => 
+      wm.id === windmillId ? { ...wm, x: newX, y: newY } : wm
     ));
   };
 
@@ -270,8 +312,12 @@ export const useGameLoop = (fieldSize) => {
         
         // 꽃 주변에 있으면 행복도 보너스
         const currentFlowers = flowersRef.current;
+        const currentFlowerBushes = flowerBushesRef.current;
         const nearFlower = currentFlowers.some(f => 
           calculateDistance(x, y, f.x, f.y) < config.FLOWER.EFFECT_RADIUS
+        );
+        const nearFlowerBush = currentFlowerBushes.some(fb => 
+          calculateDistance(x, y, fb.x, fb.y) < config.FLOWER_BUSH.EFFECT_RADIUS
         );
         
         // 연못 주변에 있으면 건강 회복
@@ -283,6 +329,16 @@ export const useGameLoop = (fieldSize) => {
           health = Math.min(config.HEALTH.MAX, health + config.POND.HEALTH_BOOST);
         }
         
+        // 풍차 주변에 있으면 모든 스탯 보너스 (황금 농장 전용)
+        const currentWindmills = windmillsRef.current;
+        const nearWindmill = currentWindmills.some(wm => 
+          calculateDistance(x, y, wm.x, wm.y) < config.WINDMILL.EFFECT_RADIUS
+        );
+        if (nearWindmill) {
+          health = Math.min(config.HEALTH.MAX, health + config.WINDMILL.ALL_BOOST);
+          // 풍차는 아래에서 행복도도 추가
+        }
+        
         // 행복도는 건강해야만 상승, 아니면 감소
         if (health >= config.HEALTH.HAPPINESS_THRESHOLD) {
           // 건강하면 자연 감소
@@ -290,6 +346,14 @@ export const useGameLoop = (fieldSize) => {
           // 꽃 주변이면 행복도 증가
           if (nearFlower) {
             happinessChange += config.FLOWER.HAPPINESS_BOOST;
+          }
+          // 꽃덤불 주변이면 더 많은 행복도 증가
+          if (nearFlowerBush) {
+            happinessChange += config.FLOWER_BUSH.HAPPINESS_BOOST;
+          }
+          // 풍차 주변이면 모든 스탯 증가
+          if (nearWindmill) {
+            happinessChange += config.WINDMILL.ALL_BOOST;
           }
           happiness = Math.min(config.HAPPINESS.MAX, Math.max(config.HAPPINESS.MIN, happiness + happinessChange));
         } else {
@@ -582,7 +646,9 @@ export const useGameLoop = (fieldSize) => {
     setEggs([]);
     setFeeds([]);
     setFlowers([]);
+    setFlowerBushes([]);
     setPonds([]);
+    setWindmills([]);
     setCoops([]);
     setCoins(100);
     setDeathCount(0);
@@ -603,7 +669,9 @@ export const useGameLoop = (fieldSize) => {
     eggs, 
     feeds, 
     flowers,
+    flowerBushes,
     ponds,
+    windmills,
     coops,
     coins,
     deathCount,
@@ -613,8 +681,12 @@ export const useGameLoop = (fieldSize) => {
     placingCoop,
     addFeed,
     addFlower,
+    addFlowerBush,
+    moveFlowerBush,
     addPond,
     movePond,
+    addWindmill,
+    moveWindmill,
     addCoop,
     moveCoop,
     togglePlacingCoop,
@@ -625,5 +697,7 @@ export const useGameLoop = (fieldSize) => {
     chickCount: chickens.filter(c => c.stage === GROWTH_STAGE.CHICK).length,
     sleepingCount: chickens.filter(c => c.state === 'sleeping').length,
     totalChickenCount,
+    flowerBushCount: flowerBushes.length,
+    windmillCount: windmills.length,
   };
 };
