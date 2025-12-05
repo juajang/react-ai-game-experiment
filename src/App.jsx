@@ -1,12 +1,20 @@
 import { useRef, useCallback } from 'react';
-import { Chicken, Feed, Field, GameInfo, StatusBar } from './components';
+import { Chicken, Chick, Egg, Feed, Field, GameInfo, StatusBar } from './components';
 import { useGameLoop } from './hooks/useGameLoop';
 import { useFieldSize } from './hooks/useFieldSize';
 
 export default function ChickenGame() {
   const fieldRef = useRef(null);
   const fieldSize = useFieldSize(fieldRef);
-  const { chicken, feeds, addFeed } = useGameLoop(fieldSize);
+  const { 
+    chicken, 
+    chickens, 
+    eggs, 
+    feeds, 
+    addFeed,
+    chickenCount,
+    chickCount,
+  } = useGameLoop(fieldSize);
 
   // 사료 배치 핸들러
   const handleFieldClick = useCallback((e) => {
@@ -45,12 +53,17 @@ export default function ChickenGame() {
               letterSpacing: '3px',
             }}
           >
-            🐔 닭 시뮬레이션 🌾
+            🐔 닭 농장 시뮬레이션 🌾
           </h1>
         </div>
         
         {/* 상태바 */}
-        <StatusBar hunger={chicken.hunger} state={chicken.state} />
+        <StatusBar 
+          chicken={chicken} 
+          chickenCount={chickenCount}
+          chickCount={chickCount}
+          eggCount={eggs.length}
+        />
         
         {/* 플레이 필드 */}
         <div className="mt-4" ref={fieldRef}>
@@ -60,14 +73,40 @@ export default function ChickenGame() {
               <Feed key={feed.id} x={feed.x} y={feed.y} />
             ))}
             
-            {/* 닭 */}
-            <Chicken 
-              x={chicken.x} 
-              y={chicken.y} 
-              frame={chicken.frame}
-              direction={chicken.direction}
-              state={chicken.state}
-            />
+            {/* 알들 */}
+            {eggs.map(egg => (
+              <Egg 
+                key={egg.id} 
+                x={egg.x} 
+                y={egg.y} 
+                state={egg.state}
+                warmth={egg.warmth}
+              />
+            ))}
+            
+            {/* 닭들과 병아리들 */}
+            {chickens.map(c => (
+              c.isAdult ? (
+                <Chicken 
+                  key={c.id}
+                  x={c.x} 
+                  y={c.y} 
+                  frame={c.frame}
+                  direction={c.direction}
+                  state={c.state}
+                />
+              ) : (
+                <Chick
+                  key={c.id}
+                  x={c.x}
+                  y={c.y}
+                  frame={c.frame}
+                  direction={c.direction}
+                  state={c.state}
+                  growthProgress={c.growthProgress}
+                />
+              )
+            ))}
           </Field>
         </div>
         

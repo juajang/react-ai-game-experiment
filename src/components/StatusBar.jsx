@@ -1,13 +1,60 @@
 import { STATE_TEXT } from '../constants/gameConfig';
-import { getHungerColor } from '../utils/gameUtils';
 
-const StatusBar = ({ hunger, state }) => {
+// 픽셀 스타일 프로그레스 바
+const PixelBar = ({ value, color, label }) => (
+  <div className="flex items-center gap-2 mb-2">
+    <span 
+      className="min-w-[60px]"
+      style={{ 
+        color: '#8b7355',
+        fontSize: '11px',
+      }}
+    >
+      {label}
+    </span>
+    <div 
+      className="flex-1 h-4 overflow-hidden relative"
+      style={{
+        backgroundColor: '#3d3d3d',
+        border: '2px solid #5d4037',
+      }}
+    >
+      <div 
+        className="h-full transition-all duration-300"
+        style={{ 
+          width: `${value}%`,
+          backgroundColor: color,
+          boxShadow: 'inset 0 -3px 0 rgba(0,0,0,0.3)',
+        }}
+      />
+      <div 
+        className="absolute top-0 left-0 h-1"
+        style={{
+          backgroundColor: 'rgba(255,255,255,0.3)',
+          width: `${value}%`,
+        }}
+      />
+    </div>
+    <span 
+      className="font-bold min-w-[40px] text-right"
+      style={{ 
+        color: '#5d4037',
+        fontSize: '11px',
+      }}
+    >
+      {Math.round(value)}%
+    </span>
+  </div>
+);
+
+const StatusBar = ({ chicken, chickenCount, chickCount, eggCount }) => {
+  const { hunger, happiness, health, state } = chicken || {};
   const stateText = STATE_TEXT[state] || STATE_TEXT.default;
   
-  // 도트 스타일 배고픔 바 색상
-  const getPixelHungerColor = () => {
-    if (hunger > 70) return '#22c55e';
-    if (hunger > 30) return '#eab308';
+  // 색상 결정 함수
+  const getColor = (value, thresholds = { high: 70, low: 30 }) => {
+    if (value > thresholds.high) return '#22c55e';
+    if (value > thresholds.low) return '#eab308';
     return '#ef4444';
   };
 
@@ -20,6 +67,7 @@ const StatusBar = ({ hunger, state }) => {
         boxShadow: '4px 4px 0px #5d4037',
       }}
     >
+      {/* 헤더 */}
       <div className="flex items-center justify-between mb-3">
         <span 
           className="font-bold"
@@ -28,7 +76,7 @@ const StatusBar = ({ hunger, state }) => {
             fontSize: '14px',
           }}
         >
-          🐔 닭의 상태
+          🐔 농장 상태
         </span>
         <span 
           className="px-3 py-1 rounded"
@@ -36,59 +84,47 @@ const StatusBar = ({ hunger, state }) => {
             backgroundColor: '#e8d5b7',
             border: '2px solid #8b7355',
             color: '#5d4037',
-            fontSize: '12px',
+            fontSize: '11px',
           }}
         >
           {stateText}
         </span>
       </div>
       
-      <div className="flex items-center gap-3">
-        <span 
-          style={{ 
-            color: '#8b7355',
-            fontSize: '12px',
-          }}
-        >
-          포만감:
-        </span>
-        
-        {/* 도트 스타일 프로그레스 바 */}
-        <div 
-          className="flex-1 h-5 overflow-hidden relative"
-          style={{
-            backgroundColor: '#3d3d3d',
-            border: '3px solid #5d4037',
-          }}
-        >
-          <div 
-            className="h-full transition-all duration-300"
-            style={{ 
-              width: `${hunger}%`,
-              backgroundColor: getPixelHungerColor(),
-              boxShadow: 'inset 0 -4px 0 rgba(0,0,0,0.3)',
-            }}
-          />
-          
-          {/* 픽셀 하이라이트 */}
-          <div 
-            className="absolute top-0 left-0 right-0 h-1"
-            style={{
-              backgroundColor: 'rgba(255,255,255,0.3)',
-              width: `${hunger}%`,
-            }}
-          />
+      {/* 스탯 바들 */}
+      <PixelBar 
+        value={hunger || 0} 
+        color={getColor(hunger)} 
+        label="🍽️ 포만감" 
+      />
+      <PixelBar 
+        value={happiness || 0} 
+        color={getColor(happiness, { high: 60, low: 40 })} 
+        label="😊 행복도" 
+      />
+      <PixelBar 
+        value={health || 0} 
+        color={getColor(health, { high: 80, low: 60 })} 
+        label="❤️ 건강" 
+      />
+      
+      {/* 개체 수 표시 */}
+      <div 
+        className="mt-3 pt-3 flex justify-around"
+        style={{ borderTop: '2px dashed #8b7355' }}
+      >
+        <div className="text-center">
+          <div style={{ fontSize: '16px' }}>🐔</div>
+          <div style={{ color: '#5d4037', fontSize: '12px' }}>{chickenCount || 1}</div>
         </div>
-        
-        <span 
-          className="font-bold min-w-[50px] text-right"
-          style={{ 
-            color: '#5d4037',
-            fontSize: '12px',
-          }}
-        >
-          {Math.round(hunger)}%
-        </span>
+        <div className="text-center">
+          <div style={{ fontSize: '16px' }}>🐥</div>
+          <div style={{ color: '#5d4037', fontSize: '12px' }}>{chickCount || 0}</div>
+        </div>
+        <div className="text-center">
+          <div style={{ fontSize: '16px' }}>🥚</div>
+          <div style={{ color: '#5d4037', fontSize: '12px' }}>{eggCount || 0}</div>
+        </div>
       </div>
     </div>
   );
