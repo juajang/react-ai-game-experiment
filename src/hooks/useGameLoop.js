@@ -13,8 +13,7 @@ import {
 let chickenNameCounter = 1;
 
 // 귀여운 닭 이름 목록
-const CHICKEN_NAMES = ['꼬꼬', '삐약이', '노란이', '뽀삐', '콩이', '달이', '해피', '럭키', '초코', '모카', '밀크', '치즈', '버터', '꿀이', '별이', '구름이', '솜이', '복이', '보리', '찰스'];
-
+const CHICKEN_NAMES = ['꼬꼬', '삐약이', '뽀삐', '초코', '모카', '밀크', '치즈', '보리', '찰스', "달구", "달순이", "병숙이", "칠성이", "막순이", "복댁이", "알복이", "덕배", "종달이"];
 const getRandomChickenName = () => {
   const baseName = CHICKEN_NAMES[Math.floor(Math.random() * CHICKEN_NAMES.length)];
   return `${baseName}${chickenNameCounter++}`;
