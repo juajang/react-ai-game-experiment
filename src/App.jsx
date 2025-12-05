@@ -1,8 +1,8 @@
 import { useRef, useCallback, useState } from 'react';
-import { Chicken, Chick, Juvenile, Egg, Feed, Field, GameInfo, StatusBar } from './components';
+import { Chicken, Chick, Juvenile, Egg, Feed, Field, GameInfo, StatusBar, Coop } from './components';
 import { useGameLoop } from './hooks/useGameLoop';
 import { useFieldSize } from './hooks/useFieldSize';
-import { GROWTH_STAGE } from './constants/gameConfig';
+import { GROWTH_STAGE, GAME_CONFIG } from './constants/gameConfig';
 
 export default function ChickenGame() {
   const fieldRef = useRef(null);
@@ -11,11 +11,16 @@ export default function ChickenGame() {
     chickens, 
     eggs, 
     feeds, 
+    coops,
     coins,
+    placingCoop,
     addFeed,
+    addCoop,
+    togglePlacingCoop,
     chickenCount,
     juvenileCount,
     chickCount,
+    sleepingCount,
   } = useGameLoop(fieldSize);
 
   // 선택된 닭 ID
@@ -31,8 +36,13 @@ export default function ChickenGame() {
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
-    addFeed(x, y);
-  }, [addFeed]);
+    
+    if (placingCoop) {
+      addCoop(x, y);
+    } else {
+      addFeed(x, y);
+    }
+  }, [addFeed, addCoop, placingCoop]);
 
   const handleChickenClick = useCallback((id) => {
     setSelectedId(id);
@@ -40,6 +50,9 @@ export default function ChickenGame() {
 
   // 성장 단계에 따른 컴포넌트 렌더링
   const renderChicken = (c) => {
+    // 잠자는 중이면 렌더링하지 않음 (닭집 안에 있음)
+    if (c.state === 'sleeping') return null;
+    
     const isSelected = c.id === selectedId || (!selectedId && c === chickens[0]);
     
     switch (c.stage) {
@@ -118,19 +131,49 @@ export default function ChickenGame() {
           </h1>
         </div>
         
-        {/* 상태바 - 코인 추가 */}
+        {/* 상태바 */}
         <StatusBar 
           selectedChicken={displayChicken} 
           chickenCount={chickenCount}
           juvenileCount={juvenileCount}
           chickCount={chickCount}
           eggCount={eggs.length}
+          coopCount={coops.length}
+          sleepingCount={sleepingCount}
           coins={coins}
+          onBuyCoop={togglePlacingCoop}
+          canBuyCoop={coins >= GAME_CONFIG.COOP.COST}
         />
+        
+        {/* 닭집 배치 모드 안내 */}
+        {placingCoop && (
+          <div 
+            className="mt-2 p-2 rounded text-center"
+            style={{
+              backgroundColor: '#fef3c7',
+              border: '3px solid #f59e0b',
+              color: '#92400e',
+              fontSize: '12px',
+            }}
+          >
+            🏠 필드를 클릭해서 닭집을 배치하세요!
+          </div>
+        )}
         
         {/* 플레이 필드 */}
         <div className="mt-4" ref={fieldRef}>
-          <Field onClick={handleFieldClick}>
+          <Field onClick={handleFieldClick} placingCoop={placingCoop}>
+            {/* 닭집들 */}
+            {coops.map(coop => (
+              <Coop 
+                key={coop.id}
+                x={coop.x}
+                y={coop.y}
+                occupants={chickens.filter(c => c.inCoopId === coop.id).length}
+                capacity={coop.capacity}
+              />
+            ))}
+            
             {/* 사료들 */}
             {feeds.map(feed => (
               <Feed key={feed.id} x={feed.x} y={feed.y} />

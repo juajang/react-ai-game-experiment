@@ -25,6 +25,7 @@ const createChicken = (x, y, stage = GROWTH_STAGE.ADULT) => ({
   health: stage === GROWTH_STAGE.ADULT 
     ? GAME_CONFIG.CHICKEN.INITIAL_HEALTH 
     : GAME_CONFIG.CHICK.INITIAL_HEALTH,
+  tiredness: 0,
   state: 'idle',
   direction: 1,
   frame: 0,
@@ -33,6 +34,8 @@ const createChicken = (x, y, stage = GROWTH_STAGE.ADULT) => ({
   stage,
   growthProgress: stage === GROWTH_STAGE.ADULT ? 100 : 0,
   eggCooldown: 0,
+  sleepTime: 0,
+  inCoopId: null,
 });
 
 /**
@@ -48,6 +51,17 @@ const createEgg = (x, y) => ({
 });
 
 /**
+ * 닭집 생성
+ */
+const createCoop = (x, y) => ({
+  id: Date.now() + Math.random(),
+  x,
+  y,
+  capacity: GAME_CONFIG.COOP.CAPACITY,
+  occupants: [],
+});
+
+/**
  * 게임 루프를 관리하는 커스텀 훅
  */
 export const useGameLoop = (fieldSize) => {
@@ -56,24 +70,63 @@ export const useGameLoop = (fieldSize) => {
   ]);
   const [eggs, setEggs] = useState([]);
   const [feeds, setFeeds] = useState([]);
-  const [coins, setCoins] = useState(0);
+  const [coops, setCoops] = useState([]);
+  const [coins, setCoins] = useState(100); // 시작 코인
+  const [placingCoop, setPlacingCoop] = useState(false);
 
   // useRef로 현재 상태 참조
   const chickensRef = useRef(chickens);
   const eggsRef = useRef(eggs);
   const feedsRef = useRef(feeds);
+  const coopsRef = useRef(coops);
   const fieldSizeRef = useRef(fieldSize);
-  const coinsRef = useRef(coins);
 
   useEffect(() => { chickensRef.current = chickens; }, [chickens]);
   useEffect(() => { eggsRef.current = eggs; }, [eggs]);
   useEffect(() => { feedsRef.current = feeds; }, [feeds]);
+  useEffect(() => { coopsRef.current = coops; }, [coops]);
   useEffect(() => { fieldSizeRef.current = fieldSize; }, [fieldSize]);
-  useEffect(() => { coinsRef.current = coins; }, [coins]);
 
   // 사료 추가
   const addFeed = (x, y) => {
     setFeeds(prev => [...prev, { id: Date.now(), x, y }]);
+  };
+
+  // 닭집 추가
+  const addCoop = (x, y) => {
+    if (coins >= GAME_CONFIG.COOP.COST) {
+      setCoops(prev => [...prev, createCoop(x, y)]);
+      setCoins(prev => prev - GAME_CONFIG.COOP.COST);
+      setPlacingCoop(false);
+      return true;
+    }
+    return false;
+  };
+
+  // 닭집 배치 모드 토글
+  const togglePlacingCoop = () => {
+    if (coins >= GAME_CONFIG.COOP.COST) {
+      setPlacingCoop(prev => !prev);
+    }
+  };
+
+  // 가장 가까운 빈 닭집 찾기
+  const findNearestAvailableCoop = (x, y, coops, chickens) => {
+    let nearest = null;
+    let minDist = Infinity;
+    
+    coops.forEach(coop => {
+      const occupantCount = chickens.filter(c => c.inCoopId === coop.id).length;
+      if (occupantCount < coop.capacity) {
+        const dist = calculateDistance(x, y, coop.x, coop.y);
+        if (dist < minDist) {
+          minDist = dist;
+          nearest = coop;
+        }
+      }
+    });
+    
+    return nearest ? { coop: nearest, distance: minDist } : null;
   };
 
   // 게임 루프
@@ -82,6 +135,7 @@ export const useGameLoop = (fieldSize) => {
       const currentFeeds = feedsRef.current;
       const currentChickens = chickensRef.current;
       const currentEggs = eggsRef.current;
+      const currentCoops = coopsRef.current;
       const currentFieldSize = fieldSizeRef.current;
       const config = GAME_CONFIG;
 
@@ -93,7 +147,29 @@ export const useGameLoop = (fieldSize) => {
 
       // 1. 닭들 업데이트
       const updatedChickens = currentChickens.map(chicken => {
-        let { x, y, hunger, happiness, health, state, direction, frame, targetX, targetY, stage, growthProgress, eggCooldown } = chicken;
+        let { x, y, hunger, happiness, health, tiredness, state, direction, frame, targetX, targetY, stage, growthProgress, eggCooldown, sleepTime, inCoopId } = chicken;
+        
+        // 잠자는 중이면 회복 처리
+        if (state === 'sleeping' && inCoopId) {
+          sleepTime++;
+          tiredness = Math.max(config.TIREDNESS.MIN, tiredness - config.COOP.SLEEP_RECOVERY_RATE);
+          health = Math.min(config.HEALTH.MAX, health + config.COOP.HEALTH_RECOVERY_RATE);
+          
+          // 수면 완료 체크
+          if (tiredness <= 10 && sleepTime >= config.COOP.MIN_SLEEP_TIME) {
+            state = 'idle';
+            inCoopId = null;
+            sleepTime = 0;
+            // 닭집에서 나올 때 근처로 이동
+            const coop = currentCoops.find(c => c.id === inCoopId);
+            if (coop) {
+              x = coop.x + (Math.random() - 0.5) * 40;
+              y = coop.y + 30;
+            }
+          }
+          
+          return { ...chicken, x, y, hunger, happiness, health, tiredness, state, direction, frame, targetX, targetY, stage, growthProgress, eggCooldown, sleepTime, inCoopId };
+        }
         
         // 단계별 속도 및 배고픔 감소율
         let speed, hungerDecreaseRate, coinMultiplier;
@@ -114,20 +190,19 @@ export const useGameLoop = (fieldSize) => {
             coinMultiplier = config.COIN.ADULT_MULTIPLIER;
         }
 
-        // 스탯 감소
+        // 스탯 변화
         hunger = Math.max(config.HUNGER.MIN, hunger - hungerDecreaseRate);
         happiness = Math.max(config.HAPPINESS.MIN, happiness - config.HAPPINESS.DECREASE_RATE);
         health = Math.max(config.HEALTH.MIN, health - config.HEALTH.DECREASE_RATE);
+        tiredness = Math.min(config.TIREDNESS.MAX, tiredness + config.TIREDNESS.INCREASE_RATE);
         
         // 쿨다운 감소
         if (eggCooldown > 0) eggCooldown--;
 
-        // 화폐 획득 체크 (행복도 기반)
-        const happinessCheck = happiness >= config.COIN.HAPPINESS_THRESHOLD;
-        const multiplierCheck = coinMultiplier > 0;
-        const randomCheck = Math.random() * 100 < config.COIN.EARN_CHANCE;
-        
-        if (happinessCheck && multiplierCheck && randomCheck) {
+        // 화폐 획득 체크
+        if (happiness >= config.COIN.HAPPINESS_THRESHOLD && 
+            coinMultiplier > 0 &&
+            Math.random() * 100 < config.COIN.EARN_CHANCE) {
           totalEarnedCoins += config.COIN.EARN_AMOUNT * coinMultiplier;
         }
 
@@ -146,61 +221,94 @@ export const useGameLoop = (fieldSize) => {
           }
         }
 
-        // 아직 먹지 않은 사료만 고려
-        const availableFeeds = currentFeeds.filter(f => !eatenFeedIds.has(f.id));
-
-        // 사료가 있으면 가장 가까운 사료로 이동
-        if (availableFeeds.length > 0) {
-          const closest = findClosestFeed(availableFeeds, x, y);
-          
-          if (closest) {
-            targetX = closest.feed.x;
-            targetY = closest.feed.y;
-            state = 'seeking';
-
-            if (closest.distance < config.FEED.REACH_DISTANCE) {
-              eatenFeedIds.add(closest.feed.id);
-              hunger = Math.min(config.HUNGER.MAX, hunger + config.HUNGER.FEED_RESTORE);
-              happiness = Math.min(config.HAPPINESS.MAX, happiness + config.HAPPINESS.FEED_RESTORE);
-              health = Math.min(config.HEALTH.MAX, health + config.HEALTH.FEED_RESTORE);
-              state = 'eating';
-              frame = 2;
-              
-              return { ...chicken, x, y, hunger, happiness, health, state, direction, frame, targetX: null, targetY: null, stage, growthProgress, eggCooldown };
-            }
-          }
-        } else if (hunger < config.HUNGER.HUNGRY_THRESHOLD) {
-          state = 'hungry';
-          if (!targetX || calculateDistance(x, y, targetX, targetY) < config.FEED.TARGET_REACH_DISTANCE) {
-            const newPos = getRandomPosition(currentFieldSize.width, currentFieldSize.height);
-            targetX = newPos.x;
-            targetY = newPos.y;
-          }
-        } else {
-          // 알 품기 체크 (성체만)
-          if (stage === GROWTH_STAGE.ADULT && currentEggs.length > 0) {
-            const nearEgg = currentEggs.find(egg => 
-              calculateDistance(x, y, egg.x, egg.y) < config.EGG.WARM_DISTANCE
-            );
-            if (nearEgg && nearEgg.state !== EGG_STATE.HATCHING) {
-              state = 'warming';
-            } else {
-              state = 'idle';
-            }
+        // 피곤하면 닭집으로 이동
+        if (tiredness >= config.TIREDNESS.TIRED_THRESHOLD && currentCoops.length > 0 && state !== 'goingToCoop') {
+          const nearestCoop = findNearestAvailableCoop(x, y, currentCoops, currentChickens);
+          if (nearestCoop) {
+            targetX = nearestCoop.coop.x;
+            targetY = nearestCoop.coop.y;
+            state = 'goingToCoop';
           } else {
-            state = 'idle';
-          }
-          
-          if (!targetX || calculateDistance(x, y, targetX, targetY) < config.FEED.TARGET_REACH_DISTANCE || Math.random() < config.RANDOM_MOVE_CHANCE) {
-            const newPos = getRandomPosition(currentFieldSize.width, currentFieldSize.height);
-            targetX = newPos.x;
-            targetY = newPos.y;
+            state = 'tired';
           }
         }
 
-        // 목표를 향해 이동
+        // 닭집으로 이동 중
+        if (state === 'goingToCoop') {
+          const nearestCoop = findNearestAvailableCoop(x, y, currentCoops, currentChickens);
+          if (nearestCoop && nearestCoop.distance < config.COOP.ENTER_DISTANCE) {
+            // 닭집 입장
+            state = 'sleeping';
+            inCoopId = nearestCoop.coop.id;
+            x = nearestCoop.coop.x;
+            y = nearestCoop.coop.y;
+            targetX = null;
+            targetY = null;
+            return { ...chicken, x, y, hunger, happiness, health, tiredness, state, direction, frame, targetX, targetY, stage, growthProgress, eggCooldown, sleepTime: 0, inCoopId };
+          }
+        }
+
+        // 아직 먹지 않은 사료만 고려
+        const availableFeeds = currentFeeds.filter(f => !eatenFeedIds.has(f.id));
+
+        // 피곤하지 않을 때만 일반 행동
+        if (state !== 'goingToCoop' && state !== 'tired') {
+          // 사료가 있으면 가장 가까운 사료로 이동
+          if (availableFeeds.length > 0) {
+            const closest = findClosestFeed(availableFeeds, x, y);
+            
+            if (closest) {
+              targetX = closest.feed.x;
+              targetY = closest.feed.y;
+              state = 'seeking';
+
+              if (closest.distance < config.FEED.REACH_DISTANCE) {
+                eatenFeedIds.add(closest.feed.id);
+                hunger = Math.min(config.HUNGER.MAX, hunger + config.HUNGER.FEED_RESTORE);
+                happiness = Math.min(config.HAPPINESS.MAX, happiness + config.HAPPINESS.FEED_RESTORE);
+                health = Math.min(config.HEALTH.MAX, health + config.HEALTH.FEED_RESTORE);
+                state = 'eating';
+                frame = 2;
+                
+                return { ...chicken, x, y, hunger, happiness, health, tiredness, state, direction, frame, targetX: null, targetY: null, stage, growthProgress, eggCooldown, sleepTime, inCoopId };
+              }
+            }
+          } else if (hunger < config.HUNGER.HUNGRY_THRESHOLD) {
+            state = 'hungry';
+            if (!targetX || calculateDistance(x, y, targetX, targetY) < config.FEED.TARGET_REACH_DISTANCE) {
+              const newPos = getRandomPosition(currentFieldSize.width, currentFieldSize.height);
+              targetX = newPos.x;
+              targetY = newPos.y;
+            }
+          } else {
+            // 알 품기 체크 (성체만)
+            if (stage === GROWTH_STAGE.ADULT && currentEggs.length > 0) {
+              const nearEgg = currentEggs.find(egg => 
+                calculateDistance(x, y, egg.x, egg.y) < config.EGG.WARM_DISTANCE
+              );
+              if (nearEgg && nearEgg.state !== EGG_STATE.HATCHING) {
+                state = 'warming';
+              } else {
+                state = 'idle';
+              }
+            } else {
+              state = 'idle';
+            }
+            
+            if (!targetX || calculateDistance(x, y, targetX, targetY) < config.FEED.TARGET_REACH_DISTANCE || Math.random() < config.RANDOM_MOVE_CHANCE) {
+              const newPos = getRandomPosition(currentFieldSize.width, currentFieldSize.height);
+              targetX = newPos.x;
+              targetY = newPos.y;
+            }
+          }
+        }
+
+        // 목표를 향해 이동 (탈진 상태면 느리게)
         if (targetX !== null && targetY !== null) {
-          const moveSpeed = state === 'hungry' ? speed * config.CHICKEN.HUNGRY_SPEED_MULTIPLIER : speed;
+          let moveSpeed = state === 'hungry' ? speed * config.CHICKEN.HUNGRY_SPEED_MULTIPLIER : speed;
+          if (tiredness >= config.TIREDNESS.EXHAUSTED_THRESHOLD) {
+            moveSpeed *= 0.5; // 탈진 상태면 50% 속도
+          }
           const movement = moveTowardsTarget(x, y, targetX, targetY, moveSpeed);
           x = movement.x;
           y = movement.y;
@@ -216,8 +324,9 @@ export const useGameLoop = (fieldSize) => {
         // 애니메이션 프레임
         frame = getAnimationFrame(state, frame);
 
-        // 알 낳기 체크 (성체만)
+        // 알 낳기 체크 (성체만, 피곤하지 않을 때)
         if (stage === GROWTH_STAGE.ADULT && eggCooldown <= 0 && 
+            tiredness < config.TIREDNESS.TIRED_THRESHOLD &&
             hunger >= config.EGG.MIN_HUNGER && 
             happiness >= config.EGG.MIN_HAPPINESS && 
             health >= config.EGG.MIN_HEALTH &&
@@ -227,7 +336,7 @@ export const useGameLoop = (fieldSize) => {
           state = 'laying';
         }
 
-        return { ...chicken, x, y, hunger, happiness, health, state, direction, frame, targetX, targetY, stage, growthProgress, eggCooldown };
+        return { ...chicken, x, y, hunger, happiness, health, tiredness, state, direction, frame, targetX, targetY, stage, growthProgress, eggCooldown, sleepTime, inCoopId };
       });
 
       // 2. 알 업데이트
@@ -238,7 +347,9 @@ export const useGameLoop = (fieldSize) => {
         age++;
         
         const nearChicken = updatedChickens.find(c => 
-          c.stage === GROWTH_STAGE.ADULT && calculateDistance(c.x, c.y, egg.x, egg.y) < eggConfig.WARM_DISTANCE
+          c.stage === GROWTH_STAGE.ADULT && 
+          c.state !== 'sleeping' &&
+          calculateDistance(c.x, c.y, egg.x, egg.y) < eggConfig.WARM_DISTANCE
         );
         
         if (nearChicken) {
@@ -291,10 +402,15 @@ export const useGameLoop = (fieldSize) => {
     chickens, 
     eggs, 
     feeds, 
+    coops,
     coins,
+    placingCoop,
     addFeed,
+    addCoop,
+    togglePlacingCoop,
     chickenCount: chickens.filter(c => c.stage === GROWTH_STAGE.ADULT).length,
     juvenileCount: chickens.filter(c => c.stage === GROWTH_STAGE.JUVENILE).length,
     chickCount: chickens.filter(c => c.stage === GROWTH_STAGE.CHICK).length,
+    sleepingCount: chickens.filter(c => c.state === 'sleeping').length,
   };
 };

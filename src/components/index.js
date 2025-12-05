@@ -6,6 +6,7 @@ export { default as Juvenile } from './Juvenile';
 export { default as JuvenileSprite } from './JuvenileSprite';
 export { default as Plumbob } from './Plumbob';
 export { default as Coin } from './Coin';
+export { default as Coop } from './Coop';
 export { default as Egg } from './Egg';
 export { default as Feed } from './Feed';
 export { default as Field } from './Field';

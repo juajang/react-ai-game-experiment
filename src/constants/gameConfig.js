@@ -100,6 +100,25 @@ export const GAME_CONFIG = {
     JUVENILE_MULTIPLIER: 0.5,      // 청소년 배율
     CHICK_MULTIPLIER: 0,           // 병아리는 돈 못 벌어요
   },
+  
+  // 피로 관련
+  TIREDNESS: {
+    INCREASE_RATE: 0.08,           // 피로 증가 속도
+    TIRED_THRESHOLD: 70,           // 이 피로도 이상이면 피곤한 상태
+    EXHAUSTED_THRESHOLD: 90,       // 이 피로도 이상이면 탈진 상태
+    MAX: 100,
+    MIN: 0,
+  },
+  
+  // 닭집 관련
+  COOP: {
+    CAPACITY: 3,                   // 닭집당 수용 가능 닭 수
+    SLEEP_RECOVERY_RATE: 2,        // 잠잘 때 피로 회복 속도
+    HEALTH_RECOVERY_RATE: 0.5,     // 잠잘 때 건강 회복 속도
+    MIN_SLEEP_TIME: 50,            // 최소 수면 시간 (50틱 = 5초)
+    ENTER_DISTANCE: 30,            // 닭집 입장 거리
+    COST: 50,                      // 닭집 구매 비용
+  },
 };
 
 // 상태 텍스트
@@ -110,6 +129,9 @@ export const STATE_TEXT = {
   hungry: '😢 배고파요!',
   laying: '🥚 알 낳는 중',
   warming: '🐣 알 품는 중',
+  tired: '😪 피곤해요',
+  goingToCoop: '🏠 닭집 가는 중',
+  sleeping: '😴 잠자는 중',
   default: '🐔',
 };
 

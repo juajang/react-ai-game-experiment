@@ -52,7 +52,7 @@ const SmallRock = ({ x, y }) => (
   </svg>
 );
 
-const Field = ({ children, onClick }) => {
+const Field = ({ children, onClick, placingCoop }) => {
   const grassCount = GAME_CONFIG.FIELD.GRASS_COUNT;
 
   // 잔디와 돌 위치 생성 (고정된 시드로 일관된 배치)
@@ -65,8 +65,11 @@ const Field = ({ children, onClick }) => {
 
   return (
     <div 
-      className="relative w-full h-80 rounded-lg overflow-hidden cursor-pointer shadow-lg"
+      className="relative w-full h-80 rounded-lg overflow-hidden shadow-lg"
       onClick={onClick}
+      style={{
+        cursor: placingCoop ? 'crosshair' : 'pointer',
+      }}
       style={{
         backgroundColor: '#7cba5f',
         backgroundImage: `

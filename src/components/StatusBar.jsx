@@ -1,4 +1,4 @@
-import { STATE_TEXT, CHICK_STATE_TEXT, JUVENILE_STATE_TEXT, GROWTH_STAGE } from '../constants/gameConfig';
+import { STATE_TEXT, CHICK_STATE_TEXT, JUVENILE_STATE_TEXT, GROWTH_STAGE, GAME_CONFIG } from '../constants/gameConfig';
 import Coin from './Coin';
 
 // 픽셀 스타일 프로그레스 바
@@ -6,12 +6,12 @@ const PixelBar = ({ value, color, label }) => (
   <div className="flex items-center gap-2 mb-2">
     <span 
       className="min-w-[60px]"
-      style={{ color: '#8b7355', fontSize: '11px' }}
+      style={{ color: '#8b7355', fontSize: '10px' }}
     >
       {label}
     </span>
     <div 
-      className="flex-1 h-4 overflow-hidden relative"
+      className="flex-1 h-3 overflow-hidden relative"
       style={{ backgroundColor: '#3d3d3d', border: '2px solid #5d4037' }}
     >
       <div 
@@ -19,25 +19,21 @@ const PixelBar = ({ value, color, label }) => (
         style={{ 
           width: `${value}%`,
           backgroundColor: color,
-          boxShadow: 'inset 0 -3px 0 rgba(0,0,0,0.3)',
+          boxShadow: 'inset 0 -2px 0 rgba(0,0,0,0.3)',
         }}
-      />
-      <div 
-        className="absolute top-0 left-0 h-1"
-        style={{ backgroundColor: 'rgba(255,255,255,0.3)', width: `${value}%` }}
       />
     </div>
     <span 
-      className="font-bold min-w-[40px] text-right"
-      style={{ color: '#5d4037', fontSize: '11px' }}
+      className="font-bold min-w-[32px] text-right"
+      style={{ color: '#5d4037', fontSize: '10px' }}
     >
       {Math.round(value)}%
     </span>
   </div>
 );
 
-const StatusBar = ({ selectedChicken, chickenCount, juvenileCount, chickCount, eggCount, coins }) => {
-  const { hunger, happiness, health, state, stage } = selectedChicken || {};
+const StatusBar = ({ selectedChicken, chickenCount, juvenileCount, chickCount, eggCount, coopCount, sleepingCount, coins, onBuyCoop, canBuyCoop }) => {
+  const { hunger, happiness, health, tiredness, state, stage } = selectedChicken || {};
   
   // 단계별 상태 텍스트
   const getStateText = () => {
@@ -76,21 +72,28 @@ const StatusBar = ({ selectedChicken, chickenCount, juvenileCount, chickCount, e
     if (value > thresholds.low) return '#eab308';
     return '#ef4444';
   };
+  
+  // 피로도는 반대로 (높을수록 나쁨)
+  const getTirednessColor = (value) => {
+    if (value < 30) return '#22c55e';
+    if (value < 70) return '#eab308';
+    return '#ef4444';
+  };
 
   return (
     <div 
-      className="p-4 rounded-lg"
+      className="p-3 rounded-lg"
       style={{
         backgroundColor: '#f5e6c8',
         border: '4px solid #8b7355',
         boxShadow: '4px 4px 0px #5d4037',
       }}
     >
-      {/* 헤더 - 코인 표시 추가 */}
-      <div className="flex items-center justify-between mb-3">
+      {/* 헤더 - 코인 표시 */}
+      <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
-          <span style={{ fontSize: '18px' }}>{getStageIcon()}</span>
-          <span className="font-bold" style={{ color: '#5d4037', fontSize: '13px' }}>
+          <span style={{ fontSize: '16px' }}>{getStageIcon()}</span>
+          <span className="font-bold" style={{ color: '#5d4037', fontSize: '12px' }}>
             {getStageName()}
           </span>
         </div>
@@ -103,8 +106,8 @@ const StatusBar = ({ selectedChicken, chickenCount, juvenileCount, chickCount, e
             border: '2px solid #8b7355',
           }}
         >
-          <Coin size={16} />
-          <span style={{ color: '#5d4037', fontSize: '12px', fontWeight: 'bold' }}>
+          <Coin size={14} />
+          <span style={{ color: '#5d4037', fontSize: '11px', fontWeight: 'bold' }}>
             {Math.floor(coins)}
           </span>
         </div>
@@ -112,53 +115,72 @@ const StatusBar = ({ selectedChicken, chickenCount, juvenileCount, chickCount, e
       
       {/* 상태 표시 */}
       <div 
-        className="mb-3 px-2 py-1 rounded text-center"
+        className="mb-2 px-2 py-1 rounded text-center"
         style={{ 
           backgroundColor: '#e8d5b7',
           border: '2px solid #8b7355',
           color: '#5d4037',
-          fontSize: '11px',
+          fontSize: '10px',
         }}
       >
         {getStateText()}
       </div>
       
-      {/* 선택된 닭이 있을 때만 스탯 표시 */}
-      {selectedChicken ? (
+      {/* 스탯 바들 */}
+      {selectedChicken && (
         <>
           <PixelBar value={hunger || 0} color={getColor(hunger)} label="🍽️ 포만감" />
           <PixelBar value={happiness || 0} color={getColor(happiness, { high: 60, low: 40 })} label="😊 행복도" />
           <PixelBar value={health || 0} color={getColor(health, { high: 80, low: 60 })} label="❤️ 건강" />
+          <PixelBar value={tiredness || 0} color={getTirednessColor(tiredness)} label="😪 피로도" />
         </>
-      ) : (
-        <div 
-          className="text-center py-4"
-          style={{ color: '#8b7355', fontSize: '12px' }}
-        >
-          닭을 클릭해서 상태를 확인하세요
-        </div>
       )}
+      
+      {/* 닭집 구매 버튼 */}
+      <div className="mt-2 mb-2">
+        <button
+          onClick={onBuyCoop}
+          disabled={!canBuyCoop}
+          className="w-full py-1 px-2 rounded font-bold text-xs"
+          style={{
+            backgroundColor: canBuyCoop ? '#4ade80' : '#9ca3af',
+            border: '2px solid ' + (canBuyCoop ? '#22c55e' : '#6b7280'),
+            color: 'white',
+            cursor: canBuyCoop ? 'pointer' : 'not-allowed',
+          }}
+        >
+          🏠 닭집 구매 ({GAME_CONFIG.COOP.COST} 코인)
+        </button>
+      </div>
       
       {/* 개체 수 표시 */}
       <div 
-        className="mt-3 pt-3 flex justify-around"
+        className="pt-2 flex justify-around flex-wrap gap-1"
         style={{ borderTop: '2px dashed #8b7355' }}
       >
-        <div className="text-center">
-          <div style={{ fontSize: '16px' }}>🐔</div>
-          <div style={{ color: '#5d4037', fontSize: '11px' }}>{chickenCount || 0}</div>
+        <div className="text-center min-w-[30px]">
+          <div style={{ fontSize: '14px' }}>🐔</div>
+          <div style={{ color: '#5d4037', fontSize: '10px' }}>{chickenCount || 0}</div>
         </div>
-        <div className="text-center">
-          <div style={{ fontSize: '16px' }}>🐤</div>
-          <div style={{ color: '#5d4037', fontSize: '11px' }}>{juvenileCount || 0}</div>
+        <div className="text-center min-w-[30px]">
+          <div style={{ fontSize: '14px' }}>🐤</div>
+          <div style={{ color: '#5d4037', fontSize: '10px' }}>{juvenileCount || 0}</div>
         </div>
-        <div className="text-center">
-          <div style={{ fontSize: '16px' }}>🐥</div>
-          <div style={{ color: '#5d4037', fontSize: '11px' }}>{chickCount || 0}</div>
+        <div className="text-center min-w-[30px]">
+          <div style={{ fontSize: '14px' }}>🐥</div>
+          <div style={{ color: '#5d4037', fontSize: '10px' }}>{chickCount || 0}</div>
         </div>
-        <div className="text-center">
-          <div style={{ fontSize: '16px' }}>🥚</div>
-          <div style={{ color: '#5d4037', fontSize: '11px' }}>{eggCount || 0}</div>
+        <div className="text-center min-w-[30px]">
+          <div style={{ fontSize: '14px' }}>🥚</div>
+          <div style={{ color: '#5d4037', fontSize: '10px' }}>{eggCount || 0}</div>
+        </div>
+        <div className="text-center min-w-[30px]">
+          <div style={{ fontSize: '14px' }}>🏠</div>
+          <div style={{ color: '#5d4037', fontSize: '10px' }}>{coopCount || 0}</div>
+        </div>
+        <div className="text-center min-w-[30px]">
+          <div style={{ fontSize: '14px' }}>💤</div>
+          <div style={{ color: '#5d4037', fontSize: '10px' }}>{sleepingCount || 0}</div>
         </div>
       </div>
     </div>
