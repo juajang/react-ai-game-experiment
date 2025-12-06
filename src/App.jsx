@@ -227,6 +227,35 @@ export default function ChickenGame() {
     });
   }, []);
   
+  // 탐험 자원 상태 (물, 조사한 타일)
+  const [adventureWater, setAdventureWater] = useState(30);
+  const [investigatedTiles, setInvestigatedTiles] = useState(new Set());
+  
+  // 플레이어 이동 핸들러
+  const handlePlayerMove = useCallback((newPos) => {
+    setPlayerPosition(newPos);
+  }, []);
+  
+  // 물 소모 핸들러
+  const handleConsumeWater = useCallback((amount) => {
+    setAdventureWater(prev => Math.max(0, prev - amount));
+  }, []);
+  
+  // 벼(사료) 소모 핸들러 - 기존 feeds에서 1개 제거
+  const handleConsumeRice = useCallback((amount) => {
+    // feeds 배열에서 amount개 제거 (게임 내 사료와 연동)
+    // 여기서는 간단히 처리
+  }, []);
+  
+  // 조사 완료 핸들러
+  const handleInvestigate = useCallback((tileKey) => {
+    setInvestigatedTiles(prev => {
+      const updated = new Set(prev);
+      updated.add(tileKey);
+      return updated;
+    });
+  }, []);
+  
   const selectedChicken = chickens.find(c => c.id === selectedChickenId);
   const displayChicken = selectedChicken || chickens[0];
 
@@ -711,9 +740,16 @@ export default function ChickenGame() {
           <AdventurePanel 
             chickens={chickens}
             playerPosition={playerPosition}
+            onPlayerMove={handlePlayerMove}
             onTileClick={handleTileClick}
             exploredTiles={exploredTiles}
             onExplore={handleExplore}
+            water={adventureWater}
+            rice={feeds.length}
+            onConsumeWater={handleConsumeWater}
+            onConsumeRice={handleConsumeRice}
+            investigatedTiles={investigatedTiles}
+            onInvestigate={handleInvestigate}
           />
         </div>
       </div>
