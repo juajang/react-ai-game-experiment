@@ -84,7 +84,7 @@ const createCoop = (x, y) => ({
 /**
  * 게임 루프를 관리하는 커스텀 훅
  */
-export const useGameLoop = (fieldSize) => {
+export const useGameLoop = (fieldSize, adventuringChickenId = null) => {
   const [chickens, setChickens] = useState([
     createChicken(GAME_CONFIG.CHICKEN.INITIAL_X, GAME_CONFIG.CHICKEN.INITIAL_Y, GROWTH_STAGE.ADULT)
   ]);
@@ -132,6 +132,10 @@ export const useGameLoop = (fieldSize) => {
   useEffect(() => { coopsRef.current = coops; }, [coops]);
   useEffect(() => { poopsRef.current = poops; }, [poops]);
   useEffect(() => { fieldSizeRef.current = fieldSize; }, [fieldSize]);
+  
+  // 모험 중인 닭 ID (상태 업데이트 건너뛰기용)
+  const adventuringChickenIdRef = useRef(adventuringChickenId);
+  useEffect(() => { adventuringChickenIdRef.current = adventuringChickenId; }, [adventuringChickenId]);
 
   // 사료 추가 (돈 필요)
   const addFeed = (x, y) => {
@@ -291,6 +295,11 @@ export const useGameLoop = (fieldSize) => {
 
       // 1. 닭들 업데이트
       const updatedChickens = currentChickens.map(chicken => {
+        // 모험 중인 닭은 상태 업데이트 건너뛰기 (피로도는 App.jsx에서 별도 관리)
+        if (adventuringChickenIdRef.current && chicken.id === adventuringChickenIdRef.current) {
+          return chicken; // 변경 없이 그대로 반환
+        }
+        
         let { x, y, hunger, happiness, health, tiredness, state, direction, frame, targetX, targetY, stage, growthProgress, eggCooldown, sleepTime, inCoopId, level = 1, experience = 0, expForNextLevel = 100 } = chicken;
         
         // 잠자는 중이면 회복 처리

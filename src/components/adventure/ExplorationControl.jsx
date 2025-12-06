@@ -599,26 +599,22 @@ const ExplorationControl = ({
             <span style={{ fontSize: '7px', color: '#90caf9' }}>-1🌾</span>
           </button>
           
-          {/* 라운드 종료 버튼 (주사위 횟수 0일 때 표시) */}
-          {adventuringChicken && adventuringChicken.remainingDiceRolls <= 0 && remainingMoves <= 0 && (
+          {/* 귀환 버튼 */}
+          {adventuringChicken && (
             <button
-              onClick={() => {
-                onResetDiceRolls?.();
-                setMessage(`🔄 새 라운드 시작! 주사위 ${adventuringChicken.maxDiceRolls}회 충전!`);
-              }}
+              onClick={() => onRecallChicken?.('manual')}
               className="rounded font-bold flex flex-col items-center justify-center"
               style={{
-                backgroundColor: '#ff9800',
+                backgroundColor: '#ef4444',
                 color: 'white',
-                border: '2px solid #f57c00',
+                border: '2px solid #b91c1c',
                 cursor: 'pointer',
                 width: '50px',
                 height: '50px',
               }}
             >
-              <span style={{ fontSize: '14px' }}>🔄</span>
-              <span style={{ fontSize: '7px', fontWeight: 'bold' }}>라운드</span>
-              <span style={{ fontSize: '7px' }}>종료</span>
+              <span style={{ fontSize: '14px' }}>🏠</span>
+              <span style={{ fontSize: '8px', fontWeight: 'bold' }}>귀환</span>
             </button>
           )}
         </div>
