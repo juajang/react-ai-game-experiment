@@ -38,7 +38,7 @@ const TILE_DESCRIPTIONS = {
     "익숙한 농장... 마음이 편안해진다.",
   ],
   RESOURCE: [
-    "자원을 발견했다! 유용한 것을 얻을 수 있다.",
+    "자원을 발견했다!",
     "반짝이는 무언가가 있다...",
   ],
   MOUNTAIN: [
@@ -437,7 +437,7 @@ const ExplorationControl = ({
         // 삽은 도구이므로 이미 있으면 획득하지 않음
         if (!inventory.shovel) {
           onAddItem?.('shovel', 1);
-          lootMessage = ` ${emoji} ${loot.name}을(를) 발견했다!`;
+          lootMessage = ` ${emoji} 삽이에요! 농장의 똥을 치울 수 있어요! 💩`;
         }
       } else {
         // 다른 아이템들은 중복 획득 가능
