@@ -664,18 +664,16 @@ const ExplorationControl = ({
         {message}
       </div>
       
-      {/* 조사한 장소 목록 - 남은 공간 채움 */}
+      {/* 조사한 장소 목록 - 남은 공간 채움, 내부 스크롤 */}
       <div 
-        className="px-2 py-1 flex-1 flex flex-col"
+        className="px-2 py-1 flex flex-col flex-1 min-h-0"
         style={{ 
           backgroundColor: '#1e1e30',
           borderTop: '2px solid #5d4037',
-          overflowY: 'auto',
-          minHeight: '80px',
         }}
       >
         <div 
-          className="mb-1 font-bold"
+          className="mb-1 font-bold flex-shrink-0"
           style={{ fontSize: '9px', color: '#90a4ae' }}
         >
           📋 탐험 기록 ({explorationLog.length})
@@ -688,11 +686,14 @@ const ExplorationControl = ({
             아직 조사한 장소가 없습니다.
           </div>
         ) : (
-          <div className="flex flex-col gap-1">
+          <div 
+            className="flex flex-col gap-1 flex-1 overflow-y-auto pr-1"
+            style={{ scrollbarWidth: 'thin', scrollbarColor: '#5d4037 #1e1e30' }}
+          >
             {explorationLog.slice(-10).reverse().map((log, idx) => (
               <div 
                 key={idx}
-                className="p-1 rounded"
+                className="p-1 rounded flex-shrink-0"
                 style={{ 
                   backgroundColor: '#37474f',
                   fontSize: '8px',
@@ -711,9 +712,9 @@ const ExplorationControl = ({
         )}
       </div>
       
-      {/* 인벤토리 */}
+      {/* 인벤토리 - 고정 높이 (2줄) */}
       <div 
-        className="px-2 py-1.5"
+        className="px-2 py-1.5 flex-shrink-0"
         style={{ 
           backgroundColor: '#252538',
           borderTop: '2px solid #5d4037',
