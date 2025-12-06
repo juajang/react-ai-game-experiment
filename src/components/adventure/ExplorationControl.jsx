@@ -729,38 +729,34 @@ const ExplorationControl = ({
           )}
         </div>
         
-        {/* 인벤토리 슬롯 */}
-        <div className="flex flex-wrap gap-1">
+        {/* 인벤토리 슬롯 - 2줄 (4개씩) */}
+        <div className="grid grid-cols-4 gap-1">
           {/* 삽 슬롯 */}
           <div
             onClick={() => inventory.shovel && onSelectTool?.(selectedTool === 'shovel' ? null : 'shovel')}
-            className="flex items-center gap-1.5 px-2 py-1 rounded cursor-pointer transition-all"
+            className="flex items-center justify-center gap-1 px-1 py-1.5 rounded cursor-pointer transition-all"
             style={{
               backgroundColor: selectedTool === 'shovel' ? '#4caf50' : (inventory.shovel ? '#37474f' : '#2a2a3e'),
               border: '1px dashed #5d4037',
               opacity: inventory.shovel ? 1 : 0.4,
-              flex: '1 1 auto',
-              minWidth: '70px',
             }}
             title={inventory.shovel ? (selectedTool === 'shovel' ? '삽 사용 중!' : '클릭하여 삽 선택') : '삽 없음'}
           >
-            <span style={{ fontSize: '14px' }}>🪏</span>
-            <span style={{ fontSize: '8px', color: selectedTool === 'shovel' ? '#fff' : (inventory.shovel ? '#a5d6a7' : '#455a64') }}>
-              {inventory.shovel ? (selectedTool === 'shovel' ? '사용중' : '삽') : '-'}
+            <span style={{ fontSize: '12px' }}>🪏</span>
+            <span style={{ fontSize: '7px', color: selectedTool === 'shovel' ? '#fff' : (inventory.shovel ? '#a5d6a7' : '#455a64') }}>
+              {inventory.shovel ? (selectedTool === 'shovel' ? '사용' : '삽') : '-'}
             </span>
           </div>
           
-          {/* 빈 슬롯들 */}
-          {[...Array(3)].map((_, idx) => (
+          {/* 빈 슬롯들 (7개 = 총 8칸, 2줄) */}
+          {[...Array(7)].map((_, idx) => (
             <div
               key={idx}
-              className="flex items-center justify-center px-2 py-1 rounded"
+              className="flex items-center justify-center px-1 py-1.5 rounded"
               style={{
                 backgroundColor: '#2a2a3e',
                 border: '1px dashed #5d4037',
                 opacity: 0.4,
-                flex: '1 1 auto',
-                minWidth: '45px',
               }}
             >
               <span style={{ fontSize: '8px', color: '#455a64' }}>-</span>
