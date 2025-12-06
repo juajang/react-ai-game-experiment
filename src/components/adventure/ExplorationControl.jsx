@@ -154,6 +154,56 @@ const Dice3D = ({ value, isRolling, size = 50 }) => {
   );
 };
 
+// 획득 가능한 아이템 목록
+const LOOT_TABLE = {
+  GRASS: [
+    { item: null, chance: 0.7 },
+    { item: 'shovel', chance: 0.15, name: '삽' },
+    { item: 'water', chance: 0.15, amount: 5, name: '물' },
+  ],
+  FOREST: [
+    { item: null, chance: 0.5 },
+    { item: 'shovel', chance: 0.2, name: '삽' },
+    { item: 'water', chance: 0.3, amount: 8, name: '물' },
+  ],
+  BEACH: [
+    { item: null, chance: 0.6 },
+    { item: 'shovel', chance: 0.25, name: '삽' },
+    { item: 'water', chance: 0.15, amount: 3, name: '물' },
+  ],
+  VILLAGE: [
+    { item: null, chance: 0.3 },
+    { item: 'shovel', chance: 0.35, name: '삽' },
+    { item: 'water', chance: 0.35, amount: 10, name: '물' },
+  ],
+  OUTPOST: [
+    { item: null, chance: 0.4 },
+    { item: 'shovel', chance: 0.4, name: '삽' },
+    { item: 'water', chance: 0.2, amount: 5, name: '물' },
+  ],
+  RESOURCE: [
+    { item: null, chance: 0.1 },
+    { item: 'shovel', chance: 0.5, name: '삽' },
+    { item: 'water', chance: 0.4, amount: 15, name: '물' },
+  ],
+};
+
+// 아이템 획득 함수
+const rollLoot = (tileType, x, y) => {
+  const lootTable = LOOT_TABLE[tileType] || LOOT_TABLE.GRASS;
+  const seed = Math.sin(x * 17 + y * 31) * 10000;
+  const rand = (seed - Math.floor(seed) + Math.random()) / 2;
+  
+  let cumulative = 0;
+  for (const loot of lootTable) {
+    cumulative += loot.chance;
+    if (rand < cumulative) {
+      return loot.item ? loot : null;
+    }
+  }
+  return null;
+};
+
 const ExplorationControl = ({
   playerPosition,
   onPlayerMove,
@@ -168,6 +218,11 @@ const ExplorationControl = ({
   currentTileType = 'GRASS',
   currentPoi = null,
   canPass,
+  fillHeight = false,
+  inventory = {},
+  onAddItem,
+  selectedTool,
+  onSelectTool,
 }) => {
   const [diceResult, setDiceResult] = useState(1);
   const [remainingMoves, setRemainingMoves] = useState(0);
@@ -275,23 +330,39 @@ const ExplorationControl = ({
     const description = getDescription(tileType, playerPosition.x, playerPosition.y);
     const tileName = currentPoi?.name || TILE_NAMES[tileType] || tileType;
     
+    // 아이템 획득 체크
+    const loot = rollLoot(tileType, playerPosition.x, playerPosition.y);
+    let lootMessage = '';
+    if (loot) {
+      if (loot.item === 'shovel') {
+        // 삽은 도구이므로 이미 있으면 획득하지 않음
+        if (!inventory.shovel) {
+          onAddItem?.('shovel', 1);
+          lootMessage = ' 🎁 삽을 발견했다!';
+        }
+      } else if (loot.item === 'water') {
+        onAddItem?.('water', loot.amount);
+        lootMessage = ` 💧 물 ${loot.amount}을(를) 발견했다!`;
+      }
+    }
+    
     // 탐험 로그에 추가
     onAddLog?.({
       x: playerPosition.x,
       y: playerPosition.y,
       name: tileName,
-      description,
+      description: description + lootMessage,
       tileType,
     });
     
-    setMessage(`🔍 ${description}`);
-  }, [posKey, rice, investigatedTiles, onConsumeRice, onInvestigate, currentPoi, currentTileType, playerPosition, onAddLog]);
+    setMessage(`🔍 ${description}${lootMessage}`);
+  }, [posKey, rice, investigatedTiles, onConsumeRice, onInvestigate, currentPoi, currentTileType, playerPosition, onAddLog, onAddItem, inventory.shovel]);
 
   const canRoll = !isRolling && remainingMoves <= 0;
 
   return (
     <div 
-      className="rounded-lg overflow-hidden"
+      className={`rounded-lg overflow-hidden flex flex-col ${fillHeight ? 'flex-1' : ''}`}
       style={{
         backgroundColor: '#1a1a2e',
         border: '3px solid #5d4037',
@@ -347,11 +418,11 @@ const ExplorationControl = ({
       
       {/* 주사위 & 이동 컨트롤 */}
       <div 
-        className="px-2 py-2"
+        className="px-2 py-1.5"
         style={{ backgroundColor: '#252538' }}
       >
-        <div className="flex items-center gap-3">
-          {/* 큰 주사위 (클릭 가능) */}
+        <div className="flex items-center gap-2">
+          {/* 주사위 (클릭 가능) */}
           <div 
             onClick={rollDice}
             className="flex flex-col items-center"
@@ -365,29 +436,25 @@ const ExplorationControl = ({
           >
             <div 
               style={{ 
-                padding: '8px',
+                padding: '5px',
                 backgroundColor: canRoll ? '#5d4037' : '#37474f',
-                borderRadius: '10px',
-                border: '3px solid #3e2723',
+                borderRadius: '8px',
+                border: '2px solid #3e2723',
                 boxShadow: isRolling 
-                  ? '0 8px 20px rgba(0,0,0,0.4), inset 0 2px 4px rgba(255,255,255,0.1)' 
-                  : canRoll 
-                    ? '0 6px 15px rgba(0,0,0,0.3), inset 0 2px 4px rgba(255,255,255,0.1)' 
-                    : '0 2px 5px rgba(0,0,0,0.2)',
-                transition: 'box-shadow 0.2s ease',
+                  ? '0 6px 15px rgba(0,0,0,0.4)' 
+                  : '0 3px 8px rgba(0,0,0,0.2)',
               }}
             >
-              <Dice3D value={diceResult} isRolling={isRolling} size={55} />
+              <Dice3D value={diceResult} isRolling={isRolling} size={42} />
             </div>
             {/* 남은 이동 수 표시 */}
             <div 
-              className="mt-1 px-2 py-0.5 rounded text-center"
+              className="mt-1 px-1.5 rounded text-center"
               style={{ 
                 backgroundColor: remainingMoves > 0 ? '#ffd54f' : '#37474f',
                 color: remainingMoves > 0 ? '#5d4037' : '#90a4ae',
-                fontSize: '10px',
+                fontSize: '9px',
                 fontWeight: 'bold',
-                minWidth: '45px',
               }}
             >
               {remainingMoves > 0 ? `${remainingMoves}칸` : '클릭!'}
@@ -395,32 +462,32 @@ const ExplorationControl = ({
           </div>
           
           {/* 방향 버튼 */}
-          <div className="flex flex-col items-center gap-1">
+          <div className="flex flex-col items-center gap-0.5">
             <button
               onClick={() => move('up')}
               disabled={remainingMoves <= 0}
-              className="w-8 h-8 rounded font-bold"
+              className="w-7 h-7 rounded font-bold"
               style={{
                 backgroundColor: remainingMoves > 0 ? '#4caf50' : '#455a64',
                 color: 'white',
                 border: '2px solid #5d4037',
-                fontSize: '14px',
+                fontSize: '12px',
                 cursor: remainingMoves > 0 ? 'pointer' : 'not-allowed',
                 opacity: remainingMoves > 0 ? 1 : 0.5,
               }}
             >
               ↑
             </button>
-            <div className="flex gap-1">
+            <div className="flex gap-0.5">
               <button
                 onClick={() => move('left')}
                 disabled={remainingMoves <= 0}
-                className="w-8 h-8 rounded font-bold"
+                className="w-7 h-7 rounded font-bold"
                 style={{
                   backgroundColor: remainingMoves > 0 ? '#4caf50' : '#455a64',
                   color: 'white',
                   border: '2px solid #5d4037',
-                  fontSize: '14px',
+                  fontSize: '12px',
                   cursor: remainingMoves > 0 ? 'pointer' : 'not-allowed',
                   opacity: remainingMoves > 0 ? 1 : 0.5,
                 }}
@@ -430,12 +497,12 @@ const ExplorationControl = ({
               <button
                 onClick={() => move('down')}
                 disabled={remainingMoves <= 0}
-                className="w-8 h-8 rounded font-bold"
+                className="w-7 h-7 rounded font-bold"
                 style={{
                   backgroundColor: remainingMoves > 0 ? '#4caf50' : '#455a64',
                   color: 'white',
                   border: '2px solid #5d4037',
-                  fontSize: '14px',
+                  fontSize: '12px',
                   cursor: remainingMoves > 0 ? 'pointer' : 'not-allowed',
                   opacity: remainingMoves > 0 ? 1 : 0.5,
                 }}
@@ -445,12 +512,12 @@ const ExplorationControl = ({
               <button
                 onClick={() => move('right')}
                 disabled={remainingMoves <= 0}
-                className="w-8 h-8 rounded font-bold"
+                className="w-7 h-7 rounded font-bold"
                 style={{
                   backgroundColor: remainingMoves > 0 ? '#4caf50' : '#455a64',
                   color: 'white',
                   border: '2px solid #5d4037',
-                  fontSize: '14px',
+                  fontSize: '12px',
                   cursor: remainingMoves > 0 ? 'pointer' : 'not-allowed',
                   opacity: remainingMoves > 0 ? 1 : 0.5,
                 }}
@@ -464,45 +531,46 @@ const ExplorationControl = ({
           <button
             onClick={investigate}
             disabled={!canInvestigate || rice <= 0}
-            className="px-3 py-2 rounded font-bold"
+            className="rounded font-bold flex flex-col items-center justify-center"
             style={{
               backgroundColor: canInvestigate && rice > 0 ? '#2196f3' : '#455a64',
               color: 'white',
               border: '2px solid #5d4037',
-              fontSize: '10px',
               cursor: canInvestigate && rice > 0 ? 'pointer' : 'not-allowed',
               opacity: canInvestigate && rice > 0 ? 1 : 0.5,
+              width: '50px',
+              height: '50px',
             }}
           >
-            🔍 조사
-            <br />
-            <span style={{ fontSize: '8px' }}>(-1🌾)</span>
+            <span style={{ fontSize: '14px' }}>🔍</span>
+            <span style={{ fontSize: '8px', fontWeight: 'bold' }}>조사</span>
+            <span style={{ fontSize: '7px', color: '#90caf9' }}>-1🌾</span>
           </button>
         </div>
       </div>
       
       {/* 메시지 영역 */}
       <div 
-        className="px-2 py-2"
+        className="px-2 py-1"
         style={{ 
           backgroundColor: '#2d2d44',
           borderTop: '2px solid #5d4037',
-          fontSize: '9px',
+          fontSize: '8px',
           color: '#e0e0e0',
-          minHeight: '32px',
+          minHeight: '24px',
         }}
       >
         {message}
       </div>
       
-      {/* 조사한 장소 목록 */}
+      {/* 조사한 장소 목록 - 남은 공간 채움 */}
       <div 
-        className="px-2 py-1"
+        className="px-2 py-1 flex-1 flex flex-col"
         style={{ 
           backgroundColor: '#1e1e30',
           borderTop: '2px solid #5d4037',
-          maxHeight: '100px',
           overflowY: 'auto',
+          minHeight: '80px',
         }}
       >
         <div 
@@ -512,12 +580,15 @@ const ExplorationControl = ({
           📋 탐험 기록 ({explorationLog.length})
         </div>
         {explorationLog.length === 0 ? (
-          <div style={{ fontSize: '8px', color: '#607d8b' }}>
+          <div 
+            className="flex-1 flex items-center justify-center"
+            style={{ fontSize: '8px', color: '#607d8b' }}
+          >
             아직 조사한 장소가 없습니다.
           </div>
         ) : (
           <div className="flex flex-col gap-1">
-            {explorationLog.slice(-5).reverse().map((log, idx) => (
+            {explorationLog.slice(-10).reverse().map((log, idx) => (
               <div 
                 key={idx}
                 className="p-1 rounded"
@@ -530,13 +601,88 @@ const ExplorationControl = ({
                 <div style={{ color: '#ffd54f' }}>
                   📍 [{log.x},{log.y}] {log.name}
                 </div>
-                <div style={{ color: '#b0bec5' }}>
+                <div style={{ color: '#b0bec5', lineHeight: '1.2' }}>
                   {log.description}
                 </div>
               </div>
             ))}
           </div>
         )}
+      </div>
+      
+      {/* 인벤토리 */}
+      <div 
+        className="px-2 py-1.5"
+        style={{ 
+          backgroundColor: '#252538',
+          borderTop: '2px solid #5d4037',
+        }}
+      >
+        <div 
+          className="mb-1 font-bold flex justify-between items-center"
+          style={{ fontSize: '9px', color: '#90a4ae' }}
+        >
+          <span>🎒 인벤토리</span>
+          {selectedTool === 'shovel' && inventory.shovel && (
+            <span style={{ color: '#4caf50', fontSize: '8px' }}>🪏 사용 중</span>
+          )}
+        </div>
+        
+        {/* 인벤토리 슬롯 */}
+        <div className="flex flex-wrap gap-1">
+          {/* 삽 슬롯 */}
+          <div
+            onClick={() => inventory.shovel && onSelectTool?.(selectedTool === 'shovel' ? null : 'shovel')}
+            className="flex items-center gap-1.5 px-2 py-1 rounded cursor-pointer transition-all"
+            style={{
+              backgroundColor: selectedTool === 'shovel' ? '#4caf50' : (inventory.shovel ? '#37474f' : '#2a2a3e'),
+              border: '1px dashed #5d4037',
+              opacity: inventory.shovel ? 1 : 0.4,
+              flex: '1 1 auto',
+              minWidth: '70px',
+            }}
+            title={inventory.shovel ? (selectedTool === 'shovel' ? '삽 사용 중!' : '클릭하여 삽 선택') : '삽 없음'}
+          >
+            <span style={{ fontSize: '14px' }}>🪏</span>
+            <span style={{ fontSize: '8px', color: selectedTool === 'shovel' ? '#fff' : (inventory.shovel ? '#a5d6a7' : '#455a64') }}>
+              {inventory.shovel ? (selectedTool === 'shovel' ? '사용중' : '삽') : '-'}
+            </span>
+          </div>
+          
+          {/* 물 슬롯 */}
+          <div
+            className="flex items-center gap-1.5 px-2 py-1 rounded"
+            style={{
+              backgroundColor: (inventory.water || 0) > 0 ? '#37474f' : '#2a2a3e',
+              border: '1px dashed #5d4037',
+              opacity: (inventory.water || 0) > 0 ? 1 : 0.4,
+              flex: '1 1 auto',
+              minWidth: '70px',
+            }}
+          >
+            <span style={{ fontSize: '14px' }}>💧</span>
+            <span style={{ fontSize: '8px', color: (inventory.water || 0) > 0 ? '#4fc3f7' : '#455a64' }}>
+              {(inventory.water || 0) > 0 ? `+${inventory.water}` : '-'}
+            </span>
+          </div>
+          
+          {/* 빈 슬롯들 */}
+          {[...Array(4)].map((_, idx) => (
+            <div
+              key={idx}
+              className="flex items-center justify-center px-2 py-1 rounded"
+              style={{
+                backgroundColor: '#2a2a3e',
+                border: '1px dashed #5d4037',
+                opacity: 0.4,
+                flex: '1 1 auto',
+                minWidth: '35px',
+              }}
+            >
+              <span style={{ fontSize: '8px', color: '#455a64' }}>-</span>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

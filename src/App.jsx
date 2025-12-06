@@ -4,6 +4,24 @@ import { useGameLoop } from './hooks/useGameLoop';
 import { useFieldSize } from './hooks/useFieldSize';
 import { GROWTH_STAGE, GAME_CONFIG, GAME_STATE, FARM_GRADE } from './constants/gameConfig';
 
+// 삽 커서 (정확한 마우스 위치에 표시)
+const ShovelCursor = ({ isActive, position }) => {
+  if (!isActive || !position) return null;
+  
+  return (
+    <div
+      className="fixed pointer-events-none z-[9999]"
+      style={{
+        left: position.x - 14,
+        top: position.y - 14,
+        transform: 'rotate(-30deg)',
+      }}
+    >
+      <span style={{ fontSize: '28px', filter: 'drop-shadow(2px 2px 2px rgba(0,0,0,0.5))' }}>🪏</span>
+    </div>
+  );
+};
+
 // 게임 오버/클리어 오버레이
 const GameOverlay = ({ type, farmGrade, deathCount, onRestart, onContinue }) => {
   const isGameOver = type === GAME_STATE.GAME_OVER;
@@ -231,6 +249,32 @@ export default function ChickenGame() {
   const [adventureWater, setAdventureWater] = useState(30);
   const [investigatedTiles, setInvestigatedTiles] = useState(new Set());
   
+  // 인벤토리 상태 (탐험에서 얻은 아이템)
+  const [inventory, setInventory] = useState({ shovel: false, water: 0 });
+  const [selectedTool, setSelectedTool] = useState(null);
+  
+  // 마우스 위치 추적 (삽 자석 효과용)
+  const [mousePos, setMousePos] = useState(null);
+  const [fieldRectState, setFieldRectState] = useState(null);
+  
+  // 마우스 위치 추적
+  useEffect(() => {
+    if (selectedTool !== 'shovel') {
+      setMousePos(null);
+      return;
+    }
+    
+    const handleMouseMove = (e) => {
+      setMousePos({ x: e.clientX, y: e.clientY });
+      if (fieldRef.current) {
+        setFieldRectState(fieldRef.current.getBoundingClientRect());
+      }
+    };
+    
+    document.addEventListener('mousemove', handleMouseMove);
+    return () => document.removeEventListener('mousemove', handleMouseMove);
+  }, [selectedTool]);
+  
   // 플레이어 이동 핸들러
   const handlePlayerMove = useCallback((newPos) => {
     setPlayerPosition(newPos);
@@ -255,6 +299,32 @@ export default function ChickenGame() {
       return updated;
     });
   }, []);
+  
+  // 인벤토리에 아이템 추가
+  const handleAddItem = useCallback((item, amount) => {
+    if (item === 'water') {
+      // 물은 즉시 탐험 자원에 추가
+      setAdventureWater(prev => prev + amount);
+      setInventory(prev => ({ ...prev, water: (prev.water || 0) + amount }));
+    } else if (item === 'shovel') {
+      // 삽은 도구이므로 보유 여부만 체크 (true/false)
+      setInventory(prev => ({ ...prev, shovel: true }));
+    } else {
+      setInventory(prev => ({ ...prev, [item]: (prev[item] || 0) + amount }));
+    }
+  }, []);
+  
+  // 도구 선택 핸들러
+  const handleSelectTool = useCallback((tool) => {
+    setSelectedTool(tool);
+  }, []);
+  
+  // 삽으로 똥 제거 (삽은 소모되지 않음 - 도구)
+  const handleShovelPoop = useCallback((poopId) => {
+    if (selectedTool === 'shovel' && inventory.shovel) {
+      removePoop(poopId);
+    }
+  }, [selectedTool, inventory.shovel, removePoop]);
   
   const selectedChicken = chickens.find(c => c.id === selectedChickenId);
   const displayChicken = selectedChicken || chickens[0];
@@ -543,7 +613,7 @@ export default function ChickenGame() {
         </div>
         
         {/* 메인 레이아웃 - 3열 구조 */}
-        <div className="flex gap-3">
+        <div className="flex gap-3 items-stretch">
           {/* 좌측 아이템 패널 */}
           <ItemPanel 
             selectedItem={selectedItem}
@@ -687,6 +757,10 @@ export default function ChickenGame() {
                     y={poop.y} 
                     age={poop.age}
                     onClick={() => removePoop(poop.id)}
+                    isShovelActive={selectedTool === 'shovel' && inventory.shovel}
+                    onShovelClean={() => handleShovelPoop(poop.id)}
+                    mousePos={mousePos}
+                    fieldRect={fieldRectState}
                   />
                 ))}
                 
@@ -750,9 +824,16 @@ export default function ChickenGame() {
             onConsumeRice={handleConsumeRice}
             investigatedTiles={investigatedTiles}
             onInvestigate={handleInvestigate}
+            inventory={inventory}
+            onAddItem={handleAddItem}
+            selectedTool={selectedTool}
+            onSelectTool={handleSelectTool}
           />
         </div>
       </div>
+      
+      {/* 삽 커서 (삽 선택 시 마우스 따라다님) */}
+      <ShovelCursor isActive={selectedTool === 'shovel' && inventory.shovel} position={mousePos} />
     </div>
   );
 }

@@ -251,10 +251,10 @@ const WorldMap = ({
       <div 
         className="p-1 overflow-auto"
         style={{ 
-          fontSize: '9px',
-          lineHeight: '10px',
-          letterSpacing: '1px',
-          maxHeight: '200px',
+          fontSize: '8px',
+          lineHeight: '9px',
+          letterSpacing: '0.5px',
+          maxHeight: '160px',
         }}
       >
         {baseMap.map((row, y) => (

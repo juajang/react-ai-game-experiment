@@ -15,6 +15,10 @@ const AdventurePanel = ({
   onConsumeRice,
   investigatedTiles = new Set(),
   onInvestigate,
+  inventory = {},
+  onAddItem,
+  selectedTool,
+  onSelectTool,
 }) => {
   const [mapData, setMapData] = useState(null);
   const [explorationLog, setExplorationLog] = useState([]);
@@ -65,7 +69,7 @@ const AdventurePanel = ({
   const { tileType, poi } = getCurrentTileInfo();
 
   return (
-    <div className="flex flex-col gap-2 w-72">
+    <div className="flex flex-col gap-2 w-72 self-stretch">
       {/* 상단: 월드맵 */}
       <WorldMap 
         playerPosition={playerPosition}
@@ -77,7 +81,7 @@ const AdventurePanel = ({
         onMapData={handleMapData}
       />
       
-      {/* 하단: 탐험 컨트롤 + 조사 기록 */}
+      {/* 하단: 탐험 컨트롤 + 조사 기록 (남은 공간 채움) */}
       <ExplorationControl
         playerPosition={playerPosition}
         onPlayerMove={onPlayerMove}
@@ -92,6 +96,11 @@ const AdventurePanel = ({
         currentTileType={tileType}
         currentPoi={poi}
         canPass={canPass}
+        fillHeight={true}
+        inventory={inventory}
+        onAddItem={onAddItem}
+        selectedTool={selectedTool}
+        onSelectTool={onSelectTool}
       />
     </div>
   );
