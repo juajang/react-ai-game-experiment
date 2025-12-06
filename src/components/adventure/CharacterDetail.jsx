@@ -1,98 +1,150 @@
 import { useState } from 'react';
 import { GROWTH_STAGE, STATE_TEXT, CHICK_STATE_TEXT, JUVENILE_STATE_TEXT } from '../../constants/gameConfig';
+import { CHICKEN_COLORS, CHICK_COLORS, JUVENILE_COLORS } from '../../constants/sprites';
 
-// 큰 닭 스프라이트 (클로즈업용)
-const LargeChickenSprite = ({ stage, frame = 0, direction = 1 }) => {
-  const size = 120;
+// 도트 스타일 닭 얼굴 클로즈업 (기존 스프라이트 스타일)
+const PixelChickenFace = ({ stage, state = 'idle' }) => {
+  const isSleeping = state === 'sleeping';
+  const isEating = state === 'eating';
   
   if (stage === GROWTH_STAGE.CHICK) {
+    const colors = CHICK_COLORS;
+    // 병아리 얼굴 클로즈업 - viewBox로 얼굴 부분만 확대
     return (
       <svg 
-        width={size} 
-        height={size} 
-        viewBox="0 0 16 16" 
+        width="100%" 
+        height="100%" 
+        viewBox="2 2 12 10" 
         xmlns="http://www.w3.org/2000/svg"
-        style={{ 
-          transform: direction < 0 ? 'scaleX(-1)' : 'scaleX(1)',
-          imageRendering: 'pixelated',
-        }}
+        style={{ imageRendering: 'pixelated' }}
       >
-        {/* 병아리 */}
-        <rect x="3" y="7" width="1" height="2" fill="#f3e17a" />
-        <rect x="5" y="5" width="6" height="6" fill="#ffe866" />
-        <rect x="4" y="6" width="8" height="4" fill="#ffe866" />
-        <rect x="4" y="7" width="2" height="2" fill="#f7d94d" />
-        <rect x="10" y="7" width="2" height="2" fill="#f7d94d" />
-        <rect x="6" y="6" width="1" height="1" fill="#000" />
-        <rect x="9" y="6" width="1" height="1" fill="#000" />
-        <rect x="7" y="7" width="2" height="1" fill="#ffb347" />
-        <rect x="6" y="11" width="1" height="1" fill="#ff9933" />
-        <rect x="9" y="11" width="1" height="1" fill="#ff9933" />
+        {/* 머리/몸통 */}
+        <rect x="5" y="5" width="6" height="5" fill={colors.BODY} />
+        <rect x="4" y="6" width="8" height="3" fill={colors.BODY} />
+        
+        {/* 날개 (음영) */}
+        <rect x="4" y="7" width="2" height="2" fill={colors.BODY_SHADE} />
+        <rect x="10" y="7" width="2" height="2" fill={colors.BODY_SHADE} />
+        
+        {/* 눈 */}
+        {isSleeping ? (
+          <>
+            {/* 감은 눈 - 가로선 */}
+            <rect x="6" y="6" width="1" height="1" fill={colors.EYE} />
+            <rect x="9" y="6" width="1" height="1" fill={colors.EYE} />
+          </>
+        ) : (
+          <>
+            {/* 일반 눈 */}
+            <rect x="6" y="6" width="1" height="1" fill={colors.EYE} />
+            <rect x="9" y="6" width="1" height="1" fill={colors.EYE} />
+            {/* 눈 하이라이트 */}
+            <rect x="6" y="6" width="1" height="1" fill="#fff" fillOpacity="0.3" />
+            <rect x="9" y="6" width="1" height="1" fill="#fff" fillOpacity="0.3" />
+          </>
+        )}
+        
+        {/* 부리 */}
+        <rect x="7" y="7" width="2" height="1" fill={colors.BEAK} />
+        {isEating && <rect x="7" y="8" width="2" height="1" fill={colors.BEAK} />}
+        
+        {/* 머리 깃털 */}
+        <rect x="7" y="4" width="1" height="1" fill={colors.BODY} />
+        <rect x="8" y="3" width="1" height="1" fill={colors.BODY} />
       </svg>
     );
   }
   
   if (stage === GROWTH_STAGE.JUVENILE) {
+    const colors = JUVENILE_COLORS;
+    // 청소년 닭 얼굴 클로즈업
     return (
       <svg 
-        width={size} 
-        height={size} 
-        viewBox="0 0 16 16" 
+        width="100%" 
+        height="100%" 
+        viewBox="2 1 12 11" 
         xmlns="http://www.w3.org/2000/svg"
-        style={{ 
-          transform: direction < 0 ? 'scaleX(-1)' : 'scaleX(1)',
-          imageRendering: 'pixelated',
-        }}
+        style={{ imageRendering: 'pixelated' }}
       >
-        {/* 청소년 닭 */}
-        <rect x="3" y="6" width="1" height="3" fill="#f3e17a" />
-        <rect x="5" y="5" width="6" height="6" fill="#ffe866" />
-        <rect x="4" y="6" width="8" height="4" fill="#ffe866" />
-        <rect x="4" y="7" width="2" height="2" fill="#f7d94d" />
-        <rect x="10" y="7" width="2" height="2" fill="#f7d94d" />
-        <rect x="6" y="6" width="1" height="1" fill="#000" />
-        <rect x="9" y="6" width="1" height="1" fill="#000" />
-        <rect x="7" y="7" width="2" height="1" fill="#ffb347" />
-        <rect x="7" y="3" width="1" height="1" fill="#ff6666" />
-        <rect x="8" y="3" width="1" height="1" fill="#ff6666" />
-        <rect x="6" y="11" width="1" height="1" fill="#ff9933" />
-        <rect x="9" y="11" width="1" height="1" fill="#ff9933" />
+        {/* 머리/몸통 */}
+        <rect x="5" y="4" width="6" height="6" fill={colors.BODY} />
+        <rect x="4" y="6" width="8" height="3" fill={colors.BODY} />
+        
+        {/* 날개 (음영) */}
+        <rect x="4" y="7" width="2" height="2" fill={colors.BODY_SHADE} />
+        <rect x="10" y="7" width="2" height="2" fill={colors.BODY_SHADE} />
+        
+        {/* 눈 */}
+        {isSleeping ? (
+          <>
+            <rect x="6" y="5" width="1" height="1" fill={colors.EYE} />
+            <rect x="9" y="5" width="1" height="1" fill={colors.EYE} />
+          </>
+        ) : (
+          <>
+            <rect x="6" y="5" width="1" height="1" fill={colors.EYE} />
+            <rect x="9" y="5" width="1" height="1" fill={colors.EYE} />
+            <rect x="6" y="5" width="1" height="1" fill="#fff" fillOpacity="0.3" />
+            <rect x="9" y="5" width="1" height="1" fill="#fff" fillOpacity="0.3" />
+          </>
+        )}
+        
+        {/* 부리 */}
+        <rect x="7" y="6" width="2" height="1" fill={colors.BEAK} />
+        {isEating && <rect x="7" y="7" width="2" height="1" fill={colors.BEAK} />}
+        
+        {/* 작은 볏 */}
+        <rect x="7" y="3" width="1" height="1" fill={colors.COMB} />
+        <rect x="8" y="2" width="1" height="1" fill={colors.COMB} />
+        <rect x="9" y="3" width="1" height="1" fill={colors.COMB} />
       </svg>
     );
   }
   
-  // 성체 닭
+  // 성체 닭 얼굴 클로즈업
+  const colors = CHICKEN_COLORS;
   return (
     <svg 
-      width={size} 
-      height={size} 
-      viewBox="0 0 16 16" 
+      width="100%" 
+      height="100%" 
+      viewBox="2 0 12 12" 
       xmlns="http://www.w3.org/2000/svg"
-      style={{ 
-        transform: direction < 0 ? 'scaleX(-1)' : 'scaleX(1)',
-        imageRendering: 'pixelated',
-      }}
+      style={{ imageRendering: 'pixelated' }}
     >
-      {/* 꼬리 */}
-      <rect x="3" y="6" width="1" height="2" fill="#c4a574" />
-      {/* 몸통 */}
-      <rect x="5" y="4" width="6" height="7" fill="#fff8e1" />
-      <rect x="4" y="6" width="8" height="4" fill="#fff8e1" />
-      {/* 날개 */}
-      <rect x="4" y="7" width="2" height="2" fill="#e8d5b7" />
-      <rect x="10" y="7" width="2" height="2" fill="#e8d5b7" />
+      {/* 머리/몸통 */}
+      <rect x="5" y="4" width="6" height="6" fill={colors.BODY} />
+      <rect x="4" y="6" width="8" height="3" fill={colors.BODY} />
+      
+      {/* 날개 (음영) */}
+      <rect x="4" y="7" width="2" height="2" fill={colors.BODY_SHADE} />
+      <rect x="10" y="7" width="2" height="2" fill={colors.BODY_SHADE} />
+      
       {/* 눈 */}
-      <rect x="6" y="5" width="1" height="1" fill="#000" />
-      <rect x="9" y="5" width="1" height="1" fill="#000" />
+      {isSleeping ? (
+        <>
+          {/* 감은 눈 - 가로선 */}
+          <rect x="6" y="5" width="1" height="1" fill={colors.EYE} />
+          <rect x="9" y="5" width="1" height="1" fill={colors.EYE} />
+        </>
+      ) : (
+        <>
+          {/* 일반 눈 */}
+          <rect x="6" y="5" width="1" height="1" fill={colors.EYE} />
+          <rect x="9" y="5" width="1" height="1" fill={colors.EYE} />
+          {/* 눈 하이라이트 */}
+          <rect x="6" y="5" width="1" height="1" fill="#fff" fillOpacity="0.3" />
+          <rect x="9" y="5" width="1" height="1" fill="#fff" fillOpacity="0.3" />
+        </>
+      )}
+      
       {/* 부리 */}
-      <rect x="7" y="6" width="2" height="1" fill="#ff9800" />
+      <rect x="7" y="6" width="2" height="1" fill={colors.BEAK} />
+      {isEating && <rect x="7" y="7" width="2" height="1" fill={colors.BEAK} />}
+      
       {/* 볏 */}
-      <rect x="7" y="3" width="1" height="1" fill="#f44336" />
-      <rect x="8" y="2" width="1" height="1" fill="#f44336" />
-      <rect x="9" y="3" width="1" height="1" fill="#f44336" />
-      {/* 발 */}
-      <rect x="6" y="11" width="1" height="1" fill="#ff9800" />
-      <rect x="9" y="11" width="1" height="1" fill="#ff9800" />
+      <rect x="7" y="3" width="1" height="1" fill={colors.COMB} />
+      <rect x="8" y="2" width="1" height="1" fill={colors.COMB} />
+      <rect x="9" y="3" width="1" height="1" fill={colors.COMB} />
     </svg>
   );
 };
@@ -136,8 +188,6 @@ const CharacterDetail = ({
     happiness = 50, 
     health = 100, 
     tiredness = 0,
-    frame = 0,
-    direction = 1,
     growthProgress = 0,
     level = 1,
     experience = 0,
@@ -234,24 +284,31 @@ const CharacterDetail = ({
         </div>
       </div>
       
-      {/* 닭 클로즈업 */}
+      {/* 닭 얼굴 클로즈업 */}
       <div 
-        className="flex justify-center items-center py-2"
-        style={{ backgroundColor: '#fff8e1' }}
+        className="relative flex justify-center items-center"
+        style={{ 
+          backgroundColor: '#fff8e1',
+          height: '140px',
+          overflow: 'hidden',
+        }}
       >
-        <div className="relative">
-          <LargeChickenSprite stage={stage} frame={frame} direction={direction} />
-          
-          {/* 상태 이모티콘 */}
-          <div 
-            className="absolute -top-2 -right-2 animate-bounce"
-            style={{ fontSize: '16px' }}
-          >
-            {state === 'eating' && '😋'}
-            {state === 'sleeping' && '💤'}
-            {state === 'laying' && '🥚'}
-            {health < 30 && '💔'}
-          </div>
+        <div 
+          className="w-full h-full flex justify-center items-center"
+          style={{ padding: '8px' }}
+        >
+          <PixelChickenFace stage={stage} state={state} />
+        </div>
+        
+        {/* 상태 이모티콘 */}
+        <div 
+          className="absolute top-2 right-2 animate-bounce"
+          style={{ fontSize: '20px' }}
+        >
+          {state === 'eating' && '😋'}
+          {state === 'sleeping' && '💤'}
+          {state === 'laying' && '🥚'}
+          {health < 30 && '💔'}
         </div>
       </div>
       

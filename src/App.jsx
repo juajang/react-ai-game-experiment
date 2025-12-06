@@ -1,5 +1,5 @@
 import { useRef, useCallback, useState, useEffect } from 'react';
-import { Chicken, Chick, Juvenile, DeadChicken, Egg, Feed, Flower, FlowerBush, Pond, Windmill, Poop, Field, GameInfo, Coop, ItemPanel, AdventurePanel } from './components';
+import { Chicken, Chick, Juvenile, DeadChicken, Egg, Feed, Flower, FlowerBush, Pond, Windmill, Poop, Field, GameInfo, Coop, ItemPanel, AdventurePanel, StatusBar } from './components';
 import { useGameLoop } from './hooks/useGameLoop';
 import { useFieldSize } from './hooks/useFieldSize';
 import { GROWTH_STAGE, GAME_CONFIG, GAME_STATE, FARM_GRADE } from './constants/gameConfig';
@@ -530,13 +530,16 @@ export default function ChickenGame() {
           
           {/* 중앙 게임 영역 */}
           <div className="flex-1 relative">
-            {/* 상단 요약 바 */}
-            <TopSummaryBar 
+            {/* 상단 상태바 - 닭 얼굴 + 스탯 */}
+            <StatusBar 
+              selectedChicken={displayChicken}
               chickenCount={chickenCount}
               juvenileCount={juvenileCount}
               chickCount={chickCount}
               eggCount={eggs.length}
               deathCount={deathCount}
+              coins={coins}
+              onNameChange={updateChickenName}
             />
             
             {/* 안내 메시지 */}
@@ -706,10 +709,7 @@ export default function ChickenGame() {
           
           {/* 우측 모험 패널 (맵 + 캐릭터 상세) */}
           <AdventurePanel 
-            selectedChicken={displayChicken}
             chickens={chickens}
-            onNameChange={updateChickenName}
-            coins={coins}
             playerPosition={playerPosition}
             onTileClick={handleTileClick}
             exploredTiles={exploredTiles}
