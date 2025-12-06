@@ -4,6 +4,7 @@ import { FlowerPreview } from '../items/Flower';
 import { FlowerBushPreview } from '../items/FlowerBush';
 import { PondPreview } from '../buildings/Pond';
 import { WindmillPreview } from '../buildings/Windmill';
+import { StrawSpaceshipPreview } from '../buildings/StrawSpaceship';
 import Coin from './Coin';
 
 // 사료 미리보기
@@ -33,7 +34,9 @@ const ItemPanel = ({
   flowerCount,
   flowerBushCount,
   windmillCount,
+  spaceshipCount = 0,
   farmGrade,
+  inventory = {},
 }) => {
   const isGoldenFarm = farmGrade?.level === FARM_GRADE.GOLDEN_FARM.level;
   const consumables = [
@@ -86,6 +89,15 @@ const ItemPanel = ({
       goldenOnly: true,
     },
   ];
+
+  // 우주선 재료 체크 (테스트용: 항상 건설 가능)
+  // TODO: 테스트 후 원래 조건 복원
+  // const requiredItems = GAME_CONFIG.SPACESHIP?.REQUIRED_ITEMS || {};
+  // const hasAllMaterials = Object.entries(requiredItems).every(
+  //   ([item, count]) => (inventory[item] || 0) >= count
+  // );
+  // const canBuildSpaceship = coins >= (GAME_CONFIG.SPACESHIP?.COST || 500) && hasAllMaterials && isGoldenFarm;
+  const canBuildSpaceship = true; // 테스트용
 
   const renderItem = (item, isGoldenItem = false) => {
     const canAfford = coins >= item.cost;
@@ -183,6 +195,56 @@ const ItemPanel = ({
       {/* 황금 농장 전용 아이템 */}
       {goldenItems.map(item => renderItem(item, true))}
       
+      {/* 우주선 특별 섹션 */}
+      <div 
+        className="flex items-center gap-1" 
+        style={{ margin: '2px 0' }}
+      >
+        <div style={{ borderTop: '2px dashed #7c3aed', flex: 1 }} />
+        <span style={{ fontSize: '8px', color: '#7c3aed' }}>🚀</span>
+        <div style={{ borderTop: '2px dashed #7c3aed', flex: 1 }} />
+      </div>
+      
+      {/* 우주선 */}
+      <button
+        onClick={() => canBuildSpaceship && onSelectItem(selectedItem === 'spaceship' ? null : 'spaceship')}
+        disabled={!canBuildSpaceship}
+        className="flex flex-col items-center p-2 rounded transition-all w-full relative"
+        style={{
+          backgroundColor: selectedItem === 'spaceship' ? '#ddd6fe' : '#ede9fe',
+          border: selectedItem === 'spaceship' ? '3px solid #7c3aed' : '2px solid #a78bfa',
+          opacity: canBuildSpaceship ? 1 : 0.5,
+          cursor: canBuildSpaceship ? 'pointer' : 'not-allowed',
+        }}
+        title={!isGoldenFarm ? '황금 닭 농장 필요' : !hasAllMaterials ? '재료 부족' : '우주선 건설!'}
+      >
+        {!isGoldenFarm && (
+          <div className="absolute -top-1 -right-1 text-xs">🔒</div>
+        )}
+        {isGoldenFarm && !hasAllMaterials && (
+          <div className="absolute -top-1 -right-1 text-xs">🔧</div>
+        )}
+        {canBuildSpaceship && (
+          <div className="absolute -top-1 -right-1 text-xs animate-pulse">✨</div>
+        )}
+        <div className="mb-1"><StrawSpaceshipPreview size={28} /></div>
+        <div style={{ fontSize: '9px', color: '#5b21b6', fontWeight: 'bold' }}>
+          우주선
+        </div>
+        <div className="flex items-center gap-0.5 mt-1" style={{ fontSize: '8px', color: '#7c3aed' }}>
+          <Coin size={10} />
+          <span>{GAME_CONFIG.SPACESHIP?.COST || 500}</span>
+        </div>
+        {/* 필요 재료 표시 */}
+        <div style={{ fontSize: '7px', color: '#6b7280', marginTop: '2px' }}>
+          <span style={{ color: (inventory.metal_scrap || 0) >= 3 ? '#22c55e' : '#ef4444' }}>⚙️{inventory.metal_scrap || 0}/3</span>
+          {' '}
+          <span style={{ color: (inventory.blueprint || 0) >= 2 ? '#22c55e' : '#ef4444' }}>📜{inventory.blueprint || 0}/2</span>
+          {' '}
+          <span style={{ color: (inventory.fuel_cell || 0) >= 1 ? '#22c55e' : '#ef4444' }}>🔋{inventory.fuel_cell || 0}/1</span>
+        </div>
+      </button>
+      
       {/* 보유 개수 */}
       <div 
         className="mt-1 pt-1 text-center"
@@ -196,6 +258,7 @@ const ItemPanel = ({
         <div>💧 {pondCount || 0}개</div>
         <div>🏠 {coopCount}개</div>
         {windmillCount > 0 && <div>🌀 {windmillCount}개</div>}
+        {spaceshipCount > 0 && <div style={{ color: '#7c3aed' }}>🚀 {spaceshipCount}개</div>}
       </div>
     </div>
   );

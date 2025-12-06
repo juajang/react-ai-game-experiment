@@ -18,7 +18,9 @@ export {
   Pond, 
   PondPreview, 
   Windmill, 
-  WindmillPreview 
+  WindmillPreview,
+  StrawSpaceship,
+  StrawSpaceshipPreview
 } from './buildings';
 
 // 아이템 컴포넌트

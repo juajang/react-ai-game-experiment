@@ -94,6 +94,7 @@ export const useGameLoop = (fieldSize, adventuringChickenId = null) => {
   const [flowerBushes, setFlowerBushes] = useState([]);
   const [ponds, setPonds] = useState([]);
   const [windmills, setWindmills] = useState([]);
+  const [spaceships, setSpaceships] = useState([]);
   const [coops, setCoops] = useState([]);
   const [poops, setPoops] = useState([]);
   const [coins, setCoins] = useState(100); // 시작 코인
@@ -209,6 +210,28 @@ export const useGameLoop = (fieldSize, adventuringChickenId = null) => {
   const moveWindmill = (windmillId, newX, newY) => {
     setWindmills(prev => prev.map(wm => 
       wm.id === windmillId ? { ...wm, x: newX, y: newY } : wm
+    ));
+  };
+
+  // 우주선 추가 (테스트용: 조건 없음)
+  const addSpaceship = (x, y, inventory, consumeItems) => {
+    // TODO: 테스트 후 원래 조건 복원
+    // const totalChickens = chickensRef.current.length;
+    // const isGoldenFarm = totalChickens >= FARM_GRADE.GOLDEN_FARM.minChickens;
+    // const requiredItems = GAME_CONFIG.SPACESHIP?.REQUIRED_ITEMS || {};
+    // const hasAllMaterials = Object.entries(requiredItems).every(
+    //   ([item, count]) => (inventory[item] || 0) >= count
+    // );
+    
+    // 테스트용: 무조건 배치 가능
+    setSpaceships(prev => [...prev, { id: Date.now(), x, y }]);
+    return true;
+  };
+
+  // 우주선 이동
+  const moveSpaceship = (spaceshipId, newX, newY) => {
+    setSpaceships(prev => prev.map(ss => 
+      ss.id === spaceshipId ? { ...ss, x: newX, y: newY } : ss
     ));
   };
 
@@ -779,6 +802,7 @@ export const useGameLoop = (fieldSize, adventuringChickenId = null) => {
     flowerBushes,
     ponds,
     windmills,
+    spaceships,
     coops,
     poops,
     coins,
@@ -795,6 +819,8 @@ export const useGameLoop = (fieldSize, adventuringChickenId = null) => {
     movePond,
     addWindmill,
     moveWindmill,
+    addSpaceship,
+    moveSpaceship,
     addCoop,
     moveCoop,
     removePoop,

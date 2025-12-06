@@ -121,6 +121,16 @@ export const GAME_CONFIG = {
     MAX_AGE: 200,                    // 최대 방치 시간 (사라지지 않음, 효과만 강해짐)
   },
   
+  // 짚단 우주선 관련
+  SPACESHIP: {
+    COST: 500,                       // 높은 가격 (엔드게임 컨텐츠)
+    REQUIRED_ITEMS: {                // 필요 재료
+      metal_scrap: 3,                // 신기한 금속 조각 3개
+      blueprint: 2,                  // 우주선 설계도 조각 2개
+      fuel_cell: 1,                  // 연료 전지 1개
+    },
+  },
+  
   // 필드 관련
   FIELD: {
     DEFAULT_WIDTH: 400,
