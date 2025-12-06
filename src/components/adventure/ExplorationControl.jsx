@@ -222,6 +222,7 @@ const ExplorationControl = ({
   onAddTiredness,
   onUseDiceRoll,
   onResetDiceRolls,
+  onAddExp,
 }) => {
   const [diceResult, setDiceResult] = useState(1);
   const [remainingMoves, setRemainingMoves] = useState(0);
@@ -268,12 +269,14 @@ const ExplorationControl = ({
         setRemainingMoves(finalResult);
         setIsRolling(false);
         
-        // 피로도 증가 (+15) 및 주사위 횟수 감소
-        onAddTiredness?.(15);
+        // 피로도 증가 (레벨에 따라 다름) 및 주사위 횟수 감소
+        const tirednessIncrease = adventuringChicken.tirednessPerRoll || Math.floor(100 / (adventuringChicken.level || 1));
+        onAddTiredness?.(tirednessIncrease);
         onUseDiceRoll?.();
         
         const newRemainingDice = (adventuringChicken.remainingDiceRolls || 1) - 1;
-        setMessage(`🎲 ${finalResult}칸 이동! (남은 주사위: ${newRemainingDice}회)`);
+        const newTiredness = Math.min(100, (adventuringChicken.tiredness || 0) + tirednessIncrease);
+        setMessage(`🎲 ${finalResult}칸 이동! (피로도 +${tirednessIncrease}%, 남은 주사위: ${newRemainingDice}회)`);
       }
     }, 60);
   }, [remainingMoves, isRolling, adventuringChicken, onAddTiredness, onUseDiceRoll]);
@@ -316,11 +319,17 @@ const ExplorationControl = ({
     onPlayerMove?.({ x: newX, y: newY });
     onConsumeWater?.(1);
     
+    // 이동할 때마다 경험치 획득 (5 EXP)
+    const expGain = 5;
+    onAddExp?.(expGain);
+    
     const newRemaining = remainingMoves - 1;
     setRemainingMoves(newRemaining);
     
+    const totalEarnedExp = (adventuringChicken?.earnedExp || 0) + expGain;
+    
     if (newRemaining > 0) {
-      setMessage(`📍 이동 완료! 남은 이동: ${newRemaining}칸`);
+      setMessage(`📍 이동 완료! +${expGain}EXP (총 ${totalEarnedExp}EXP) 남은 이동: ${newRemaining}칸`);
     } else {
       const newPosKey = `${newX},${newY}`;
       const isInvestigated = investigatedTiles.has(newPosKey);
@@ -445,6 +454,9 @@ const ExplorationControl = ({
               </span>
               <span style={{ color: '#ce93d8' }}>
                 🎲{adventuringChicken.remainingDiceRolls}/{adventuringChicken.maxDiceRolls}
+              </span>
+              <span style={{ color: '#ffd54f' }}>
+                ⭐{adventuringChicken.earnedExp || 0}
               </span>
             </>
           )}

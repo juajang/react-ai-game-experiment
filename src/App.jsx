@@ -22,6 +22,111 @@ const ShovelCursor = ({ isActive, position }) => {
   );
 };
 
+// 모험 종료 오버레이
+const AdventureEndOverlay = ({ result, onClose }) => {
+  if (!result) return null;
+  
+  const { chickenName, moveCount, earnedExp, reason, leveledUp, newLevel } = result;
+  
+  let reasonText = '';
+  let reasonEmoji = '🏠';
+  switch (reason) {
+    case 'tiredness':
+      reasonText = '피로도가 100%에 도달했습니다!';
+      reasonEmoji = '😫';
+      break;
+    case 'water':
+      reasonText = '물이 다 떨어졌습니다!';
+      reasonEmoji = '💧';
+      break;
+    case 'rice':
+      reasonText = '벼가 다 떨어졌습니다!';
+      reasonEmoji = '🌾';
+      break;
+    default:
+      reasonText = '무사히 귀환했습니다!';
+      reasonEmoji = '🏠';
+  }
+  
+  return (
+    <div 
+      className="absolute inset-0 flex items-center justify-center z-50"
+      style={{ backgroundColor: 'rgba(0, 0, 0, 0.6)' }}
+    >
+      <div 
+        className="text-center p-4 rounded-lg"
+        style={{
+          backgroundColor: '#1e3a5f',
+          border: '4px solid #60a5fa',
+          boxShadow: '4px 4px 0px rgba(0,0,0,0.3)',
+          minWidth: '240px',
+        }}
+      >
+        {/* 타이틀 */}
+        <div 
+          className="font-bold mb-2"
+          style={{ color: '#60a5fa', fontSize: '16px' }}
+        >
+          🗺️ 모험 종료!
+        </div>
+        
+        {/* 닭 이름 */}
+        <div 
+          className="mb-2 px-3 py-1 rounded inline-block"
+          style={{ backgroundColor: '#374151', color: '#fbbf24', fontSize: '14px', fontWeight: 'bold' }}
+        >
+          🐔 {chickenName}
+        </div>
+        
+        {/* 결과 */}
+        <div 
+          className="mb-3"
+          style={{ color: '#e5e7eb', fontSize: '12px' }}
+        >
+          <p className="mb-2" style={{ color: '#9ca3af' }}>{reasonEmoji} {reasonText}</p>
+          <div 
+            className="flex justify-around py-2 px-3 rounded"
+            style={{ backgroundColor: '#374151' }}
+          >
+            <div>
+              <div style={{ color: '#60a5fa', fontSize: '10px' }}>이동</div>
+              <div style={{ fontWeight: 'bold' }}>📍 {moveCount}칸</div>
+            </div>
+            <div>
+              <div style={{ color: '#fbbf24', fontSize: '10px' }}>경험치</div>
+              <div style={{ fontWeight: 'bold' }}>⭐ +{earnedExp}</div>
+            </div>
+          </div>
+          
+          {/* 레벨업 표시 */}
+          {leveledUp && (
+            <div 
+              className="mt-2 py-1 px-2 rounded"
+              style={{ backgroundColor: '#7c3aed', color: '#fff', fontSize: '12px' }}
+            >
+              🎉 레벨 업! Lv.{newLevel}
+            </div>
+          )}
+        </div>
+        
+        {/* 확인 버튼 */}
+        <button
+          onClick={onClose}
+          className="px-4 py-1.5 rounded font-bold transition-transform hover:scale-105"
+          style={{
+            backgroundColor: '#60a5fa',
+            color: 'white',
+            border: '2px solid #3b82f6',
+            fontSize: '11px',
+          }}
+        >
+          확인
+        </button>
+      </div>
+    </div>
+  );
+};
+
 // 게임 오버/클리어 오버레이
 const GameOverlay = ({ type, farmGrade, deathCount, onRestart, onContinue }) => {
   const isGameOver = type === GAME_STATE.GAME_OVER;
@@ -257,6 +362,9 @@ export default function ChickenGame() {
   // 모험 중인 닭 상태
   const [adventuringChicken, setAdventuringChicken] = useState(null);
   
+  // 모험 종료 결과 (오버레이 표시용)
+  const [adventureEndResult, setAdventureEndResult] = useState(null);
+  
   // 마우스 위치 추적 (삽 자석 효과용)
   const [mousePos, setMousePos] = useState(null);
   const [fieldRectState, setFieldRectState] = useState(null);
@@ -309,11 +417,15 @@ export default function ChickenGame() {
     const chicken = chickens.find(c => c.id === chickenId);
     if (!chicken || chicken.stage !== 'adult') return;
     
+    // 피로도가 100이면 모험 불가
+    if ((chicken.tiredness || 0) >= 100) return;
+    
     // 닭의 실제 레벨 사용 (기본값 1)
     const level = chicken.level || 1;
     const water = 10 + level * 5; // 15~35
     const rice = 3 + level * 2;   // 5~13
     const maxDiceRolls = level; // 레벨 1: 1회, 레벨 5: 5회
+    const tirednessPerRoll = Math.floor(100 / level); // 레벨 1: 100, 레벨 4: 25
     
     setAdventuringChicken({
       id: chicken.id,
@@ -324,9 +436,12 @@ export default function ChickenGame() {
       maxRice: rice,
       level,
       tiredness: chicken.tiredness || 0, // 현재 피로도
+      tirednessPerRoll, // 주사위당 피로도 증가량
       maxDiceRolls, // 라운드당 최대 주사위 횟수
       remainingDiceRolls: maxDiceRolls, // 남은 주사위 횟수
       startPosition: { x: 15, y: 12 }, // 농장 위치
+      earnedExp: 0, // 모험에서 획득한 경험치
+      moveCount: 0, // 이동 횟수
     });
     
     // 플레이어 위치를 농장으로 설정
@@ -334,15 +449,56 @@ export default function ChickenGame() {
   }, [chickens]);
   
   // 모험 닭 귀환
-  const handleRecallChicken = useCallback(() => {
-    // 귀환 시 피로도를 원래 닭에게 적용
-    if (adventuringChicken) {
-      setChickens(prev => prev.map(c => 
-        c.id === adventuringChicken.id 
-          ? { ...c, tiredness: adventuringChicken.tiredness }
-          : c
-      ));
-    }
+  const handleRecallChicken = useCallback((reason = 'manual') => {
+    if (!adventuringChicken) return;
+    
+    const earnedExp = adventuringChicken.earnedExp || 0;
+    const moveCount = adventuringChicken.moveCount || 0;
+    const chickenName = adventuringChicken.name;
+    const currentLevel = adventuringChicken.level || 1;
+    
+    let leveledUp = false;
+    let newLevel = currentLevel;
+    
+    // 귀환 시 피로도와 경험치를 원래 닭에게 적용
+    setChickens(prev => prev.map(c => {
+      if (c.id === adventuringChicken.id) {
+        const newExp = (c.experience || 0) + earnedExp;
+        const expForNext = c.expForNextLevel || 100;
+        
+        // 레벨업 체크
+        if (newExp >= expForNext) {
+          leveledUp = true;
+          newLevel = (c.level || 1) + 1;
+          const newExpForNextLevel = Math.floor(100 * Math.pow(1.5, newLevel - 1));
+          return { 
+            ...c, 
+            tiredness: adventuringChicken.tiredness,
+            experience: newExp - expForNext,
+            level: newLevel,
+            expForNextLevel: newExpForNextLevel,
+          };
+        }
+        
+        return { 
+          ...c, 
+          tiredness: adventuringChicken.tiredness,
+          experience: newExp,
+        };
+      }
+      return c;
+    }));
+    
+    // 모험 종료 결과 설정 (오버레이 표시)
+    setAdventureEndResult({
+      chickenName,
+      moveCount,
+      earnedExp,
+      reason,
+      leveledUp,
+      newLevel,
+    });
+    
     setAdventuringChicken(null);
     setPlayerPosition({ x: 15, y: 12 }); // 농장으로 돌아가기
   }, [adventuringChicken]);
@@ -354,7 +510,7 @@ export default function ChickenGame() {
       const newTiredness = Math.min(100, prev.tiredness + amount);
       // 피로도가 100이 되면 자동 귀환
       if (newTiredness >= 100) {
-        setTimeout(() => handleRecallChicken(), 500);
+        setTimeout(() => handleRecallChicken('tiredness'), 500);
         return { ...prev, tiredness: 100 };
       }
       return { ...prev, tiredness: newTiredness };
@@ -388,6 +544,18 @@ export default function ChickenGame() {
     });
   }, []);
   
+  // 모험 중 경험치 획득 (이동할 때마다)
+  const handleAddExp = useCallback((amount) => {
+    setAdventuringChicken(prev => {
+      if (!prev) return null;
+      return { 
+        ...prev, 
+        earnedExp: (prev.earnedExp || 0) + amount,
+        moveCount: (prev.moveCount || 0) + 1,
+      };
+    });
+  }, []);
+  
   // 모험 중 물 소모
   const handleConsumeAdventureWater = useCallback((amount) => {
     setAdventuringChicken(prev => {
@@ -395,7 +563,7 @@ export default function ChickenGame() {
       const newWater = Math.max(0, prev.water - amount);
       // 물이 0이 되면 자동 귀환
       if (newWater <= 0) {
-        setTimeout(() => handleRecallChicken(), 500);
+        setTimeout(() => handleRecallChicken('water'), 500);
         return { ...prev, water: 0 };
       }
       return { ...prev, water: newWater };
@@ -409,7 +577,7 @@ export default function ChickenGame() {
       const newRice = Math.max(0, prev.rice - amount);
       // 벼가 0이 되면 자동 귀환
       if (newRice <= 0) {
-        setTimeout(() => handleRecallChicken(), 500);
+        setTimeout(() => handleRecallChicken('rice'), 500);
         return { ...prev, rice: 0 };
       }
       return { ...prev, rice: newRice };
@@ -918,6 +1086,14 @@ export default function ChickenGame() {
                   onContinue={continueGame}
                 />
               )}
+              
+              {/* 모험 종료 오버레이 */}
+              {adventureEndResult && (
+                <AdventureEndOverlay 
+                  result={adventureEndResult}
+                  onClose={() => setAdventureEndResult(null)}
+                />
+              )}
             </div>
             
             {/* 게임 안내 */}
@@ -947,6 +1123,7 @@ export default function ChickenGame() {
             onAddTiredness={handleAddTiredness}
             onUseDiceRoll={handleUseDiceRoll}
             onResetDiceRolls={handleResetDiceRolls}
+            onAddExp={handleAddExp}
           />
         </div>
       </div>

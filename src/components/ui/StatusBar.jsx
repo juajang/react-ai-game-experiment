@@ -321,6 +321,19 @@ const StatusBar = ({ selectedChicken, chickenCount, juvenileCount, chickCount, e
                       다른 닭 모험중
                     </span>
                   )
+                ) : tiredness >= 100 ? (
+                  <span 
+                    className="px-2 py-0.5 rounded"
+                    style={{ 
+                      backgroundColor: '#ef4444', 
+                      color: '#fff', 
+                      fontSize: '9px',
+                      border: '2px solid #b91c1c',
+                    }}
+                    title="피로도가 너무 높습니다. 휴식이 필요합니다."
+                  >
+                    😫 피곤함
+                  </span>
                 ) : (
                   <button
                     onClick={() => onSendToAdventure?.(id)}

@@ -24,6 +24,7 @@ const AdventurePanel = ({
   onAddTiredness,
   onUseDiceRoll,
   onResetDiceRolls,
+  onAddExp,
 }) => {
   const [mapData, setMapData] = useState(null);
   const [explorationLog, setExplorationLog] = useState([]);
@@ -112,6 +113,7 @@ const AdventurePanel = ({
         onAddTiredness={onAddTiredness}
         onUseDiceRoll={onUseDiceRoll}
         onResetDiceRolls={onResetDiceRolls}
+        onAddExp={onAddExp}
       />
     </div>
   );
