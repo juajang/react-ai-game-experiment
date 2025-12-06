@@ -8,6 +8,8 @@ const AdventurePanel = ({
   coins = 0,
   playerPosition = { x: 15, y: 12 },
   onTileClick,
+  exploredTiles,
+  onExplore,
 }) => {
   return (
     <div className="flex flex-col gap-2 w-64">
@@ -16,6 +18,8 @@ const AdventurePanel = ({
         playerPosition={playerPosition}
         chickens={chickens}
         onTileClick={onTileClick}
+        exploredTiles={exploredTiles}
+        onExplore={onExplore}
       />
       
       {/* 하단: 캐릭터 상세 */}

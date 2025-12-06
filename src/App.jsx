@@ -200,6 +200,33 @@ export default function ChickenGame() {
   // 플레이어 위치 (월드맵용)
   const [playerPosition, setPlayerPosition] = useState({ x: 15, y: 12 });
   
+  // 탐험한 타일들 (fog of war)
+  const [exploredTiles, setExploredTiles] = useState(() => {
+    // 초기 탐험 영역: 플레이어 시작 위치 주변 (작은 범위)
+    const initialTiles = new Set();
+    const startX = 15;
+    const startY = 12;
+    const radius = 2; // 초기 시야 반경 축소
+    for (let dy = -radius; dy <= radius; dy++) {
+      for (let dx = -radius; dx <= radius; dx++) {
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        if (distance <= radius) {
+          initialTiles.add(`${startX + dx},${startY + dy}`);
+        }
+      }
+    }
+    return initialTiles;
+  });
+  
+  // 새로운 타일 탐험 핸들러
+  const handleExplore = useCallback((newTiles) => {
+    setExploredTiles(prev => {
+      const updated = new Set(prev);
+      newTiles.forEach(tile => updated.add(tile));
+      return updated;
+    });
+  }, []);
+  
   const selectedChicken = chickens.find(c => c.id === selectedChickenId);
   const displayChicken = selectedChicken || chickens[0];
 
@@ -685,6 +712,8 @@ export default function ChickenGame() {
             coins={coins}
             playerPosition={playerPosition}
             onTileClick={handleTileClick}
+            exploredTiles={exploredTiles}
+            onExplore={handleExplore}
           />
         </div>
       </div>

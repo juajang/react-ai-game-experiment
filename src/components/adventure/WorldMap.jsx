@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 
 // 맵 타일 타입 정의
 const TILE_TYPES = {
@@ -14,13 +14,20 @@ const TILE_TYPES = {
   PLAYER: { char: '@', color: '#f44336', bg: null },
   CHICKEN: { char: 'c', color: '#fff176', bg: null },
   RESOURCE: { char: '*', color: '#e91e63', bg: null },
+  UNKNOWN: { char: '?', color: '#3d3d5c', bg: '#2a2a3e' },
 };
 
 // 심 모양의 맵 생성
-const generateIslandMap = (width, height) => {
+const generateIslandMap = (width, height, seed = 42) => {
   const map = [];
   const centerX = width / 2;
   const centerY = height / 2;
+  
+  // 시드 기반 랜덤 (일관된 맵 생성)
+  const seededRandom = (x, y) => {
+    const n = Math.sin(x * 12.9898 + y * 78.233 + seed) * 43758.5453;
+    return n - Math.floor(n);
+  };
   
   for (let y = 0; y < height; y++) {
     const row = [];
@@ -35,16 +42,17 @@ const generateIslandMap = (width, height) => {
       const adjustedDist = distance + noise;
       
       let tile;
+      const rand = seededRandom(x, y);
       if (adjustedDist > 1.1) {
         tile = 'WATER';
       } else if (adjustedDist > 0.95) {
         tile = 'BEACH';
       } else if (adjustedDist > 0.8) {
-        tile = Math.random() > 0.7 ? 'FOREST' : 'GRASS';
+        tile = rand > 0.7 ? 'FOREST' : 'GRASS';
       } else if (adjustedDist > 0.5) {
-        tile = Math.random() > 0.5 ? 'FOREST' : 'GRASS';
+        tile = rand > 0.5 ? 'FOREST' : 'GRASS';
       } else if (adjustedDist > 0.3) {
-        tile = Math.random() > 0.8 ? 'MOUNTAIN' : 'GRASS';
+        tile = rand > 0.8 ? 'MOUNTAIN' : 'GRASS';
       } else {
         tile = 'GRASS';
       }
@@ -58,10 +66,16 @@ const generateIslandMap = (width, height) => {
 };
 
 // 포인트 오브 인터레스트 생성
-const generatePOIs = (map) => {
+const generatePOIs = (map, seed = 42) => {
   const pois = [];
   const height = map.length;
   const width = map[0].length;
+  
+  // 시드 기반 랜덤
+  const seededRandom = (i) => {
+    const n = Math.sin(i * 12.9898 + seed) * 43758.5453;
+    return n - Math.floor(n);
+  };
   
   // 마을 (중앙 근처)
   pois.push({ x: Math.floor(width / 2), y: Math.floor(height / 2) + 2, type: 'VILLAGE', name: '마을' });
@@ -73,10 +87,10 @@ const generatePOIs = (map) => {
   pois.push({ x: Math.floor(width / 3), y: Math.floor(height / 3), type: 'OUTPOST', name: '북서 전초기지' });
   pois.push({ x: Math.floor(width * 2 / 3), y: Math.floor(height / 3), type: 'OUTPOST', name: '북동 전초기지' });
   
-  // 자원 포인트들
+  // 자원 포인트들 (시드 기반)
   for (let i = 0; i < 5; i++) {
-    const x = Math.floor(Math.random() * (width - 10)) + 5;
-    const y = Math.floor(Math.random() * (height - 10)) + 5;
+    const x = Math.floor(seededRandom(i * 2) * (width - 10)) + 5;
+    const y = Math.floor(seededRandom(i * 2 + 1) * (height - 10)) + 5;
     if (map[y]?.[x] === 'GRASS' || map[y]?.[x] === 'FOREST') {
       pois.push({ x, y, type: 'RESOURCE', name: '자원' });
     }
@@ -85,11 +99,26 @@ const generatePOIs = (map) => {
   return pois;
 };
 
+// 플레이어 주변 타일을 탐험 상태로 만드는 함수
+const getVisibleTiles = (playerX, playerY, radius = 2) => {
+  const tiles = new Set();
+  for (let dy = -radius; dy <= radius; dy++) {
+    for (let dx = -radius; dx <= radius; dx++) {
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      if (distance <= radius) {
+        tiles.add(`${playerX + dx},${playerY + dy}`);
+      }
+    }
+  }
+  return tiles;
+};
+
 const WorldMap = ({ 
   playerPosition = { x: 15, y: 12 },
   chickens = [],
   onTileClick,
-  exploredTiles = new Set(),
+  exploredTiles,
+  onExplore,
 }) => {
   const mapWidth = 35;
   const mapHeight = 25;
@@ -103,6 +132,14 @@ const WorldMap = ({
     return { baseMap: base, pois: points };
   }, []);
   
+  // 플레이어가 이동할 때마다 주변 탐험
+  useEffect(() => {
+    if (onExplore) {
+      const newVisibleTiles = getVisibleTiles(playerPosition.x, playerPosition.y, 2);
+      onExplore(newVisibleTiles);
+    }
+  }, [playerPosition.x, playerPosition.y, onExplore]);
+  
   // 마을까지의 거리 계산
   const village = pois.find(p => p.type === 'VILLAGE');
   const distanceToVillage = village 
@@ -115,8 +152,31 @@ const WorldMap = ({
     ? Math.min(...outposts.map(o => Math.abs(playerPosition.x - o.x) + Math.abs(playerPosition.y - o.y)))
     : 0;
   
+  // 타일이 탐험되었는지 체크
+  const isExplored = (x, y) => {
+    if (!exploredTiles) return true; // exploredTiles가 없으면 전체 표시
+    return exploredTiles.has(`${x},${y}`);
+  };
+  
   const renderTile = (x, y) => {
+    const explored = isExplored(x, y);
     const baseTile = baseMap[y]?.[x] || 'WATER';
+    
+    // 탐험하지 않은 지역은 어둡게 표시
+    if (!explored) {
+      return (
+        <span
+          key={`${x}-${y}`}
+          style={{
+            color: '#2a2a3e',
+            backgroundColor: 'transparent',
+            cursor: 'default',
+          }}
+        >
+          ░
+        </span>
+      );
+    }
     
     // POI 체크
     const poi = pois.find(p => p.x === x && p.y === y);
@@ -169,6 +229,10 @@ const WorldMap = ({
       </span>
     );
   };
+
+  // 현재 위치의 타일 정보
+  const currentTile = baseMap[playerPosition.y]?.[playerPosition.x] || 'UNKNOWN';
+  const currentPoi = pois.find(p => p.x === playerPosition.x && p.y === playerPosition.y);
 
   return (
     <div 
@@ -250,23 +314,32 @@ const WorldMap = ({
         ))}
       </div>
       
-      {/* 호버 정보 */}
-      {hoveredTile && (
-        <div 
-          className="px-2 py-1"
-          style={{ 
-            backgroundColor: '#2d2d44',
-            borderTop: '2px solid #5d4037',
-            fontSize: '9px',
-            color: '#e0e0e0',
-          }}
-        >
-          [{hoveredTile.x}, {hoveredTile.y}] {hoveredTile.poi?.name || hoveredTile.baseTile}
-        </div>
-      )}
+      {/* 현재 위치 / 호버 정보 - 항상 표시 */}
+      <div 
+        className="px-2 py-1"
+        style={{ 
+          backgroundColor: '#2d2d44',
+          borderTop: '2px solid #5d4037',
+          fontSize: '9px',
+          color: '#e0e0e0',
+        }}
+      >
+        {hoveredTile ? (
+          // 호버 중인 타일 정보
+          <>
+            <span style={{ color: '#90a4ae' }}>🔍 </span>
+            [{hoveredTile.x}, {hoveredTile.y}] {hoveredTile.poi?.name || hoveredTile.baseTile}
+          </>
+        ) : (
+          // 현재 플레이어 위치 정보
+          <>
+            <span style={{ color: '#f44336' }}>📍 </span>
+            [{playerPosition.x}, {playerPosition.y}] {currentPoi?.name || currentTile}
+          </>
+        )}
+      </div>
     </div>
   );
 };
 
 export default WorldMap;
-
