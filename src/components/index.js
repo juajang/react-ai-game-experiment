@@ -1,22 +1,43 @@
-export { default as Chicken } from './Chicken';
-export { default as ChickenSprite } from './ChickenSprite';
-export { default as DeadChicken } from './DeadChicken';
-export { default as DeadChickenSprite } from './DeadChickenSprite';
-export { default as Chick } from './Chick';
-export { default as ChickSprite } from './ChickSprite';
-export { default as Juvenile } from './Juvenile';
-export { default as JuvenileSprite } from './JuvenileSprite';
-export { default as Plumbob } from './Plumbob';
-export { default as Coin } from './Coin';
-export { default as Coop, CoopPreview } from './Coop';
-export { default as Egg } from './Egg';
-export { default as Feed } from './Feed';
-export { default as Flower, FlowerPreview } from './Flower';
-export { default as FlowerBush, FlowerBushPreview } from './FlowerBush';
-export { default as Pond, PondPreview } from './Pond';
-export { default as Windmill, WindmillPreview } from './Windmill';
-export { default as Poop, PoopPreview } from './Poop';
-export { default as Field } from './Field';
-export { default as GameInfo } from './GameInfo';
-export { default as StatusBar } from './StatusBar';
-export { default as ItemPanel } from './ItemPanel';
+// 캐릭터 컴포넌트
+export { 
+  Chicken, 
+  ChickenSprite, 
+  Chick, 
+  ChickSprite, 
+  Juvenile, 
+  JuvenileSprite,
+  DeadChicken,
+  DeadChickenSprite,
+  Plumbob 
+} from './characters';
+
+// 건물 컴포넌트
+export { 
+  Coop, 
+  CoopPreview, 
+  Pond, 
+  PondPreview, 
+  Windmill, 
+  WindmillPreview 
+} from './buildings';
+
+// 아이템 컴포넌트
+export { 
+  Egg, 
+  Feed, 
+  Flower, 
+  FlowerPreview, 
+  FlowerBush, 
+  FlowerBushPreview,
+  Poop,
+  PoopPreview 
+} from './items';
+
+// UI 컴포넌트
+export { 
+  GameInfo, 
+  ItemPanel, 
+  StatusBar, 
+  Coin, 
+  Field 
+} from './ui';

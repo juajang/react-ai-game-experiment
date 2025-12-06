@@ -1,4 +1,4 @@
-import { GAME_CONFIG } from '../constants/gameConfig';
+import { GAME_CONFIG } from '../../constants/gameConfig';
 
 // 등급별 사이즈
 const GRADE_STYLES = {
@@ -206,3 +206,4 @@ const Pond = ({ x, y, isSelected, onMouseDown, gradeLevel = 1 }) => {
 };
 
 export default Pond;
+

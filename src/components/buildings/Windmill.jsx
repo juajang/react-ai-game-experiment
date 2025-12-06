@@ -1,4 +1,4 @@
-import { GAME_CONFIG } from '../constants/gameConfig';
+import { GAME_CONFIG } from '../../constants/gameConfig';
 
 // 풍차 날개 (회전 애니메이션용)
 const WindmillBlades = ({ size = 40 }) => (
@@ -215,3 +215,4 @@ const Windmill = ({ x, y, isSelected, onMouseDown }) => {
 };
 
 export default Windmill;
+

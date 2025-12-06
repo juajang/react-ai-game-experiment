@@ -1,4 +1,4 @@
-import { CHICKEN_COLORS, SPRITE_SIZE } from '../constants/sprites';
+import { CHICKEN_COLORS, SPRITE_SIZE } from '../../constants/sprites';
 
 const ChickenSprite = ({ frame, direction, isHeld }) => {
   const colors = CHICKEN_COLORS;
@@ -97,3 +97,4 @@ const ChickenSprite = ({ frame, direction, isHeld }) => {
 };
 
 export default ChickenSprite;
+

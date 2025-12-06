@@ -1,4 +1,4 @@
-import { EGG_STATE } from '../constants/gameConfig';
+import { EGG_STATE } from '../../constants/gameConfig';
 
 const Egg = ({ x, y, state, warmth }) => {
   // 상태에 따른 색상 변화

@@ -77,3 +77,4 @@ const ChickSprite = ({ frame, direction, isHeld }) => {
 };
 
 export default ChickSprite;
+

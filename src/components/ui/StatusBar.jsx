@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { STATE_TEXT, CHICK_STATE_TEXT, JUVENILE_STATE_TEXT, GROWTH_STAGE } from '../constants/gameConfig';
+import { STATE_TEXT, CHICK_STATE_TEXT, JUVENILE_STATE_TEXT, GROWTH_STAGE } from '../../constants/gameConfig';
 import Coin from './Coin';
 
 // 픽셀 스타일 프로그레스 바
@@ -205,3 +205,4 @@ const StatusBar = ({ selectedChicken, chickenCount, juvenileCount, chickCount, e
 };
 
 export default StatusBar;
+

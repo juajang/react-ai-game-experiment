@@ -1,4 +1,4 @@
-import { GAME_CONFIG } from '../constants/gameConfig';
+import { GAME_CONFIG } from '../../constants/gameConfig';
 
 // 도트 스타일 잔디 SVG 컴포넌트
 const GrassTile = ({ x, y, variant = 0 }) => {
@@ -116,3 +116,4 @@ const Field = ({ children, onClick, placingCoop, cursor }) => {
 };
 
 export default Field;
+

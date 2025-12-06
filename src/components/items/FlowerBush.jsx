@@ -1,4 +1,4 @@
-import { GAME_CONFIG } from '../constants/gameConfig';
+import { GAME_CONFIG } from '../../constants/gameConfig';
 
 // 꽃 덤불 SVG 컴포넌트
 const FlowerBushSprite = () => (

@@ -1,4 +1,4 @@
-import { CHICKEN_COLORS, SPRITE_SIZE } from '../constants/sprites';
+import { CHICKEN_COLORS, SPRITE_SIZE } from '../../constants/sprites';
 
 // 사망한 닭 스프라이트 (천사 링 + 누워있는 상태)
 const DeadChickenSprite = () => {

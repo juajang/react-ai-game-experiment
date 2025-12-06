@@ -1,9 +1,9 @@
-import { GAME_CONFIG, FARM_GRADE } from '../constants/gameConfig';
-import { CoopPreview } from './Coop';
-import { FlowerPreview } from './Flower';
-import { FlowerBushPreview } from './FlowerBush';
-import { PondPreview } from './Pond';
-import { WindmillPreview } from './Windmill';
+import { GAME_CONFIG, FARM_GRADE } from '../../constants/gameConfig';
+import { CoopPreview } from '../buildings/Coop';
+import { FlowerPreview } from '../items/Flower';
+import { FlowerBushPreview } from '../items/FlowerBush';
+import { PondPreview } from '../buildings/Pond';
+import { WindmillPreview } from '../buildings/Windmill';
 import Coin from './Coin';
 
 // 사료 미리보기
@@ -202,3 +202,4 @@ const ItemPanel = ({
 };
 
 export default ItemPanel;
+

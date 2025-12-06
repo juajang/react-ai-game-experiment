@@ -1,12 +1,12 @@
-import ChickSprite from './ChickSprite';
+import JuvenileSprite from './JuvenileSprite';
 import Plumbob from './Plumbob';
 
-const Chick = ({ x, y, frame, direction, state, growthProgress, isSelected, onClick, name, isHeld, onMouseDown }) => (
+const Juvenile = ({ x, y, frame, direction, state, growthProgress, isSelected, onClick, name, isHeld, onMouseDown }) => (
   <div 
     className="absolute"
     style={{ 
-      left: x - 21, 
-      top: y - 32,
+      left: x - 26, 
+      top: y - 40,
       transition: isHeld ? 'none' : 'all 100ms',
       zIndex: isHeld ? 1000 : 8,
       pointerEvents: 'auto',
@@ -24,8 +24,8 @@ const Chick = ({ x, y, frame, direction, state, growthProgress, isSelected, onCl
   >
     {/* 심즈 스타일 플럼밥 - 중앙 정렬 */}
     {isSelected && !isHeld && (
-      <div className="absolute" style={{ left: '50%', top: -14, transform: 'translateX(-50%)' }}>
-        <Plumbob size={10} />
+      <div className="absolute" style={{ left: '50%', top: -16, transform: 'translateX(-50%)' }}>
+        <Plumbob size={12} />
       </div>
     )}
     
@@ -33,13 +33,13 @@ const Chick = ({ x, y, frame, direction, state, growthProgress, isSelected, onCl
     {isHeld && (
       <div 
         className="absolute left-1/2 -translate-x-1/2 animate-bounce"
-        style={{ top: -18, fontSize: '10px' }}
+        style={{ top: -20, fontSize: '11px' }}
       >
         ✋
       </div>
     )}
     
-    <ChickSprite frame={frame} direction={direction} isHeld={isHeld} />
+    <JuvenileSprite frame={frame} direction={direction} isHeld={isHeld} />
     
     {state === 'eating' && !isHeld && (
       <div className="absolute -top-1 left-1/2 -translate-x-1/2 text-xs">😋</div>
@@ -48,12 +48,12 @@ const Chick = ({ x, y, frame, direction, state, growthProgress, isSelected, onCl
     {/* 성장 진행도 바 */}
     {growthProgress !== undefined && !isSelected && !isHeld && (
       <div 
-        className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-6 h-1"
+        className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-8 h-1"
         style={{ backgroundColor: '#3d3d3d', border: '1px solid #5d4037' }}
       >
         <div 
           className="h-full"
-          style={{ width: `${growthProgress}%`, backgroundColor: '#4caf50' }}
+          style={{ width: `${growthProgress}%`, backgroundColor: '#ff9800' }}
         />
       </div>
     )}
@@ -76,4 +76,5 @@ const Chick = ({ x, y, frame, direction, state, growthProgress, isSelected, onCl
   </div>
 );
 
-export default Chick;
+export default Juvenile;
+

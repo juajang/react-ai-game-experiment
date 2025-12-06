@@ -1,4 +1,4 @@
-import { GAME_CONFIG } from '../constants/gameConfig';
+import { GAME_CONFIG } from '../../constants/gameConfig';
 
 // 등급별 사이즈 및 디테일
 const GRADE_STYLES = {
@@ -278,3 +278,4 @@ const Coop = ({ x, y, occupants = 0, capacity, isSelected, onMouseDown, gradeLev
 };
 
 export default Coop;
+

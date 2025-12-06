@@ -1,12 +1,12 @@
-import JuvenileSprite from './JuvenileSprite';
+import ChickenSprite from './ChickenSprite';
 import Plumbob from './Plumbob';
 
-const Juvenile = ({ x, y, frame, direction, state, growthProgress, isSelected, onClick, name, isHeld, onMouseDown }) => (
+const Chicken = ({ x, y, frame, direction, state, isSelected, onClick, name, isHeld, onMouseDown }) => (
   <div 
     className="absolute"
     style={{ 
-      left: x - 26, 
-      top: y - 40,
+      left: x - 32, 
+      top: y - 48,
       transition: isHeld ? 'none' : 'all 100ms',
       zIndex: isHeld ? 1000 : 8,
       pointerEvents: 'auto',
@@ -24,8 +24,8 @@ const Juvenile = ({ x, y, frame, direction, state, growthProgress, isSelected, o
   >
     {/* 심즈 스타일 플럼밥 - 중앙 정렬 */}
     {isSelected && !isHeld && (
-      <div className="absolute" style={{ left: '50%', top: -16, transform: 'translateX(-50%)' }}>
-        <Plumbob size={12} />
+      <div className="absolute" style={{ left: '50%', top: -20, transform: 'translateX(-50%)' }}>
+        <Plumbob size={14} />
       </div>
     )}
     
@@ -33,29 +33,19 @@ const Juvenile = ({ x, y, frame, direction, state, growthProgress, isSelected, o
     {isHeld && (
       <div 
         className="absolute left-1/2 -translate-x-1/2 animate-bounce"
-        style={{ top: -20, fontSize: '11px' }}
+        style={{ top: -24, fontSize: '12px' }}
       >
         ✋
       </div>
     )}
     
-    <JuvenileSprite frame={frame} direction={direction} isHeld={isHeld} />
+    <ChickenSprite frame={frame} direction={direction} isHeld={isHeld} />
     
     {state === 'eating' && !isHeld && (
-      <div className="absolute -top-1 left-1/2 -translate-x-1/2 text-xs">😋</div>
+      <div className="absolute -top-2 left-1/2 -translate-x-1/2 text-sm">😋</div>
     )}
-    
-    {/* 성장 진행도 바 */}
-    {growthProgress !== undefined && !isSelected && !isHeld && (
-      <div 
-        className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-8 h-1"
-        style={{ backgroundColor: '#3d3d3d', border: '1px solid #5d4037' }}
-      >
-        <div 
-          className="h-full"
-          style={{ width: `${growthProgress}%`, backgroundColor: '#ff9800' }}
-        />
-      </div>
+    {state === 'laying' && !isHeld && (
+      <div className="absolute -top-2 left-1/2 -translate-x-1/2 text-sm">🥚</div>
     )}
     
     {/* 선택 시 이름 표시 */}
@@ -65,7 +55,7 @@ const Juvenile = ({ x, y, frame, direction, state, growthProgress, isSelected, o
         style={{ 
           bottom: 2,
           color: isHeld ? '#ef4444' : '#5d4037',
-          fontSize: '6px',
+          fontSize: '7px',
           fontWeight: 'bold',
           textShadow: '0 0 2px #fff, 0 0 2px #fff',
         }}
@@ -76,4 +66,5 @@ const Juvenile = ({ x, y, frame, direction, state, growthProgress, isSelected, o
   </div>
 );
 
-export default Juvenile;
+export default Chicken;
+
