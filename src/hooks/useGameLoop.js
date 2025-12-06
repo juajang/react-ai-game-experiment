@@ -20,6 +20,11 @@ const getRandomChickenName = () => {
 };
 
 /**
+ * 레벨업에 필요한 경험치 계산
+ */
+const getExpForNextLevel = (level) => Math.floor(100 * Math.pow(1.5, level - 1));
+
+/**
  * 닭 생성
  */
 const createChicken = (x, y, stage = GROWTH_STAGE.ADULT) => ({
@@ -47,6 +52,10 @@ const createChicken = (x, y, stage = GROWTH_STAGE.ADULT) => ({
   eggCooldown: 0,
   sleepTime: 0,
   inCoopId: null,
+  // 레벨 시스템
+  level: 1,
+  experience: 0,
+  expForNextLevel: getExpForNextLevel(1),
 });
 
 /**
@@ -282,7 +291,7 @@ export const useGameLoop = (fieldSize) => {
 
       // 1. 닭들 업데이트
       const updatedChickens = currentChickens.map(chicken => {
-        let { x, y, hunger, happiness, health, tiredness, state, direction, frame, targetX, targetY, stage, growthProgress, eggCooldown, sleepTime, inCoopId } = chicken;
+        let { x, y, hunger, happiness, health, tiredness, state, direction, frame, targetX, targetY, stage, growthProgress, eggCooldown, sleepTime, inCoopId, level = 1, experience = 0, expForNextLevel = 100 } = chicken;
         
         // 잠자는 중이면 회복 처리
         if (state === 'sleeping' && inCoopId) {
@@ -303,7 +312,7 @@ export const useGameLoop = (fieldSize) => {
             }
           }
           
-          return { ...chicken, x, y, hunger, happiness, health, tiredness, state, direction, frame, targetX, targetY, stage, growthProgress, eggCooldown, sleepTime, inCoopId };
+          return { ...chicken, x, y, hunger, happiness, health, tiredness, state, direction, frame, targetX, targetY, stage, growthProgress, eggCooldown, sleepTime, inCoopId, level, experience, expForNextLevel };
         }
         
         // 단계별 속도 및 배고픔 감소율
@@ -414,6 +423,23 @@ export const useGameLoop = (fieldSize) => {
           happiness = Math.max(config.HAPPINESS.MIN, happiness - config.HAPPINESS.DECREASE_RATE * 3);
         }
         
+        // 레벨 & 경험치 시스템 - 행복하면 경험치 획득
+        if (happiness >= 50 && state !== 'sleeping') {
+          // 행복도에 비례한 경험치 획득 (행복도 50~100 → 경험치 1~3)
+          const expGain = Math.floor((happiness - 40) / 20);
+          experience += expGain;
+          
+          // 레벨업 체크
+          if (experience >= expForNextLevel) {
+            level += 1;
+            experience = experience - expForNextLevel;
+            expForNextLevel = getExpForNextLevel(level);
+            // 레벨업 보너스: 체력 회복 + 코인
+            health = Math.min(config.HEALTH.MAX, health + 20);
+            totalEarnedCoins += level * 5;
+          }
+        }
+        
         // 쿨다운 감소
         if (eggCooldown > 0) eggCooldown--;
 
@@ -462,7 +488,7 @@ export const useGameLoop = (fieldSize) => {
             y = nearestCoop.coop.y;
             targetX = null;
             targetY = null;
-            return { ...chicken, x, y, hunger, happiness, health, tiredness, state, direction, frame, targetX, targetY, stage, growthProgress, eggCooldown, sleepTime: 0, inCoopId };
+            return { ...chicken, x, y, hunger, happiness, health, tiredness, state, direction, frame, targetX, targetY, stage, growthProgress, eggCooldown, sleepTime: 0, inCoopId, level, experience, expForNextLevel };
           }
         }
 
@@ -491,7 +517,7 @@ export const useGameLoop = (fieldSize) => {
                 state = 'eating';
                 frame = 2;
                 
-                return { ...chicken, x, y, hunger, happiness, health, tiredness, state, direction, frame, targetX: null, targetY: null, stage, growthProgress, eggCooldown, sleepTime, inCoopId };
+                return { ...chicken, x, y, hunger, happiness, health, tiredness, state, direction, frame, targetX: null, targetY: null, stage, growthProgress, eggCooldown, sleepTime, inCoopId, level, experience, expForNextLevel };
               }
             }
           } else if (hunger < config.HUNGER.HUNGRY_THRESHOLD) {
@@ -587,7 +613,7 @@ export const useGameLoop = (fieldSize) => {
           newPoopPositions.push({ x: x + (Math.random() - 0.5) * 10, y: y + 15 });
         }
 
-        return { ...chicken, x, y, hunger, happiness, health, tiredness, state, direction, frame, targetX, targetY, stage, growthProgress, eggCooldown, sleepTime, inCoopId };
+        return { ...chicken, x, y, hunger, happiness, health, tiredness, state, direction, frame, targetX, targetY, stage, growthProgress, eggCooldown, sleepTime, inCoopId, level, experience, expForNextLevel };
       });
 
       // 2. 알 업데이트

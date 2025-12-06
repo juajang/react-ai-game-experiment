@@ -139,6 +139,9 @@ const CharacterDetail = ({
     frame = 0,
     direction = 1,
     growthProgress = 0,
+    level = 1,
+    experience = 0,
+    expForNextLevel = 100,
   } = selectedChicken || {};
   
   const getStateText = () => {
@@ -201,7 +204,7 @@ const CharacterDetail = ({
         boxShadow: '3px 3px 0px #5d4037',
       }}
     >
-      {/* 헤더 - 코인 표시 */}
+      {/* 헤더 - 레벨 & 코인 표시 */}
       <div 
         className="px-2 py-1 flex justify-between items-center"
         style={{ 
@@ -209,7 +212,20 @@ const CharacterDetail = ({
           borderBottom: '2px solid #8b7355',
         }}
       >
-        <span style={{ fontSize: '10px', color: '#5d4037' }}>{getStageName()}</span>
+        <div className="flex items-center gap-2">
+          <span style={{ fontSize: '10px', color: '#5d4037' }}>{getStageName()}</span>
+          <span 
+            className="px-1.5 py-0.5 rounded"
+            style={{ 
+              fontSize: '9px', 
+              color: '#fff',
+              backgroundColor: level >= 10 ? '#f59e0b' : level >= 5 ? '#8b5cf6' : '#3b82f6',
+              fontWeight: 'bold',
+            }}
+          >
+            Lv.{level}
+          </span>
+        </div>
         <div className="flex items-center gap-1">
           <span style={{ fontSize: '12px' }}>🪙</span>
           <span style={{ fontSize: '10px', color: '#b8860b', fontWeight: 'bold' }}>
@@ -326,6 +342,32 @@ const CharacterDetail = ({
           color={getTirednessColor(tiredness)} 
           icon="😪"
         />
+        
+        {/* 경험치 바 */}
+        <div className="mt-2 pt-2" style={{ borderTop: '1px dashed #8b7355' }}>
+          <div className="flex items-center gap-1">
+            <span style={{ fontSize: '10px' }}>⭐</span>
+            <div 
+              className="flex-1 h-2 rounded overflow-hidden"
+              style={{ backgroundColor: '#3d3d3d', border: '1px solid #5d4037' }}
+            >
+              <div 
+                className="h-full transition-all duration-300"
+                style={{ 
+                  width: `${(experience / expForNextLevel) * 100}%`,
+                  backgroundColor: '#fbbf24',
+                  boxShadow: 'inset 0 0 4px rgba(255,255,255,0.5)',
+                }}
+              />
+            </div>
+            <span style={{ fontSize: '8px', color: '#a0a0a0' }}>
+              {experience}/{expForNextLevel}
+            </span>
+          </div>
+          <div style={{ fontSize: '8px', color: '#8b7355', textAlign: 'center', marginTop: '2px' }}>
+            다음 레벨까지 경험치
+          </div>
+        </div>
         
         {/* 성장 진행도 (병아리/청소년만) */}
         {(stage === GROWTH_STAGE.CHICK || stage === GROWTH_STAGE.JUVENILE) && (
