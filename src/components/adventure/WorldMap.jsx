@@ -15,6 +15,10 @@ const TILE_TYPES = {
   CHICKEN: { char: 'c', color: '#fff176', bg: null },
   RESOURCE: { char: '*', color: '#e91e63', bg: null, name: '자원', passable: true },
   UNKNOWN: { char: '?', color: '#3d3d5c', bg: '#2a2a3e' },
+  // 새로운 타일 타입들
+  HOUSE: { char: '⌂', color: '#9e9e9e', bg: '#757575', name: '버려진 민가', passable: true },
+  LAUNCH_SITE: { char: '▲', color: '#7e57c2', bg: '#9575cd', name: '발사장', passable: true },
+  TOWER: { char: '┃', color: '#42a5f5', bg: '#64b5f6', name: '통신탑', passable: true },
 };
 
 // 심 모양의 맵 생성
@@ -73,11 +77,34 @@ const generatePOIs = (map, seed = 42) => {
     return n - Math.floor(n);
   };
   
+  // 기본 POI
   pois.push({ x: Math.floor(width / 2), y: Math.floor(height / 2) + 2, type: 'VILLAGE', name: '마을' });
   pois.push({ x: Math.floor(width / 2) - 2, y: Math.floor(height / 2), type: 'FARM', name: '농장' });
   pois.push({ x: Math.floor(width / 3), y: Math.floor(height / 3), type: 'OUTPOST', name: '북서 전초기지' });
   pois.push({ x: Math.floor(width * 2 / 3), y: Math.floor(height / 3), type: 'OUTPOST', name: '북동 전초기지' });
   
+  // 🚀 발사장 - 맵 가장자리 (마을에서 멀지 않은 곳)
+  pois.push({ x: Math.floor(width * 3 / 4), y: Math.floor(height / 2), type: 'LAUNCH_SITE', name: '발사장' });
+  
+  // 📡 통신탑 - 발사장 근처
+  pois.push({ x: Math.floor(width * 3 / 4) - 3, y: Math.floor(height / 2) - 2, type: 'TOWER', name: '벼락 맞은 통신탑' });
+  
+  // 🏚️ 버려진 민가들 - 숲속에 드문드문 배치
+  const housePositions = [
+    { x: Math.floor(width / 4), y: Math.floor(height / 2) - 1 },
+    { x: Math.floor(width / 3) + 2, y: Math.floor(height * 2 / 3) },
+    { x: Math.floor(width * 2 / 3) - 2, y: Math.floor(height * 2 / 3) + 1 },
+    { x: Math.floor(width / 4) + 1, y: Math.floor(height / 3) + 2 },
+  ];
+  
+  housePositions.forEach((pos, i) => {
+    if (map[pos.y]?.[pos.x] === 'GRASS' || map[pos.y]?.[pos.x] === 'FOREST') {
+      const houseNames = ['낡은 오두막', '버려진 민가', '폐허가 된 집', '잊혀진 주거지'];
+      pois.push({ x: pos.x, y: pos.y, type: 'HOUSE', name: houseNames[i % houseNames.length] });
+    }
+  });
+  
+  // 자원 포인트
   for (let i = 0; i < 5; i++) {
     const x = Math.floor(seededRandom(i * 2) * (width - 10)) + 5;
     const y = Math.floor(seededRandom(i * 2 + 1) * (height - 10)) + 5;

@@ -6,11 +6,17 @@ const TILE_DESCRIPTIONS = {
     "평화로운 초원이다. 바람이 풀을 쓸어간다.",
     "드넓은 초원에서 야생화가 피어있다.",
     "초원 위로 나비가 날아다닌다.",
+    "바람이 지나갈 때마다 먼지가 춤을 춰요. 닭들은 조심스럽게 발을 내딛었어요.",
+    "여기엔 아무도 없지만, 딱… 우리 발걸음만 울려 퍼져요.",
+    "조용해요. 너무 조용해서 닭 심장소리가 들릴 정도예요.",
   ],
   FOREST: [
     "울창한 숲이다. 나무 사이로 빛이 스며든다.",
     "숲에서 새소리가 들린다. 열매가 있을지도?",
     "고요한 숲... 무언가 숨어있는 느낌이다.",
+    "바람이 지나갈 때마다 먼지가 춤을 춰요. 닭들은 조심스럽게 발을 내딛었어요.",
+    "여기엔 아무도 없지만, 딱… 우리 발걸음만 울려 퍼져요.",
+    "조용해요. 너무 조용해서 닭 심장소리가 들릴 정도예요.",
   ],
   BEACH: [
     "파도 소리가 들리는 해변이다.",
@@ -41,6 +47,30 @@ const TILE_DESCRIPTIONS = {
   WATER: [
     "깊은 바다다. 배 없이는 건널 수 없다.",
   ],
+  // 🏚️ 버려진 민가 - 인간의 흔적
+  HOUSE: [
+    "여긴… 오래전 인간의 집 같아요. 하지만 냄새는 다 사라졌어요.",
+    "이 벽엔 긁힌 자국이 남아 있어요. 아마… 우리보다 먼저 탐험한 닭인가 봐요.",
+    "낡은 노트에 누군가 남긴 문장이 있어요. '내일은 꼭 돌아온다.' …돌아오지 못한 것 같아요.",
+    "'치킨 먹고 싶다…'라는 글씨를 찾았어요. 읽지 말 걸 그랬어요.",
+    "달력은 수십 년째 같은 날을 가리키고 있어요. 시간도 멈춘 것 같아요.",
+    "먼지 쌓인 가족사진이 있어요. 웃고 있는 얼굴들… 지금은 어디에 있을까요?",
+  ],
+  // 🚀 발사장 - 우주 떡밥
+  LAUNCH_SITE: [
+    "하늘을 향해 길게 뻗은 구조물을 발견했어요. 인간들은 이미 하늘을 떠났던 걸까요?",
+    "지도를 보면, 도시 끝에 '발사장'이라고 적혀 있어요. 닭도 언젠가는…",
+    "거대한 금속 구조물이 하늘을 찌르고 있어요. 녹슬었지만… 여전히 위엄이 있어요.",
+    "발사대 옆에 카운트다운 표지판이 있어요. '3... 2... 1...' 그 다음은 뭐였을까요?",
+    "여기서 무언가가 하늘로 날아갔어요. 그 끝에는 뭐가 있을까요?",
+  ],
+  // 📡 통신탑 - 금속 조각 아이템 획득 가능
+  TOWER: [
+    "벼락 맞은 통신탑 아래서 신기한 금속 조각을 찾았어요… 우주선에 쓸 수 있을지도?",
+    "부서진 안테나가 하늘을 가리키고 있어요. 누군가와 연락하려 했던 걸까요?",
+    "탑 꼭대기에서 깜빡이던 불빛은 이제 꺼져 있어요. 마지막 신호는 언제였을까요?",
+    "통신탑 주변에 케이블이 얽혀있어요. 이게 연결되던 곳은… 지금은 어디에?",
+  ],
 };
 
 const TILE_NAMES = {
@@ -54,6 +84,9 @@ const TILE_NAMES = {
   PATH: '길',
   BEACH: '해변',
   RESOURCE: '자원',
+  HOUSE: '버려진 민가',
+  LAUNCH_SITE: '발사장',
+  TOWER: '통신탑',
 };
 
 // 시드 기반 설명 선택
@@ -179,6 +212,24 @@ const LOOT_TABLE = {
   RESOURCE: [
     { item: null, chance: 0.3 },
     { item: 'shovel', chance: 0.7, name: '삽' },
+  ],
+  // 🏚️ 버려진 민가 - 인간의 유품
+  HOUSE: [
+    { item: null, chance: 0.5 },
+    { item: 'diary', chance: 0.3, name: '낡은 일기장' },
+    { item: 'shovel', chance: 0.2, name: '삽' },
+  ],
+  // 🚀 발사장 - 우주 관련 아이템
+  LAUNCH_SITE: [
+    { item: null, chance: 0.4 },
+    { item: 'blueprint', chance: 0.4, name: '우주선 설계도 조각' },
+    { item: 'fuel_cell', chance: 0.2, name: '연료 전지' },
+  ],
+  // 📡 통신탑 - 금속 조각 획득 가능
+  TOWER: [
+    { item: null, chance: 0.3 },
+    { item: 'metal_scrap', chance: 0.5, name: '신기한 금속 조각' },
+    { item: 'antenna', chance: 0.2, name: '부서진 안테나' },
   ],
 };
 
@@ -370,12 +421,28 @@ const ExplorationControl = ({
     const loot = rollLoot(tileType, playerPosition.x, playerPosition.y);
     let lootMessage = '';
     if (loot) {
+      // 아이템별 처리
+      const itemEmojis = {
+        shovel: '🪏',
+        diary: '📔',
+        blueprint: '📜',
+        fuel_cell: '🔋',
+        metal_scrap: '⚙️',
+        antenna: '📡',
+      };
+      
+      const emoji = itemEmojis[loot.item] || '🎁';
+      
       if (loot.item === 'shovel') {
         // 삽은 도구이므로 이미 있으면 획득하지 않음
         if (!inventory.shovel) {
           onAddItem?.('shovel', 1);
-          lootMessage = ' 🎁 삽을 발견했다!';
+          lootMessage = ` ${emoji} ${loot.name}을(를) 발견했다!`;
         }
+      } else {
+        // 다른 아이템들은 중복 획득 가능
+        onAddItem?.(loot.item, 1);
+        lootMessage = ` ${emoji} ${loot.name}을(를) 발견했다!`;
       }
     }
     
@@ -732,7 +799,7 @@ const ExplorationControl = ({
         
         {/* 인벤토리 슬롯 - 2줄 (4개씩) */}
         <div className="grid grid-cols-4 gap-1">
-          {/* 삽 슬롯 */}
+          {/* 삽 슬롯 (도구) */}
           <div
             onClick={() => inventory.shovel && onSelectTool?.(selectedTool === 'shovel' ? null : 'shovel')}
             className="flex items-center justify-center gap-1 px-1 py-1.5 rounded cursor-pointer transition-all"
@@ -749,8 +816,88 @@ const ExplorationControl = ({
             </span>
           </div>
           
-          {/* 빈 슬롯들 (7개 = 총 8칸, 2줄) */}
-          {[...Array(7)].map((_, idx) => (
+          {/* 금속 조각 슬롯 */}
+          <div
+            className="flex items-center justify-center gap-1 px-1 py-1.5 rounded"
+            style={{
+              backgroundColor: (inventory.metal_scrap || 0) > 0 ? '#37474f' : '#2a2a3e',
+              border: '1px dashed #5d4037',
+              opacity: (inventory.metal_scrap || 0) > 0 ? 1 : 0.4,
+            }}
+            title={inventory.metal_scrap ? `금속 조각 x${inventory.metal_scrap}` : '금속 조각 없음'}
+          >
+            <span style={{ fontSize: '12px' }}>⚙️</span>
+            <span style={{ fontSize: '7px', color: (inventory.metal_scrap || 0) > 0 ? '#4fc3f7' : '#455a64' }}>
+              {(inventory.metal_scrap || 0) > 0 ? inventory.metal_scrap : '-'}
+            </span>
+          </div>
+          
+          {/* 우주선 설계도 조각 슬롯 */}
+          <div
+            className="flex items-center justify-center gap-1 px-1 py-1.5 rounded"
+            style={{
+              backgroundColor: (inventory.blueprint || 0) > 0 ? '#37474f' : '#2a2a3e',
+              border: '1px dashed #5d4037',
+              opacity: (inventory.blueprint || 0) > 0 ? 1 : 0.4,
+            }}
+            title={inventory.blueprint ? `설계도 조각 x${inventory.blueprint}` : '설계도 조각 없음'}
+          >
+            <span style={{ fontSize: '12px' }}>📜</span>
+            <span style={{ fontSize: '7px', color: (inventory.blueprint || 0) > 0 ? '#ce93d8' : '#455a64' }}>
+              {(inventory.blueprint || 0) > 0 ? inventory.blueprint : '-'}
+            </span>
+          </div>
+          
+          {/* 연료 전지 슬롯 */}
+          <div
+            className="flex items-center justify-center gap-1 px-1 py-1.5 rounded"
+            style={{
+              backgroundColor: (inventory.fuel_cell || 0) > 0 ? '#37474f' : '#2a2a3e',
+              border: '1px dashed #5d4037',
+              opacity: (inventory.fuel_cell || 0) > 0 ? 1 : 0.4,
+            }}
+            title={inventory.fuel_cell ? `연료 전지 x${inventory.fuel_cell}` : '연료 전지 없음'}
+          >
+            <span style={{ fontSize: '12px' }}>🔋</span>
+            <span style={{ fontSize: '7px', color: (inventory.fuel_cell || 0) > 0 ? '#a5d6a7' : '#455a64' }}>
+              {(inventory.fuel_cell || 0) > 0 ? inventory.fuel_cell : '-'}
+            </span>
+          </div>
+          
+          {/* 낡은 일기장 슬롯 */}
+          <div
+            className="flex items-center justify-center gap-1 px-1 py-1.5 rounded"
+            style={{
+              backgroundColor: (inventory.diary || 0) > 0 ? '#37474f' : '#2a2a3e',
+              border: '1px dashed #5d4037',
+              opacity: (inventory.diary || 0) > 0 ? 1 : 0.4,
+            }}
+            title={inventory.diary ? `일기장 x${inventory.diary}` : '일기장 없음'}
+          >
+            <span style={{ fontSize: '12px' }}>📔</span>
+            <span style={{ fontSize: '7px', color: (inventory.diary || 0) > 0 ? '#ffcc80' : '#455a64' }}>
+              {(inventory.diary || 0) > 0 ? inventory.diary : '-'}
+            </span>
+          </div>
+          
+          {/* 부서진 안테나 슬롯 */}
+          <div
+            className="flex items-center justify-center gap-1 px-1 py-1.5 rounded"
+            style={{
+              backgroundColor: (inventory.antenna || 0) > 0 ? '#37474f' : '#2a2a3e',
+              border: '1px dashed #5d4037',
+              opacity: (inventory.antenna || 0) > 0 ? 1 : 0.4,
+            }}
+            title={inventory.antenna ? `안테나 x${inventory.antenna}` : '안테나 없음'}
+          >
+            <span style={{ fontSize: '12px' }}>📡</span>
+            <span style={{ fontSize: '7px', color: (inventory.antenna || 0) > 0 ? '#90caf9' : '#455a64' }}>
+              {(inventory.antenna || 0) > 0 ? inventory.antenna : '-'}
+            </span>
+          </div>
+          
+          {/* 빈 슬롯들 (2개) */}
+          {[...Array(2)].map((_, idx) => (
             <div
               key={idx}
               className="flex items-center justify-center px-1 py-1.5 rounded"
