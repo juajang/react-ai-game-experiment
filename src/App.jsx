@@ -858,8 +858,11 @@ export default function ChickenGame() {
     <div 
       className="min-h-screen p-3 relative"
       style={{
-        backgroundColor: '#87ceeb',
-        backgroundImage: 'linear-gradient(to bottom, #87ceeb 0%, #98d8ef 50%, #b8e4f0 100%)',
+        backgroundColor: '#f5f0e8',
+        backgroundImage: `
+          radial-gradient(circle, #c4b8a8 1px, transparent 1px)
+        `,
+        backgroundSize: '20px 20px',
       }}
     >
       <div className="max-w-5xl mx-auto">
