@@ -403,7 +403,7 @@ const StatusBar = ({ selectedChicken, chickenCount, juvenileCount, chickCount, e
                   className="font-bold min-w-[28px] text-right"
                   style={{ color: '#5d4037', fontSize: '9px' }}
                 >
-                  {experience}/{expForNextLevel}
+                  {Math.floor(experience)}/{Math.floor(expForNextLevel)}
                 </span>
               </div>
               <PixelBar value={hunger || 0} color={getColor(hunger)} label="🍽️ 포만감" />

@@ -472,11 +472,13 @@ export default function ChickenGame() {
       if (c.id === adventuringChicken.id) {
         const newExp = (c.experience || 0) + earnedExp;
         const expForNext = c.expForNextLevel || 100;
+        const happiness = c.happiness || 0;
         
-        // 레벨업 체크
-        if (newExp >= expForNext) {
+        // 레벨업 체크 (행복도 80% 이상일 때만)
+        if (newExp >= expForNext && happiness >= 80) {
           leveledUp = true;
           newLevel = (c.level || 1) + 1;
+          // 레벨업 필요 경험치 증가 (기본 100, 1.5배씩 증가)
           const newExpForNextLevel = Math.floor(100 * Math.pow(1.5, newLevel - 1));
           return { 
             ...c, 
@@ -487,6 +489,7 @@ export default function ChickenGame() {
           };
         }
         
+        // 경험치가 충분하지만 행복도가 낮으면 경험치만 누적 (레벨업 안함)
         return { 
           ...c, 
           tiredness: adventuringChicken.tiredness,

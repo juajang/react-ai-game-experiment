@@ -319,8 +319,8 @@ const ExplorationControl = ({
     onPlayerMove?.({ x: newX, y: newY });
     onConsumeWater?.(1);
     
-    // 이동할 때마다 경험치 획득 (5 EXP)
-    const expGain = 5;
+    // 이동할 때마다 경험치 획득 (3 EXP)
+    const expGain = 3;
     onAddExp?.(expGain);
     
     const newRemaining = remainingMoves - 1;
@@ -461,6 +461,36 @@ const ExplorationControl = ({
             </>
           )}
         </div>
+      </div>
+      
+      {/* 모험 중인 닭 정보 (헤더 아래) */}
+      <div 
+        className="px-2 py-1"
+        style={{ 
+          backgroundColor: '#252538',
+          borderBottom: '2px solid #5d4037',
+        }}
+      >
+        {adventuringChicken ? (
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-2">
+              <span style={{ fontSize: '12px' }}>🐔</span>
+              <span style={{ color: '#ffd54f', fontSize: '10px', fontWeight: 'bold' }}>{adventuringChicken.name}</span>
+              <span style={{ color: '#ce93d8', fontSize: '9px' }}>Lv.{adventuringChicken.level}</span>
+            </div>
+            <div className="flex gap-2">
+              <span style={{ fontSize: '9px', color: '#4fc3f7' }}>💧{adventuringChicken.water}</span>
+              <span style={{ fontSize: '9px', color: '#a5d6a7' }}>🌾{adventuringChicken.rice}</span>
+            </div>
+          </div>
+        ) : (
+          <div 
+            className="text-center py-1"
+            style={{ fontSize: '9px', color: '#607d8b' }}
+          >
+            🐔 농장에서 닭을 선택 후 '모험' 클릭
+          </div>
+        )}
       </div>
       
       {/* 주사위 & 이동 컨트롤 */}
@@ -681,7 +711,7 @@ const ExplorationControl = ({
         )}
       </div>
       
-      {/* 모험 닭 정보 & 인벤토리 */}
+      {/* 인벤토리 */}
       <div 
         className="px-2 py-1.5"
         style={{ 
@@ -689,64 +719,6 @@ const ExplorationControl = ({
           borderTop: '2px solid #5d4037',
         }}
       >
-        {/* 모험 중인 닭 정보 */}
-        {adventuringChicken ? (
-          <div className="mb-2">
-            <div 
-              className="mb-1 font-bold flex justify-between items-center"
-              style={{ fontSize: '9px', color: '#90a4ae' }}
-            >
-              <span>🐔 모험 중</span>
-              <span style={{ color: '#ffd54f', fontSize: '8px' }}>{adventuringChicken.name}</span>
-            </div>
-            <div 
-              className="flex gap-2 p-1.5 rounded"
-              style={{ backgroundColor: '#37474f' }}
-            >
-              <div className="flex items-center gap-1">
-                <span style={{ fontSize: '12px' }}>💧</span>
-                <span style={{ fontSize: '9px', color: '#4fc3f7' }}>{adventuringChicken.water}</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <span style={{ fontSize: '12px' }}>🌾</span>
-                <span style={{ fontSize: '9px', color: '#a5d6a7' }}>{adventuringChicken.rice}</span>
-              </div>
-              <button
-                onClick={onRecallChicken}
-                className="ml-auto px-2 py-0.5 rounded text-white"
-                style={{ 
-                  backgroundColor: '#ef5350', 
-                  fontSize: '8px',
-                  border: '1px solid #c62828',
-                }}
-              >
-                귀환
-              </button>
-            </div>
-          </div>
-        ) : (
-          <div className="mb-2">
-            <div 
-              className="mb-1 font-bold"
-              style={{ fontSize: '9px', color: '#90a4ae' }}
-            >
-              🐔 모험 닭 없음
-            </div>
-            <div 
-              className="text-center py-2 rounded"
-              style={{ 
-                backgroundColor: '#2a2a3e', 
-                fontSize: '8px', 
-                color: '#607d8b',
-                border: '1px dashed #455a64',
-              }}
-            >
-              농장에서 닭을 선택 후<br/>'모험 보내기' 클릭
-            </div>
-          </div>
-        )}
-        
-        {/* 인벤토리 */}
         <div 
           className="font-bold flex justify-between items-center mb-1"
           style={{ fontSize: '9px', color: '#90a4ae' }}

@@ -20,7 +20,7 @@ const getRandomChickenName = () => {
 };
 
 /**
- * 레벨업에 필요한 경험치 계산
+ * 레벨업에 필요한 경험치 계산 (기본 100, 1.5배씩 증가)
  */
 const getExpForNextLevel = (level) => Math.floor(100 * Math.pow(1.5, level - 1));
 
@@ -434,12 +434,12 @@ export const useGameLoop = (fieldSize, adventuringChickenId = null) => {
         
         // 레벨 & 경험치 시스템 - 행복하면 경험치 획득
         if (happiness >= 50 && state !== 'sleeping') {
-          // 행복도에 비례한 경험치 획득 (행복도 50~100 → 경험치 1~3)
-          const expGain = Math.floor((happiness - 40) / 20);
+          // 행복도에 비례한 경험치 획득 (행복도 50~100 → 경험치 0.3~0.8)
+          const expGain = Math.max(0.3, (happiness - 40) / 80);
           experience += expGain;
           
-          // 레벨업 체크
-          if (experience >= expForNextLevel) {
+          // 레벨업 체크 (행복도 80% 이상일 때만)
+          if (experience >= expForNextLevel && happiness >= 80) {
             level += 1;
             experience = experience - expForNextLevel;
             expForNextLevel = getExpForNextLevel(level);
