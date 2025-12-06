@@ -168,7 +168,8 @@ export default function ChickenGame() {
   const fieldRef = useRef(null);
   const fieldSize = useFieldSize(fieldRef);
   const { 
-    chickens, 
+    chickens,
+    setChickens,
     eggs, 
     feeds, 
     flowers,
@@ -308,10 +309,11 @@ export default function ChickenGame() {
     const chicken = chickens.find(c => c.id === chickenId);
     if (!chicken || chicken.stage !== 'adult') return;
     
-    // 레벨에 따른 자원 계산 (간단히 행복도 기반)
-    const level = Math.floor(chicken.happiness / 20) + 1; // 1~5 레벨
+    // 닭의 실제 레벨 사용 (기본값 1)
+    const level = chicken.level || 1;
     const water = 10 + level * 5; // 15~35
     const rice = 3 + level * 2;   // 5~13
+    const maxDiceRolls = level; // 레벨 1: 1회, 레벨 5: 5회
     
     setAdventuringChicken({
       id: chicken.id,
@@ -321,6 +323,9 @@ export default function ChickenGame() {
       maxWater: water,
       maxRice: rice,
       level,
+      tiredness: chicken.tiredness || 0, // 현재 피로도
+      maxDiceRolls, // 라운드당 최대 주사위 횟수
+      remainingDiceRolls: maxDiceRolls, // 남은 주사위 횟수
       startPosition: { x: 15, y: 12 }, // 농장 위치
     });
     
@@ -330,8 +335,57 @@ export default function ChickenGame() {
   
   // 모험 닭 귀환
   const handleRecallChicken = useCallback(() => {
+    // 귀환 시 피로도를 원래 닭에게 적용
+    if (adventuringChicken) {
+      setChickens(prev => prev.map(c => 
+        c.id === adventuringChicken.id 
+          ? { ...c, tiredness: adventuringChicken.tiredness }
+          : c
+      ));
+    }
     setAdventuringChicken(null);
     setPlayerPosition({ x: 15, y: 12 }); // 농장으로 돌아가기
+  }, [adventuringChicken]);
+  
+  // 모험 중 피로도 증가 (주사위 굴릴 때)
+  const handleAddTiredness = useCallback((amount) => {
+    setAdventuringChicken(prev => {
+      if (!prev) return null;
+      const newTiredness = Math.min(100, prev.tiredness + amount);
+      // 피로도가 100이 되면 자동 귀환
+      if (newTiredness >= 100) {
+        setTimeout(() => handleRecallChicken(), 500);
+        return { ...prev, tiredness: 100 };
+      }
+      return { ...prev, tiredness: newTiredness };
+    });
+  }, [handleRecallChicken]);
+  
+  // 모험 닭 피로도가 변경되면 원래 닭에게 동기화
+  useEffect(() => {
+    if (adventuringChicken) {
+      setChickens(prev => prev.map(c => 
+        c.id === adventuringChicken.id 
+          ? { ...c, tiredness: adventuringChicken.tiredness }
+          : c
+      ));
+    }
+  }, [adventuringChicken?.tiredness, adventuringChicken?.id]);
+  
+  // 모험 중 주사위 횟수 소모
+  const handleUseDiceRoll = useCallback(() => {
+    setAdventuringChicken(prev => {
+      if (!prev) return null;
+      return { ...prev, remainingDiceRolls: Math.max(0, prev.remainingDiceRolls - 1) };
+    });
+  }, []);
+  
+  // 주사위 횟수 리셋 (라운드 종료 시)
+  const handleResetDiceRolls = useCallback(() => {
+    setAdventuringChicken(prev => {
+      if (!prev) return null;
+      return { ...prev, remainingDiceRolls: prev.maxDiceRolls };
+    });
   }, []);
   
   // 모험 중 물 소모
@@ -890,6 +944,9 @@ export default function ChickenGame() {
             onSelectTool={handleSelectTool}
             adventuringChicken={adventuringChicken}
             onRecallChicken={handleRecallChicken}
+            onAddTiredness={handleAddTiredness}
+            onUseDiceRoll={handleUseDiceRoll}
+            onResetDiceRolls={handleResetDiceRolls}
           />
         </div>
       </div>

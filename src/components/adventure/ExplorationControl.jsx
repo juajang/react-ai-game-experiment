@@ -219,6 +219,9 @@ const ExplorationControl = ({
   onSelectTool,
   adventuringChicken = null,
   onRecallChicken,
+  onAddTiredness,
+  onUseDiceRoll,
+  onResetDiceRolls,
 }) => {
   const [diceResult, setDiceResult] = useState(1);
   const [remainingMoves, setRemainingMoves] = useState(0);
@@ -240,6 +243,16 @@ const ExplorationControl = ({
       setMessage("⚠️ 이동을 먼저 완료하세요!");
       return;
     }
+    // 피로도 체크
+    if (adventuringChicken.tiredness >= 100) {
+      setMessage("😫 닭이 너무 피곤합니다! 집으로 돌아갑니다...");
+      return;
+    }
+    // 주사위 횟수 체크
+    if (adventuringChicken.remainingDiceRolls <= 0) {
+      setMessage("🎲 이번 라운드의 주사위를 모두 사용했습니다!");
+      return;
+    }
     
     setIsRolling(true);
     setMessage("🎲 굴리는 중...");
@@ -254,10 +267,16 @@ const ExplorationControl = ({
         setDiceResult(finalResult);
         setRemainingMoves(finalResult);
         setIsRolling(false);
-        setMessage(`🎲 ${finalResult}칸 이동 가능! 방향을 선택하세요.`);
+        
+        // 피로도 증가 (+15) 및 주사위 횟수 감소
+        onAddTiredness?.(15);
+        onUseDiceRoll?.();
+        
+        const newRemainingDice = (adventuringChicken.remainingDiceRolls || 1) - 1;
+        setMessage(`🎲 ${finalResult}칸 이동! (남은 주사위: ${newRemainingDice}회)`);
       }
     }, 60);
-  }, [remainingMoves, isRolling, adventuringChicken]);
+  }, [remainingMoves, isRolling, adventuringChicken, onAddTiredness, onUseDiceRoll]);
   
   // 이동 처리
   const move = useCallback((direction) => {
@@ -363,7 +382,8 @@ const ExplorationControl = ({
     setMessage(`🔍 ${description}${lootMessage}`);
   }, [posKey, rice, investigatedTiles, onConsumeRice, onInvestigate, currentPoi, currentTileType, playerPosition, onAddLog, onAddItem, inventory.shovel, adventuringChicken]);
 
-  const canRoll = !isRolling && remainingMoves <= 0 && adventuringChicken;
+  const canRoll = !isRolling && remainingMoves <= 0 && adventuringChicken && 
+    (adventuringChicken.remainingDiceRolls > 0) && (adventuringChicken.tiredness < 100);
 
   return (
     <div 
@@ -418,6 +438,16 @@ const ExplorationControl = ({
         <div className="flex gap-2">
           <span style={{ color: '#4fc3f7' }}>💧{water}</span>
           <span style={{ color: '#a5d6a7' }}>🌾{rice}</span>
+          {adventuringChicken && (
+            <>
+              <span style={{ color: adventuringChicken.tiredness >= 70 ? '#ef5350' : '#ffb74d' }}>
+                😪{Math.round(adventuringChicken.tiredness)}%
+              </span>
+              <span style={{ color: '#ce93d8' }}>
+                🎲{adventuringChicken.remainingDiceRolls}/{adventuringChicken.maxDiceRolls}
+              </span>
+            </>
+          )}
         </div>
       </div>
       
@@ -456,13 +486,18 @@ const ExplorationControl = ({
             <div 
               className="mt-1 px-1.5 rounded text-center"
               style={{ 
-                backgroundColor: remainingMoves > 0 ? '#ffd54f' : '#37474f',
-                color: remainingMoves > 0 ? '#5d4037' : '#90a4ae',
+                backgroundColor: remainingMoves > 0 ? '#ffd54f' : 
+                  (adventuringChicken?.tiredness >= 100 ? '#ef5350' : 
+                   adventuringChicken?.remainingDiceRolls <= 0 ? '#9e9e9e' : '#37474f'),
+                color: remainingMoves > 0 ? '#5d4037' : '#fff',
                 fontSize: '9px',
                 fontWeight: 'bold',
               }}
             >
-              {!adventuringChicken ? '🐔?' : remainingMoves > 0 ? `${remainingMoves}칸` : '클릭!'}
+              {!adventuringChicken ? '🐔?' : 
+               adventuringChicken.tiredness >= 100 ? '😫' :
+               adventuringChicken.remainingDiceRolls <= 0 ? '⏳' :
+               remainingMoves > 0 ? `${remainingMoves}칸` : '클릭!'}
             </div>
           </div>
           
@@ -551,6 +586,29 @@ const ExplorationControl = ({
             <span style={{ fontSize: '8px', fontWeight: 'bold' }}>조사</span>
             <span style={{ fontSize: '7px', color: '#90caf9' }}>-1🌾</span>
           </button>
+          
+          {/* 라운드 종료 버튼 (주사위 횟수 0일 때 표시) */}
+          {adventuringChicken && adventuringChicken.remainingDiceRolls <= 0 && remainingMoves <= 0 && (
+            <button
+              onClick={() => {
+                onResetDiceRolls?.();
+                setMessage(`🔄 새 라운드 시작! 주사위 ${adventuringChicken.maxDiceRolls}회 충전!`);
+              }}
+              className="rounded font-bold flex flex-col items-center justify-center"
+              style={{
+                backgroundColor: '#ff9800',
+                color: 'white',
+                border: '2px solid #f57c00',
+                cursor: 'pointer',
+                width: '50px',
+                height: '50px',
+              }}
+            >
+              <span style={{ fontSize: '14px' }}>🔄</span>
+              <span style={{ fontSize: '7px', fontWeight: 'bold' }}>라운드</span>
+              <span style={{ fontSize: '7px' }}>종료</span>
+            </button>
+          )}
         </div>
       </div>
       

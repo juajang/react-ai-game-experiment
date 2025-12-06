@@ -762,7 +762,8 @@ export const useGameLoop = (fieldSize) => {
 
   return { 
     chicken: mainChicken,
-    chickens, 
+    chickens,
+    setChickens, // 외부에서 닭 상태 업데이트용
     eggs, 
     feeds, 
     flowers,

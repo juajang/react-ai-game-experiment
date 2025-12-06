@@ -167,7 +167,7 @@ const PixelBar = ({ value, color, label }) => (
 );
 
 const StatusBar = ({ selectedChicken, chickenCount, juvenileCount, chickCount, eggCount, deathCount, coins, onNameChange, onSendToAdventure, adventuringChicken }) => {
-  const { hunger, happiness, health, tiredness, state, stage, name, id } = selectedChicken || {};
+  const { hunger, happiness, health, tiredness, state, stage, name, id, level = 1, experience = 0, expForNextLevel = 100 } = selectedChicken || {};
   const [isEditingName, setIsEditingName] = useState(false);
   const [editName, setEditName] = useState('');
   
@@ -365,6 +365,34 @@ const StatusBar = ({ selectedChicken, chickenCount, juvenileCount, chickCount, e
           {/* 스탯 바들 */}
           {selectedChicken && (
             <>
+              {/* 레벨 & 경험치 - 다른 스탯 바와 동일한 스타일 */}
+              <div className="flex items-center gap-2 mb-1">
+                <span 
+                  className="min-w-[55px]"
+                  style={{ color: '#8b7355', fontSize: '9px' }}
+                >
+                  ⭐ Lv.{level}
+                </span>
+                <div 
+                  className="flex-1 h-3 overflow-hidden relative"
+                  style={{ backgroundColor: '#3d3d3d', border: '2px solid #5d4037' }}
+                >
+                  <div 
+                    className="h-full transition-all duration-300"
+                    style={{ 
+                      width: `${Math.min(100, (experience / expForNextLevel) * 100)}%`,
+                      backgroundColor: '#a78bfa',
+                      boxShadow: 'inset 0 -2px 0 rgba(0,0,0,0.3)',
+                    }}
+                  />
+                </div>
+                <span 
+                  className="font-bold min-w-[28px] text-right"
+                  style={{ color: '#5d4037', fontSize: '9px' }}
+                >
+                  {experience}/{expForNextLevel}
+                </span>
+              </div>
               <PixelBar value={hunger || 0} color={getColor(hunger)} label="🍽️ 포만감" />
               <PixelBar value={happiness || 0} color={getColor(happiness, { high: 60, low: 40 })} label="😊 행복도" />
               <PixelBar value={health || 0} color={getColor(health, { high: 80, low: 60 })} label="❤️ 건강" />

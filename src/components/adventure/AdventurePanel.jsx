@@ -21,6 +21,9 @@ const AdventurePanel = ({
   onSelectTool,
   adventuringChicken = null,
   onRecallChicken,
+  onAddTiredness,
+  onUseDiceRoll,
+  onResetDiceRolls,
 }) => {
   const [mapData, setMapData] = useState(null);
   const [explorationLog, setExplorationLog] = useState([]);
@@ -106,6 +109,9 @@ const AdventurePanel = ({
         onSelectTool={onSelectTool}
         adventuringChicken={adventuringChicken}
         onRecallChicken={onRecallChicken}
+        onAddTiredness={onAddTiredness}
+        onUseDiceRoll={onUseDiceRoll}
+        onResetDiceRolls={onResetDiceRolls}
       />
     </div>
   );
