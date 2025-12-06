@@ -111,6 +111,7 @@ const WorldMap = ({
   onExplore,
   investigatedTiles = new Set(),
   onMapData,
+  adventuringChicken = null,
 }) => {
   const mapWidth = 35;
   const mapHeight = 25;
@@ -194,9 +195,13 @@ const WorldMap = ({
       color = '#fff176';
     }
     
-    if (isPlayer) {
-      char = '@';
-      color = '#f44336';
+    // 모험 중인 닭 위치 표시
+    const isAdventuringChicken = adventuringChicken && 
+      playerPosition.x === x && playerPosition.y === y;
+    
+    if (isAdventuringChicken) {
+      char = '🐔';
+      color = '#ffd54f';
     }
     
     const isHovered = hoveredTile?.x === x && hoveredTile?.y === y;

@@ -19,6 +19,8 @@ const AdventurePanel = ({
   onAddItem,
   selectedTool,
   onSelectTool,
+  adventuringChicken = null,
+  onRecallChicken,
 }) => {
   const [mapData, setMapData] = useState(null);
   const [explorationLog, setExplorationLog] = useState([]);
@@ -79,14 +81,15 @@ const AdventurePanel = ({
         onExplore={onExplore}
         investigatedTiles={investigatedTiles}
         onMapData={handleMapData}
+        adventuringChicken={adventuringChicken}
       />
       
       {/* 하단: 탐험 컨트롤 + 조사 기록 (남은 공간 채움) */}
       <ExplorationControl
         playerPosition={playerPosition}
         onPlayerMove={onPlayerMove}
-        water={water}
-        rice={rice}
+        water={adventuringChicken?.water || 0}
+        rice={adventuringChicken?.rice || 0}
         onConsumeWater={onConsumeWater}
         onConsumeRice={onConsumeRice}
         investigatedTiles={investigatedTiles}
@@ -101,6 +104,8 @@ const AdventurePanel = ({
         onAddItem={onAddItem}
         selectedTool={selectedTool}
         onSelectTool={onSelectTool}
+        adventuringChicken={adventuringChicken}
+        onRecallChicken={onRecallChicken}
       />
     </div>
   );

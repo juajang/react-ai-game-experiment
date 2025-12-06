@@ -157,34 +157,28 @@ const Dice3D = ({ value, isRolling, size = 50 }) => {
 // 획득 가능한 아이템 목록
 const LOOT_TABLE = {
   GRASS: [
-    { item: null, chance: 0.7 },
+    { item: null, chance: 0.85 },
     { item: 'shovel', chance: 0.15, name: '삽' },
-    { item: 'water', chance: 0.15, amount: 5, name: '물' },
   ],
   FOREST: [
-    { item: null, chance: 0.5 },
-    { item: 'shovel', chance: 0.2, name: '삽' },
-    { item: 'water', chance: 0.3, amount: 8, name: '물' },
+    { item: null, chance: 0.7 },
+    { item: 'shovel', chance: 0.3, name: '삽' },
   ],
   BEACH: [
-    { item: null, chance: 0.6 },
+    { item: null, chance: 0.75 },
     { item: 'shovel', chance: 0.25, name: '삽' },
-    { item: 'water', chance: 0.15, amount: 3, name: '물' },
   ],
   VILLAGE: [
-    { item: null, chance: 0.3 },
-    { item: 'shovel', chance: 0.35, name: '삽' },
-    { item: 'water', chance: 0.35, amount: 10, name: '물' },
+    { item: null, chance: 0.5 },
+    { item: 'shovel', chance: 0.5, name: '삽' },
   ],
   OUTPOST: [
-    { item: null, chance: 0.4 },
-    { item: 'shovel', chance: 0.4, name: '삽' },
-    { item: 'water', chance: 0.2, amount: 5, name: '물' },
+    { item: null, chance: 0.5 },
+    { item: 'shovel', chance: 0.5, name: '삽' },
   ],
   RESOURCE: [
-    { item: null, chance: 0.1 },
-    { item: 'shovel', chance: 0.5, name: '삽' },
-    { item: 'water', chance: 0.4, amount: 15, name: '물' },
+    { item: null, chance: 0.3 },
+    { item: 'shovel', chance: 0.7, name: '삽' },
   ],
 };
 
@@ -223,6 +217,8 @@ const ExplorationControl = ({
   onAddItem,
   selectedTool,
   onSelectTool,
+  adventuringChicken = null,
+  onRecallChicken,
 }) => {
   const [diceResult, setDiceResult] = useState(1);
   const [remainingMoves, setRemainingMoves] = useState(0);
@@ -340,9 +336,6 @@ const ExplorationControl = ({
           onAddItem?.('shovel', 1);
           lootMessage = ' 🎁 삽을 발견했다!';
         }
-      } else if (loot.item === 'water') {
-        onAddItem?.('water', loot.amount);
-        lootMessage = ` 💧 물 ${loot.amount}을(를) 발견했다!`;
       }
     }
     
@@ -610,7 +603,7 @@ const ExplorationControl = ({
         )}
       </div>
       
-      {/* 인벤토리 */}
+      {/* 모험 닭 정보 & 인벤토리 */}
       <div 
         className="px-2 py-1.5"
         style={{ 
@@ -618,8 +611,66 @@ const ExplorationControl = ({
           borderTop: '2px solid #5d4037',
         }}
       >
+        {/* 모험 중인 닭 정보 */}
+        {adventuringChicken ? (
+          <div className="mb-2">
+            <div 
+              className="mb-1 font-bold flex justify-between items-center"
+              style={{ fontSize: '9px', color: '#90a4ae' }}
+            >
+              <span>🐔 모험 중</span>
+              <span style={{ color: '#ffd54f', fontSize: '8px' }}>{adventuringChicken.name}</span>
+            </div>
+            <div 
+              className="flex gap-2 p-1.5 rounded"
+              style={{ backgroundColor: '#37474f' }}
+            >
+              <div className="flex items-center gap-1">
+                <span style={{ fontSize: '12px' }}>💧</span>
+                <span style={{ fontSize: '9px', color: '#4fc3f7' }}>{adventuringChicken.water}</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <span style={{ fontSize: '12px' }}>🌾</span>
+                <span style={{ fontSize: '9px', color: '#a5d6a7' }}>{adventuringChicken.rice}</span>
+              </div>
+              <button
+                onClick={onRecallChicken}
+                className="ml-auto px-2 py-0.5 rounded text-white"
+                style={{ 
+                  backgroundColor: '#ef5350', 
+                  fontSize: '8px',
+                  border: '1px solid #c62828',
+                }}
+              >
+                귀환
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="mb-2">
+            <div 
+              className="mb-1 font-bold"
+              style={{ fontSize: '9px', color: '#90a4ae' }}
+            >
+              🐔 모험 닭 없음
+            </div>
+            <div 
+              className="text-center py-2 rounded"
+              style={{ 
+                backgroundColor: '#2a2a3e', 
+                fontSize: '8px', 
+                color: '#607d8b',
+                border: '1px dashed #455a64',
+              }}
+            >
+              농장에서 닭을 선택 후<br/>'모험 보내기' 클릭
+            </div>
+          </div>
+        )}
+        
+        {/* 인벤토리 */}
         <div 
-          className="mb-1 font-bold flex justify-between items-center"
+          className="font-bold flex justify-between items-center mb-1"
           style={{ fontSize: '9px', color: '#90a4ae' }}
         >
           <span>🎒 인벤토리</span>
@@ -649,25 +700,8 @@ const ExplorationControl = ({
             </span>
           </div>
           
-          {/* 물 슬롯 */}
-          <div
-            className="flex items-center gap-1.5 px-2 py-1 rounded"
-            style={{
-              backgroundColor: (inventory.water || 0) > 0 ? '#37474f' : '#2a2a3e',
-              border: '1px dashed #5d4037',
-              opacity: (inventory.water || 0) > 0 ? 1 : 0.4,
-              flex: '1 1 auto',
-              minWidth: '70px',
-            }}
-          >
-            <span style={{ fontSize: '14px' }}>💧</span>
-            <span style={{ fontSize: '8px', color: (inventory.water || 0) > 0 ? '#4fc3f7' : '#455a64' }}>
-              {(inventory.water || 0) > 0 ? `+${inventory.water}` : '-'}
-            </span>
-          </div>
-          
           {/* 빈 슬롯들 */}
-          {[...Array(4)].map((_, idx) => (
+          {[...Array(3)].map((_, idx) => (
             <div
               key={idx}
               className="flex items-center justify-center px-2 py-1 rounded"
@@ -676,7 +710,7 @@ const ExplorationControl = ({
                 border: '1px dashed #5d4037',
                 opacity: 0.4,
                 flex: '1 1 auto',
-                minWidth: '35px',
+                minWidth: '45px',
               }}
             >
               <span style={{ fontSize: '8px', color: '#455a64' }}>-</span>

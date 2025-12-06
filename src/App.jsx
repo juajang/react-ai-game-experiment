@@ -250,8 +250,11 @@ export default function ChickenGame() {
   const [investigatedTiles, setInvestigatedTiles] = useState(new Set());
   
   // 인벤토리 상태 (탐험에서 얻은 아이템)
-  const [inventory, setInventory] = useState({ shovel: false, water: 0 });
+  const [inventory, setInventory] = useState({ shovel: false });
   const [selectedTool, setSelectedTool] = useState(null);
+  
+  // 모험 중인 닭 상태
+  const [adventuringChicken, setAdventuringChicken] = useState(null);
   
   // 마우스 위치 추적 (삽 자석 효과용)
   const [mousePos, setMousePos] = useState(null);
@@ -300,13 +303,68 @@ export default function ChickenGame() {
     });
   }, []);
   
+  // 닭을 모험에 보내기 (레벨에 따라 자원 부여)
+  const handleSendChickenToAdventure = useCallback((chickenId) => {
+    const chicken = chickens.find(c => c.id === chickenId);
+    if (!chicken || chicken.stage !== 'adult') return;
+    
+    // 레벨에 따른 자원 계산 (간단히 행복도 기반)
+    const level = Math.floor(chicken.happiness / 20) + 1; // 1~5 레벨
+    const water = 10 + level * 5; // 15~35
+    const rice = 3 + level * 2;   // 5~13
+    
+    setAdventuringChicken({
+      id: chicken.id,
+      name: chicken.name || '모험 닭',
+      water,
+      rice,
+      maxWater: water,
+      maxRice: rice,
+      level,
+      startPosition: { x: 15, y: 12 }, // 농장 위치
+    });
+    
+    // 플레이어 위치를 농장으로 설정
+    setPlayerPosition({ x: 15, y: 12 });
+  }, [chickens]);
+  
+  // 모험 닭 귀환
+  const handleRecallChicken = useCallback(() => {
+    setAdventuringChicken(null);
+    setPlayerPosition({ x: 15, y: 12 }); // 농장으로 돌아가기
+  }, []);
+  
+  // 모험 중 물 소모
+  const handleConsumeAdventureWater = useCallback((amount) => {
+    setAdventuringChicken(prev => {
+      if (!prev) return null;
+      const newWater = Math.max(0, prev.water - amount);
+      // 물이 0이 되면 자동 귀환
+      if (newWater <= 0) {
+        setTimeout(() => handleRecallChicken(), 500);
+        return { ...prev, water: 0 };
+      }
+      return { ...prev, water: newWater };
+    });
+  }, [handleRecallChicken]);
+  
+  // 모험 중 벼 소모
+  const handleConsumeAdventureRice = useCallback((amount) => {
+    setAdventuringChicken(prev => {
+      if (!prev) return null;
+      const newRice = Math.max(0, prev.rice - amount);
+      // 벼가 0이 되면 자동 귀환
+      if (newRice <= 0) {
+        setTimeout(() => handleRecallChicken(), 500);
+        return { ...prev, rice: 0 };
+      }
+      return { ...prev, rice: newRice };
+    });
+  }, [handleRecallChicken]);
+  
   // 인벤토리에 아이템 추가
   const handleAddItem = useCallback((item, amount) => {
-    if (item === 'water') {
-      // 물은 즉시 탐험 자원에 추가
-      setAdventureWater(prev => prev + amount);
-      setInventory(prev => ({ ...prev, water: (prev.water || 0) + amount }));
-    } else if (item === 'shovel') {
+    if (item === 'shovel') {
       // 삽은 도구이므로 보유 여부만 체크 (true/false)
       setInventory(prev => ({ ...prev, shovel: true }));
     } else {
@@ -639,6 +697,8 @@ export default function ChickenGame() {
               deathCount={deathCount}
               coins={coins}
               onNameChange={updateChickenName}
+              onSendToAdventure={handleSendChickenToAdventure}
+              adventuringChicken={adventuringChicken}
             />
             
             {/* 안내 메시지 */}
@@ -818,16 +878,18 @@ export default function ChickenGame() {
             onTileClick={handleTileClick}
             exploredTiles={exploredTiles}
             onExplore={handleExplore}
-            water={adventureWater}
-            rice={feeds.length}
-            onConsumeWater={handleConsumeWater}
-            onConsumeRice={handleConsumeRice}
+            water={adventuringChicken?.water || 0}
+            rice={adventuringChicken?.rice || 0}
+            onConsumeWater={handleConsumeAdventureWater}
+            onConsumeRice={handleConsumeAdventureRice}
             investigatedTiles={investigatedTiles}
             onInvestigate={handleInvestigate}
             inventory={inventory}
             onAddItem={handleAddItem}
             selectedTool={selectedTool}
             onSelectTool={handleSelectTool}
+            adventuringChicken={adventuringChicken}
+            onRecallChicken={handleRecallChicken}
           />
         </div>
       </div>

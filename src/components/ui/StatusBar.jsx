@@ -166,7 +166,7 @@ const PixelBar = ({ value, color, label }) => (
   </div>
 );
 
-const StatusBar = ({ selectedChicken, chickenCount, juvenileCount, chickCount, eggCount, deathCount, coins, onNameChange }) => {
+const StatusBar = ({ selectedChicken, chickenCount, juvenileCount, chickCount, eggCount, deathCount, coins, onNameChange, onSendToAdventure, adventuringChicken }) => {
   const { hunger, happiness, health, tiredness, state, stage, name, id } = selectedChicken || {};
   const [isEditingName, setIsEditingName] = useState(false);
   const [editName, setEditName] = useState('');
@@ -304,6 +304,50 @@ const StatusBar = ({ selectedChicken, chickenCount, juvenileCount, chickCount, e
               >
                 {getStateText()}
               </span>
+              
+              {/* 모험 보내기 버튼 (성체 닭만) */}
+              {stage === GROWTH_STAGE.ADULT && (
+                adventuringChicken ? (
+                  adventuringChicken.id === id ? (
+                    <span 
+                      className="px-2 py-0.5 rounded"
+                      style={{ 
+                        backgroundColor: '#4caf50', 
+                        color: '#fff', 
+                        fontSize: '9px',
+                        border: '2px solid #388e3c',
+                      }}
+                    >
+                      🗺️ 모험 중
+                    </span>
+                  ) : (
+                    <span 
+                      className="px-2 py-0.5 rounded"
+                      style={{ 
+                        backgroundColor: '#9e9e9e', 
+                        color: '#fff', 
+                        fontSize: '9px',
+                        border: '2px solid #757575',
+                      }}
+                    >
+                      다른 닭 모험중
+                    </span>
+                  )
+                ) : (
+                  <button
+                    onClick={() => onSendToAdventure?.(id)}
+                    className="px-2 py-0.5 rounded font-bold transition-all hover:scale-105"
+                    style={{ 
+                      backgroundColor: '#ff9800', 
+                      color: '#fff', 
+                      fontSize: '9px',
+                      border: '2px solid #f57c00',
+                    }}
+                  >
+                    🗺️ 모험
+                  </button>
+                )
+              )}
             </div>
             
             {/* 코인 */}
