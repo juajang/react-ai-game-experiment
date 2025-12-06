@@ -293,19 +293,7 @@ const StatusBar = ({ selectedChicken, chickenCount, juvenileCount, chickCount, e
                 </span>
               )}
               
-              <span 
-                className="px-2 py-0.5 rounded"
-                style={{ 
-                  backgroundColor: '#e8d5b7',
-                  border: '2px solid #8b7355',
-                  color: '#5d4037',
-                  fontSize: '9px',
-                }}
-              >
-                {getStateText()}
-              </span>
-              
-              {/* 모험 보내기 버튼 (성체 닭만) */}
+              {/* 모험 보내기 버튼 (성체 닭만) - 이름 바로 옆 */}
               {stage === GROWTH_STAGE.ADULT && (
                 adventuringChicken ? (
                   adventuringChicken.id === id ? (
@@ -348,6 +336,18 @@ const StatusBar = ({ selectedChicken, chickenCount, juvenileCount, chickCount, e
                   </button>
                 )
               )}
+              
+              <span 
+                className="px-2 py-0.5 rounded"
+                style={{ 
+                  backgroundColor: '#e8d5b7',
+                  border: '2px solid #8b7355',
+                  color: '#5d4037',
+                  fontSize: '9px',
+                }}
+              >
+                {getStateText()}
+              </span>
             </div>
             
             {/* 코인 */}
