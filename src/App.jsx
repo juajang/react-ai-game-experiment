@@ -1,5 +1,5 @@
 import { useRef, useCallback, useState, useEffect } from 'react';
-import { Chicken, Chick, Juvenile, DeadChicken, Egg, Feed, Flower, FlowerBush, Pond, Windmill, Poop, Field, GameInfo, StatusBar, Coop, ItemPanel } from './components';
+import { Chicken, Chick, Juvenile, DeadChicken, Egg, Feed, Flower, FlowerBush, Pond, Windmill, Poop, Field, GameInfo, Coop, ItemPanel, AdventurePanel } from './components';
 import { useGameLoop } from './hooks/useGameLoop';
 import { useFieldSize } from './hooks/useFieldSize';
 import { GROWTH_STAGE, GAME_CONFIG, GAME_STATE, FARM_GRADE } from './constants/gameConfig';
@@ -113,6 +113,39 @@ const FarmGradeBadge = ({ grade, totalChickens }) => {
   );
 };
 
+// 간단한 상단 요약 바
+const TopSummaryBar = ({ chickenCount, juvenileCount, chickCount, eggCount, deathCount }) => (
+  <div 
+    className="flex justify-around items-center px-3 py-1.5 rounded-lg"
+    style={{
+      backgroundColor: '#f5e6c8',
+      border: '3px solid #8b7355',
+      boxShadow: '2px 2px 0px #5d4037',
+    }}
+  >
+    <div className="text-center">
+      <div style={{ fontSize: '14px' }}>🥚</div>
+      <div style={{ color: '#5d4037', fontSize: '10px', fontWeight: 'bold' }}>{eggCount || 0}</div>
+    </div>
+    <div className="text-center">
+      <div style={{ fontSize: '14px' }}>🐥</div>
+      <div style={{ color: '#5d4037', fontSize: '10px', fontWeight: 'bold' }}>{chickCount || 0}</div>
+    </div>
+    <div className="text-center">
+      <div style={{ fontSize: '14px' }}>🐤</div>
+      <div style={{ color: '#5d4037', fontSize: '10px', fontWeight: 'bold' }}>{juvenileCount || 0}</div>
+    </div>
+    <div className="text-center">
+      <div style={{ fontSize: '14px' }}>🐔</div>
+      <div style={{ color: '#5d4037', fontSize: '10px', fontWeight: 'bold' }}>{chickenCount || 0}</div>
+    </div>
+    <div className="text-center">
+      <div style={{ fontSize: '14px' }}>💀</div>
+      <div style={{ color: '#ef4444', fontSize: '10px', fontWeight: 'bold' }}>{deathCount || 0}</div>
+    </div>
+  </div>
+);
+
 export default function ChickenGame() {
   const fieldRef = useRef(null);
   const fieldSize = useFieldSize(fieldRef);
@@ -163,6 +196,9 @@ export default function ChickenGame() {
   
   // 들고 있는 닭
   const [heldChicken, setHeldChicken] = useState(null);
+  
+  // 플레이어 위치 (월드맵용)
+  const [playerPosition, setPlayerPosition] = useState({ x: 15, y: 12 });
   
   const selectedChicken = chickens.find(c => c.id === selectedChickenId);
   const displayChicken = selectedChicken || chickens[0];
@@ -309,6 +345,11 @@ export default function ChickenGame() {
     if (movingBuilding) return;
     setSelectedItem(itemId || 'feed');
   }, [movingBuilding]);
+  
+  const handleTileClick = useCallback((tile) => {
+    // 맵 타일 클릭 시 플레이어 이동 (나중에 확장 가능)
+    console.log('Tile clicked:', tile);
+  }, []);
 
   const renderChicken = (c) => {
     if (c.state === 'sleeping') return null;
@@ -385,28 +426,18 @@ export default function ChickenGame() {
   const getGuideMessage = () => {
     if (heldChicken) {
       const chicken = chickens.find(c => c.id === heldChicken.id);
-      return `✋ ${chicken?.name || '닭'}을(를) 들고 있어요! 마우스를 놓아서 내려놓으세요.`;
+      return `✋ ${chicken?.name || '닭'}을(를) 들고 있어요!`;
     }
     if (movingBuilding) {
       const nameMap = { coop: '닭집', pond: '연못', flowerBush: '꽃덤불', windmill: '풍차' };
-      return `📍 마우스를 놓아서 ${nameMap[movingBuilding.type]} 위치를 고정하세요!`;
+      return `📍 ${nameMap[movingBuilding.type]} 이동 중`;
     }
-    if (selectedItem === 'coop') {
-      return `🏠 필드를 클릭해서 닭집을 배치하세요! (💰${GAME_CONFIG.COOP.COST})`;
-    }
-    if (selectedItem === 'pond') {
-      return `💧 필드를 클릭해서 연못을 배치하세요! (💰${GAME_CONFIG.POND.COST})`;
-    }
-    if (selectedItem === 'windmill') {
-      return `🌀 필드를 클릭해서 풍차를 배치하세요! (💰${GAME_CONFIG.WINDMILL.COST}) ✨황금농장 전용`;
-    }
-    if (selectedItem === 'flowerBush') {
-      return `🌸 필드를 클릭해서 꽃덤불을 심으세요! (💰${GAME_CONFIG.FLOWER_BUSH.COST})`;
-    }
-    if (selectedItem === 'flower') {
-      return `🌸 필드를 클릭해서 꽃을 심으세요! (💰${GAME_CONFIG.FLOWER.COST})`;
-    }
-    return `🌾 필드를 클릭해서 벼를 놓으세요! (💰${GAME_CONFIG.FEED.COST})`;
+    if (selectedItem === 'coop') return `🏠 닭집 배치 (💰${GAME_CONFIG.COOP.COST})`;
+    if (selectedItem === 'pond') return `💧 연못 배치 (💰${GAME_CONFIG.POND.COST})`;
+    if (selectedItem === 'windmill') return `🌀 풍차 배치 (💰${GAME_CONFIG.WINDMILL.COST})`;
+    if (selectedItem === 'flowerBush') return `🌸 꽃덤불 (💰${GAME_CONFIG.FLOWER_BUSH.COST})`;
+    if (selectedItem === 'flower') return `🌸 꽃 (💰${GAME_CONFIG.FLOWER.COST})`;
+    return `🌾 벼 놓기 (💰${GAME_CONFIG.FEED.COST})`;
   };
 
   const getGuideColor = () => {
@@ -423,16 +454,16 @@ export default function ChickenGame() {
 
   return (
     <div 
-      className="min-h-screen p-4 relative"
+      className="min-h-screen p-3 relative"
       style={{
         backgroundColor: '#87ceeb',
         backgroundImage: 'linear-gradient(to bottom, #87ceeb 0%, #98d8ef 50%, #b8e4f0 100%)',
       }}
     >
-      <div className="max-w-2xl mx-auto">
+      <div className="max-w-5xl mx-auto">
         {/* 타이틀 */}
         <div 
-          className="text-center mb-4 py-3 px-4 rounded-lg"
+          className="text-center mb-3 py-2 px-4 rounded-lg"
           style={{
             backgroundColor: '#f5e6c8',
             border: '4px solid #8b7355',
@@ -449,14 +480,14 @@ export default function ChickenGame() {
                 letterSpacing: '3px',
               }}
             >
-              🐔 닭 농장 시뮬레이션 🌾
+              🐔 닭 농장 어드벤처 🗺️
             </h1>
             <FarmGradeBadge grade={farmGrade} totalChickens={totalChickenCount} />
           </div>
         </div>
         
-        {/* 메인 레이아웃 */}
-        <div className="flex gap-4">
+        {/* 메인 레이아웃 - 3열 구조 */}
+        <div className="flex gap-3">
           {/* 좌측 아이템 패널 */}
           <ItemPanel 
             selectedItem={selectedItem}
@@ -472,26 +503,23 @@ export default function ChickenGame() {
           
           {/* 중앙 게임 영역 */}
           <div className="flex-1 relative">
-            {/* 상태바 */}
-            <StatusBar 
-              selectedChicken={displayChicken} 
+            {/* 상단 요약 바 */}
+            <TopSummaryBar 
               chickenCount={chickenCount}
               juvenileCount={juvenileCount}
               chickCount={chickCount}
               eggCount={eggs.length}
               deathCount={deathCount}
-              coins={coins}
-              onNameChange={updateChickenName}
             />
             
             {/* 안내 메시지 */}
             <div 
-              className="mt-2 p-2 rounded text-center"
+              className="mt-2 p-1.5 rounded text-center"
               style={{
                 backgroundColor: guideColor.bg,
-                border: `3px solid ${guideColor.border}`,
+                border: `2px solid ${guideColor.border}`,
                 color: guideColor.text,
-                fontSize: '11px',
+                fontSize: '10px',
               }}
             >
               {getGuideMessage()}
@@ -648,6 +676,16 @@ export default function ChickenGame() {
             {/* 게임 안내 */}
             <GameInfo />
           </div>
+          
+          {/* 우측 모험 패널 (맵 + 캐릭터 상세) */}
+          <AdventurePanel 
+            selectedChicken={displayChicken}
+            chickens={chickens}
+            onNameChange={updateChickenName}
+            coins={coins}
+            playerPosition={playerPosition}
+            onTileClick={handleTileClick}
+          />
         </div>
       </div>
     </div>

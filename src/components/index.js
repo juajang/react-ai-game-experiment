@@ -41,3 +41,10 @@ export {
   Coin, 
   Field 
 } from './ui';
+
+// 모험 컴포넌트
+export { 
+  WorldMap, 
+  CharacterDetail, 
+  AdventurePanel 
+} from './adventure';
