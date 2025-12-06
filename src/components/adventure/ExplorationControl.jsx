@@ -223,7 +223,7 @@ const ExplorationControl = ({
   const [diceResult, setDiceResult] = useState(1);
   const [remainingMoves, setRemainingMoves] = useState(0);
   const [isRolling, setIsRolling] = useState(false);
-  const [message, setMessage] = useState("🎲 주사위를 클릭하여 탐험을 시작하세요!");
+  const [message, setMessage] = useState(adventuringChicken ? "🎲 주사위를 클릭하여 탐험을 시작하세요!" : "🐔 먼저 닭을 모험에 보내세요!");
   
   // 현재 위치가 조사되었는지 체크
   const posKey = `${playerPosition.x},${playerPosition.y}`;
@@ -232,6 +232,10 @@ const ExplorationControl = ({
   // 주사위 굴리기
   const rollDice = useCallback(() => {
     if (isRolling) return;
+    if (!adventuringChicken) {
+      setMessage("🐔 먼저 닭을 모험에 보내세요!");
+      return;
+    }
     if (remainingMoves > 0) {
       setMessage("⚠️ 이동을 먼저 완료하세요!");
       return;
@@ -253,10 +257,14 @@ const ExplorationControl = ({
         setMessage(`🎲 ${finalResult}칸 이동 가능! 방향을 선택하세요.`);
       }
     }, 60);
-  }, [remainingMoves, isRolling]);
+  }, [remainingMoves, isRolling, adventuringChicken]);
   
   // 이동 처리
   const move = useCallback((direction) => {
+    if (!adventuringChicken) {
+      setMessage("🐔 먼저 닭을 모험에 보내세요!");
+      return;
+    }
     if (remainingMoves <= 0) {
       setMessage("⚠️ 먼저 주사위를 굴리세요!");
       return;
@@ -303,10 +311,14 @@ const ExplorationControl = ({
         setMessage("✅ 이동 완료! 주사위를 다시 굴리세요.");
       }
     }
-  }, [remainingMoves, playerPosition, water, onPlayerMove, onConsumeWater, investigatedTiles, canPass]);
+  }, [remainingMoves, playerPosition, water, onPlayerMove, onConsumeWater, investigatedTiles, canPass, adventuringChicken]);
   
   // 조사하기
   const investigate = useCallback(() => {
+    if (!adventuringChicken) {
+      setMessage("🐔 먼저 닭을 모험에 보내세요!");
+      return;
+    }
     if (investigatedTiles.has(posKey)) {
       setMessage("ℹ️ 이미 조사한 지역입니다.");
       return;
@@ -349,9 +361,9 @@ const ExplorationControl = ({
     });
     
     setMessage(`🔍 ${description}${lootMessage}`);
-  }, [posKey, rice, investigatedTiles, onConsumeRice, onInvestigate, currentPoi, currentTileType, playerPosition, onAddLog, onAddItem, inventory.shovel]);
+  }, [posKey, rice, investigatedTiles, onConsumeRice, onInvestigate, currentPoi, currentTileType, playerPosition, onAddLog, onAddItem, inventory.shovel, adventuringChicken]);
 
-  const canRoll = !isRolling && remainingMoves <= 0;
+  const canRoll = !isRolling && remainingMoves <= 0 && adventuringChicken;
 
   return (
     <div 
@@ -450,7 +462,7 @@ const ExplorationControl = ({
                 fontWeight: 'bold',
               }}
             >
-              {remainingMoves > 0 ? `${remainingMoves}칸` : '클릭!'}
+              {!adventuringChicken ? '🐔?' : remainingMoves > 0 ? `${remainingMoves}칸` : '클릭!'}
             </div>
           </div>
           
@@ -458,15 +470,15 @@ const ExplorationControl = ({
           <div className="flex flex-col items-center gap-0.5">
             <button
               onClick={() => move('up')}
-              disabled={remainingMoves <= 0}
+              disabled={!adventuringChicken || remainingMoves <= 0}
               className="w-7 h-7 rounded font-bold"
               style={{
-                backgroundColor: remainingMoves > 0 ? '#4caf50' : '#455a64',
+                backgroundColor: adventuringChicken && remainingMoves > 0 ? '#4caf50' : '#455a64',
                 color: 'white',
                 border: '2px solid #5d4037',
                 fontSize: '12px',
-                cursor: remainingMoves > 0 ? 'pointer' : 'not-allowed',
-                opacity: remainingMoves > 0 ? 1 : 0.5,
+                cursor: adventuringChicken && remainingMoves > 0 ? 'pointer' : 'not-allowed',
+                opacity: adventuringChicken && remainingMoves > 0 ? 1 : 0.5,
               }}
             >
               ↑
@@ -474,45 +486,45 @@ const ExplorationControl = ({
             <div className="flex gap-0.5">
               <button
                 onClick={() => move('left')}
-                disabled={remainingMoves <= 0}
+                disabled={!adventuringChicken || remainingMoves <= 0}
                 className="w-7 h-7 rounded font-bold"
                 style={{
-                  backgroundColor: remainingMoves > 0 ? '#4caf50' : '#455a64',
+                  backgroundColor: adventuringChicken && remainingMoves > 0 ? '#4caf50' : '#455a64',
                   color: 'white',
                   border: '2px solid #5d4037',
                   fontSize: '12px',
-                  cursor: remainingMoves > 0 ? 'pointer' : 'not-allowed',
-                  opacity: remainingMoves > 0 ? 1 : 0.5,
+                  cursor: adventuringChicken && remainingMoves > 0 ? 'pointer' : 'not-allowed',
+                  opacity: adventuringChicken && remainingMoves > 0 ? 1 : 0.5,
                 }}
               >
                 ←
               </button>
               <button
                 onClick={() => move('down')}
-                disabled={remainingMoves <= 0}
+                disabled={!adventuringChicken || remainingMoves <= 0}
                 className="w-7 h-7 rounded font-bold"
                 style={{
-                  backgroundColor: remainingMoves > 0 ? '#4caf50' : '#455a64',
+                  backgroundColor: adventuringChicken && remainingMoves > 0 ? '#4caf50' : '#455a64',
                   color: 'white',
                   border: '2px solid #5d4037',
                   fontSize: '12px',
-                  cursor: remainingMoves > 0 ? 'pointer' : 'not-allowed',
-                  opacity: remainingMoves > 0 ? 1 : 0.5,
+                  cursor: adventuringChicken && remainingMoves > 0 ? 'pointer' : 'not-allowed',
+                  opacity: adventuringChicken && remainingMoves > 0 ? 1 : 0.5,
                 }}
               >
                 ↓
               </button>
               <button
                 onClick={() => move('right')}
-                disabled={remainingMoves <= 0}
+                disabled={!adventuringChicken || remainingMoves <= 0}
                 className="w-7 h-7 rounded font-bold"
                 style={{
-                  backgroundColor: remainingMoves > 0 ? '#4caf50' : '#455a64',
+                  backgroundColor: adventuringChicken && remainingMoves > 0 ? '#4caf50' : '#455a64',
                   color: 'white',
                   border: '2px solid #5d4037',
                   fontSize: '12px',
-                  cursor: remainingMoves > 0 ? 'pointer' : 'not-allowed',
-                  opacity: remainingMoves > 0 ? 1 : 0.5,
+                  cursor: adventuringChicken && remainingMoves > 0 ? 'pointer' : 'not-allowed',
+                  opacity: adventuringChicken && remainingMoves > 0 ? 1 : 0.5,
                 }}
               >
                 →
@@ -523,14 +535,14 @@ const ExplorationControl = ({
           {/* 조사 버튼 */}
           <button
             onClick={investigate}
-            disabled={!canInvestigate || rice <= 0}
+            disabled={!adventuringChicken || !canInvestigate || rice <= 0}
             className="rounded font-bold flex flex-col items-center justify-center"
             style={{
-              backgroundColor: canInvestigate && rice > 0 ? '#2196f3' : '#455a64',
+              backgroundColor: adventuringChicken && canInvestigate && rice > 0 ? '#2196f3' : '#455a64',
               color: 'white',
               border: '2px solid #5d4037',
-              cursor: canInvestigate && rice > 0 ? 'pointer' : 'not-allowed',
-              opacity: canInvestigate && rice > 0 ? 1 : 0.5,
+              cursor: adventuringChicken && canInvestigate && rice > 0 ? 'pointer' : 'not-allowed',
+              opacity: adventuringChicken && canInvestigate && rice > 0 ? 1 : 0.5,
               width: '50px',
               height: '50px',
             }}
