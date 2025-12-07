@@ -20,7 +20,9 @@ export {
   Windmill, 
   WindmillPreview,
   StrawSpaceship,
-  StrawSpaceshipPreview
+  StrawSpaceshipPreview,
+  Mansion,
+  MansionPreview
 } from './buildings';
 
 // 아이템 컴포넌트

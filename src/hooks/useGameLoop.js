@@ -95,6 +95,7 @@ export const useGameLoop = (fieldSize, adventuringChickenId = null) => {
   const [ponds, setPonds] = useState([]);
   const [windmills, setWindmills] = useState([]);
   const [spaceships, setSpaceships] = useState([]);
+  const [mansions, setMansions] = useState([]);
   const [coops, setCoops] = useState([]);
   const [poops, setPoops] = useState([]);
   const [coins, setCoins] = useState(100); // 시작 코인
@@ -241,6 +242,20 @@ export const useGameLoop = (fieldSize, adventuringChickenId = null) => {
   const moveSpaceship = (spaceshipId, newX, newY) => {
     setSpaceships(prev => prev.map(ss => 
       ss.id === spaceshipId ? { ...ss, x: newX, y: newY } : ss
+    ));
+  };
+  
+  // 오두막 추가 (테스트용: 조건 없음)
+  const addMansion = (x, y) => {
+    // 테스트용: 무조건 배치 가능
+    setMansions(prev => [...prev, { id: Date.now(), x, y }]);
+    return true;
+  };
+  
+  // 오두막 이동
+  const moveMansion = (mansionId, newX, newY) => {
+    setMansions(prev => prev.map(m => 
+      m.id === mansionId ? { ...m, x: newX, y: newY } : m
     ));
   };
 
@@ -812,6 +827,7 @@ export const useGameLoop = (fieldSize, adventuringChickenId = null) => {
     ponds,
     windmills,
     spaceships,
+    mansions,
     coops,
     poops,
     coins,
@@ -830,6 +846,8 @@ export const useGameLoop = (fieldSize, adventuringChickenId = null) => {
     moveWindmill,
     addSpaceship,
     moveSpaceship,
+    addMansion,
+    moveMansion,
     addCoop,
     moveCoop,
     removePoop,

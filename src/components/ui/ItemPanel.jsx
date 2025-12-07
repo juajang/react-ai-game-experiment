@@ -7,6 +7,7 @@ import { FlowerBushPreview } from '../items/FlowerBush';
 import { PondPreview } from '../buildings/Pond';
 import { WindmillPreview } from '../buildings/Windmill';
 import { StrawSpaceshipPreview } from '../buildings/StrawSpaceship';
+import { MansionPreview } from '../buildings/Mansion';
 import Coin from './Coin';
 
 // 사료 미리보기
@@ -221,18 +222,58 @@ const ItemPanel = ({
         {goldenItems.map(item => renderItem(item, true))}
       </div>
       
-      {/* 우주선 특별 섹션 */}
+      {/* 엔딩 건물 섹션 */}
       <div 
         className="flex items-center gap-1" 
         style={{ margin: '2px 0' }}
       >
         <div style={{ borderTop: '2px dashed #7c3aed', flex: 1 }} />
-        <span style={{ fontSize: '8px', color: '#7c3aed' }}>🚀</span>
+        <span style={{ fontSize: '8px', color: '#7c3aed' }}>✨</span>
         <div style={{ borderTop: '2px dashed #7c3aed', flex: 1 }} />
       </div>
       
-      {/* 우주선 */}
-      <div
+      {/* 엔딩 건물들 (2줄) */}
+      <div className="grid grid-cols-2 gap-2">
+        {/* 닭의 성 */}
+        <div
+          ref={el => buttonRefs.current['mansion'] = el}
+          onMouseEnter={(e) => {
+            setHoveredItem('mansion');
+            const rect = e.currentTarget.getBoundingClientRect();
+            setTooltipPosition({
+              left: rect.right + 8,
+              top: rect.top,
+            });
+          }}
+          onMouseLeave={() => {
+            setHoveredItem(null);
+            setTooltipPosition(null);
+          }}
+          className="relative w-full"
+        >
+          <button
+            onClick={() => onSelectItem(selectedItem === 'mansion' ? null : 'mansion')}
+            className="flex flex-col items-center p-2 rounded transition-all w-full relative"
+            style={{
+              backgroundColor: selectedItem === 'mansion' ? '#ddd6fe' : '#ede9fe',
+              border: selectedItem === 'mansion' ? '3px solid #f59e0b' : '2px solid #a78bfa',
+              cursor: 'pointer',
+            }}
+          >
+            <div className="absolute -top-1 -right-1 text-xs animate-pulse">✨</div>
+            <div className="mb-1"><MansionPreview size={28} /></div>
+            <div style={{ fontSize: '9px', color: '#92400e', fontWeight: 'bold' }}>
+              닭의 성
+            </div>
+            <div className="flex items-center gap-0.5 mt-1" style={{ fontSize: '8px', color: '#a16207' }}>
+              <Coin size={10} />
+              <span>0</span>
+            </div>
+          </button>
+        </div>
+        
+        {/* 우주선 */}
+        <div
         ref={el => buttonRefs.current['spaceship'] = el}
         onMouseEnter={(e) => {
           setHoveredItem('spaceship');
@@ -285,6 +326,7 @@ const ItemPanel = ({
           <span style={{ color: (inventory.fuel_cell || 0) >= 1 ? '#22c55e' : '#ef4444' }}>🔋{inventory.fuel_cell || 0}/1</span>
         </div>
       </button>
+      </div>
       </div>
       
       {/* 보유 개수 */}

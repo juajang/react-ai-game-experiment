@@ -1,5 +1,5 @@
 import { useRef, useCallback, useState, useEffect } from 'react';
-import { Chicken, Chick, Juvenile, DeadChicken, Egg, Feed, Flower, FlowerBush, Pond, Windmill, StrawSpaceship, Poop, Field, GameInfo, Coop, ItemPanel, AdventurePanel, StatusBar } from './components';
+import { Chicken, Chick, Juvenile, DeadChicken, Egg, Feed, Flower, FlowerBush, Pond, Windmill, StrawSpaceship, Mansion, Poop, Field, GameInfo, Coop, ItemPanel, AdventurePanel, StatusBar } from './components';
 import { useGameLoop } from './hooks/useGameLoop';
 import { useFieldSize } from './hooks/useFieldSize';
 import { GROWTH_STAGE, GAME_CONFIG, GAME_STATE, FARM_GRADE } from './constants/gameConfig';
@@ -285,6 +285,7 @@ export default function ChickenGame() {
     flowerBushes,
     ponds,
     windmills,
+    mansions,
     coops,
     poops,
     coins,
@@ -303,6 +304,8 @@ export default function ChickenGame() {
     spaceships,
     addSpaceship,
     moveSpaceship,
+    addMansion,
+    moveMansion,
     addCoop,
     moveCoop,
     removePoop,
@@ -636,6 +639,8 @@ export default function ChickenGame() {
           moveWindmill(movingBuilding.id, movingBuilding.x, movingBuilding.y);
         } else if (movingBuilding.type === 'spaceship') {
           moveSpaceship(movingBuilding.id, movingBuilding.x, movingBuilding.y);
+        } else if (movingBuilding.type === 'mansion') {
+          moveMansion(movingBuilding.id, movingBuilding.x, movingBuilding.y);
         }
         setMovingBuilding(null);
       }
@@ -698,6 +703,10 @@ export default function ChickenGame() {
       }
     } else if (selectedItem === 'spaceship') {
       if (addSpaceship(x, y, inventory, handleConsumeInventoryItem)) {
+        setSelectedItem('feed');
+      }
+    } else if (selectedItem === 'mansion') {
+      if (addMansion(x, y)) {
         setSelectedItem('feed');
       }
     } else if (selectedItem === 'flowerBush') {
@@ -764,6 +773,14 @@ export default function ChickenGame() {
       setMovingBuilding({ type: 'spaceship', id: spaceshipId, x: spaceship.x, y: spaceship.y });
     }
   }, [spaceships, gameState]);
+  
+  const handleMansionMouseDown = useCallback((mansionId) => {
+    if (gameState !== GAME_STATE.PLAYING) return;
+    const mansion = mansions.find(m => m.id === mansionId);
+    if (mansion) {
+      setMovingBuilding({ type: 'mansion', id: mansionId, x: mansion.x, y: mansion.y });
+    }
+  }, [mansions, gameState]);
 
   const handleSpaceshipClick = useCallback((spaceshipId) => {
     // 발사 애니메이션은 컴포넌트 내부에서 처리됨
@@ -847,7 +864,7 @@ export default function ChickenGame() {
   const getCursor = () => {
     if (heldChicken) return 'grabbing';
     if (movingBuilding) return 'grabbing';
-    if (selectedItem === 'coop' || selectedItem === 'pond' || selectedItem === 'windmill' || selectedItem === 'spaceship') return 'crosshair';
+    if (selectedItem === 'coop' || selectedItem === 'pond' || selectedItem === 'windmill' || selectedItem === 'spaceship' || selectedItem === 'mansion') return 'crosshair';
     if (selectedItem === 'flower' || selectedItem === 'flowerBush') return 'crosshair';
     return 'pointer';
   };
@@ -865,6 +882,7 @@ export default function ChickenGame() {
     if (selectedItem === 'pond') return `💧 연못 배치 (💰${GAME_CONFIG.POND.COST})`;
     if (selectedItem === 'windmill') return `🌀 풍차 배치 (💰${GAME_CONFIG.WINDMILL.COST})`;
     if (selectedItem === 'spaceship') return `🚀 우주선 배치 (💰${GAME_CONFIG.SPACESHIP.COST})`;
+    if (selectedItem === 'mansion') return `🏰 닭의 성 배치 (💰0)`;
     if (selectedItem === 'flowerBush') return `🌸 꽃덤불 (💰${GAME_CONFIG.FLOWER_BUSH.COST})`;
     if (selectedItem === 'flower') return `🌸 꽃 (💰${GAME_CONFIG.FLOWER.COST})`;
     return `🌾 벼 놓기 (💰${GAME_CONFIG.FEED.COST})`;
@@ -877,6 +895,7 @@ export default function ChickenGame() {
     if (selectedItem === 'pond') return { bg: '#dbeafe', border: '#3b82f6', text: '#1e40af' };
     if (selectedItem === 'windmill') return { bg: '#fef9c3', border: '#eab308', text: '#854d0e' };
     if (selectedItem === 'spaceship') return { bg: '#ede9fe', border: '#7c3aed', text: '#5b21b6' };
+    if (selectedItem === 'mansion') return { bg: '#fef3c7', border: '#f59e0b', text: '#92400e' };
     if (selectedItem === 'flower' || selectedItem === 'flowerBush') return { bg: '#fce7f3', border: '#ec4899', text: '#9d174d' };
     return { bg: '#dcfce7', border: '#22c55e', text: '#166534' };
   };
@@ -1047,6 +1066,25 @@ export default function ChickenGame() {
                     onRestart={restartGame}
                   />
                 ))}
+                
+                {/* 닭의 성들 (이동 가능) */}
+                {mansions.filter(m => !(movingBuilding?.type === 'mansion' && movingBuilding?.id === m.id)).map(mansion => (
+                  <Mansion 
+                    key={mansion.id}
+                    x={mansion.x}
+                    y={mansion.y}
+                    onMouseDown={() => handleMansionMouseDown(mansion.id)}
+                  />
+                ))}
+                
+                {/* 이동 중인 닭의 성 */}
+                {movingBuilding?.type === 'mansion' && (
+                  <Mansion 
+                    x={movingBuilding.x}
+                    y={movingBuilding.y}
+                    isSelected={true}
+                  />
+                )}
                 
                 {/* 꽃덤불들 (이동 중이 아닌 것) */}
                 {flowerBushes.filter(fb => !(movingBuilding?.type === 'flowerBush' && movingBuilding?.id === fb.id)).map(bush => (

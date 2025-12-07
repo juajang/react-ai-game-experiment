@@ -21,15 +21,15 @@ const CoopSprite = ({ gradeLevel = 1 }) => {
         <rect x="2" y="3" width="12" height="1" fill="#8b4513"/>
         
         {/* 벽 */}
-        <rect x="2" y="4" width="12" height="10" fill="#deb887"/>
-        <rect x="3" y="4" width="1" height="10" fill="#d2b48c"/>
-        <rect x="6" y="4" width="1" height="10" fill="#d2b48c"/>
-        <rect x="9" y="4" width="1" height="10" fill="#d2b48c"/>
-        <rect x="12" y="4" width="1" height="10" fill="#d2b48c"/>
+        <rect x="2" y="4" width="12" height="8" fill="#deb887"/>
+        <rect x="3" y="4" width="1" height="8" fill="#d2b48c"/>
+        <rect x="6" y="4" width="1" height="8" fill="#d2b48c"/>
+        <rect x="9" y="4" width="1" height="8" fill="#d2b48c"/>
+        <rect x="12" y="4" width="1" height="8" fill="#d2b48c"/>
         
         {/* 문 */}
-        <rect x="6" y="8" width="4" height="6" fill="#8b4513"/>
-        <rect x="9" y="11" width="1" height="1" fill="#5c2c0f"/>
+        <rect x="6" y="7" width="4" height="5" fill="#8b4513"/>
+        <rect x="9" y="9" width="1" height="1" fill="#5c2c0f"/>
         
         {/* 창문 */}
         <rect x="3" y="5" width="2" height="2" fill="#87ceeb"/>
@@ -49,17 +49,17 @@ const CoopSprite = ({ gradeLevel = 1 }) => {
         <rect x="2" y="4" width="16" height="1" fill="#8b4513"/>
         
         {/* 벽 */}
-        <rect x="2" y="5" width="16" height="12" fill="#deb887"/>
-        <rect x="3" y="5" width="1" height="12" fill="#d2b48c"/>
-        <rect x="6" y="5" width="1" height="12" fill="#d2b48c"/>
-        <rect x="9" y="5" width="1" height="12" fill="#d2b48c"/>
-        <rect x="12" y="5" width="1" height="12" fill="#d2b48c"/>
-        <rect x="15" y="5" width="1" height="12" fill="#d2b48c"/>
+        <rect x="2" y="5" width="16" height="10" fill="#deb887"/>
+        <rect x="3" y="5" width="1" height="10" fill="#d2b48c"/>
+        <rect x="6" y="5" width="1" height="10" fill="#d2b48c"/>
+        <rect x="9" y="5" width="1" height="10" fill="#d2b48c"/>
+        <rect x="12" y="5" width="1" height="10" fill="#d2b48c"/>
+        <rect x="15" y="5" width="1" height="10" fill="#d2b48c"/>
         
         {/* 문 */}
-        <rect x="7" y="10" width="6" height="7" fill="#5c2c0f"/>
-        <rect x="8" y="11" width="4" height="6" fill="#8b4513"/>
-        <rect x="11" y="14" width="1" height="1" fill="#ffd700"/>
+        <rect x="7" y="9" width="6" height="6" fill="#5c2c0f"/>
+        <rect x="8" y="10" width="4" height="5" fill="#8b4513"/>
+        <rect x="11" y="12" width="1" height="1" fill="#ffd700"/>
         
         {/* 창문 */}
         <rect x="3" y="6" width="3" height="3" fill="#87ceeb"/>
@@ -68,14 +68,14 @@ const CoopSprite = ({ gradeLevel = 1 }) => {
         <rect x="15" y="6" width="1" height="3" fill="#d2b48c"/>
         
         {/* 울타리 */}
-        <rect x="0" y="12" width="2" height="5" fill="#8b4513"/>
-        <rect x="0" y="13" width="2" height="1" fill="#a0522d"/>
-        <rect x="18" y="12" width="2" height="5" fill="#8b4513"/>
-        <rect x="18" y="13" width="2" height="1" fill="#a0522d"/>
+        <rect x="0" y="11" width="2" height="4" fill="#8b4513"/>
+        <rect x="0" y="12" width="2" height="1" fill="#a0522d"/>
+        <rect x="18" y="11" width="2" height="4" fill="#8b4513"/>
+        <rect x="18" y="12" width="2" height="1" fill="#a0522d"/>
         
         {/* 풀 장식 */}
-        <rect x="0" y="16" width="1" height="1" fill="#22c55e"/>
-        <rect x="19" y="16" width="1" height="1" fill="#22c55e"/>
+        <rect x="0" y="14" width="1" height="1" fill="#22c55e"/>
+        <rect x="19" y="14" width="1" height="1" fill="#22c55e"/>
       </svg>
     );
   }
@@ -94,18 +94,18 @@ const CoopSprite = ({ gradeLevel = 1 }) => {
       <rect x="3" y="6" width="18" height="1" fill="#8b4513"/>
       
       {/* 벽 */}
-      <rect x="3" y="7" width="18" height="14" fill="#deb887"/>
-      <rect x="4" y="7" width="1" height="14" fill="#d2b48c"/>
-      <rect x="7" y="7" width="1" height="14" fill="#d2b48c"/>
-      <rect x="10" y="7" width="1" height="14" fill="#d2b48c"/>
-      <rect x="13" y="7" width="1" height="14" fill="#d2b48c"/>
-      <rect x="16" y="7" width="1" height="14" fill="#d2b48c"/>
-      <rect x="19" y="7" width="1" height="14" fill="#d2b48c"/>
+      <rect x="3" y="7" width="18" height="12" fill="#deb887"/>
+      <rect x="4" y="7" width="1" height="12" fill="#d2b48c"/>
+      <rect x="7" y="7" width="1" height="12" fill="#d2b48c"/>
+      <rect x="10" y="7" width="1" height="12" fill="#d2b48c"/>
+      <rect x="13" y="7" width="1" height="12" fill="#d2b48c"/>
+      <rect x="16" y="7" width="1" height="12" fill="#d2b48c"/>
+      <rect x="19" y="7" width="1" height="12" fill="#d2b48c"/>
       
       {/* 문 */}
-      <rect x="8" y="13" width="8" height="8" fill="#5c2c0f"/>
-      <rect x="9" y="14" width="6" height="7" fill="#8b4513"/>
-      <rect x="14" y="17" width="1" height="1" fill="#ffd700"/>
+      <rect x="8" y="12" width="8" height="7" fill="#5c2c0f"/>
+      <rect x="9" y="13" width="6" height="6" fill="#8b4513"/>
+      <rect x="14" y="15" width="1" height="1" fill="#ffd700"/>
       
       {/* 창문 (더 큼) */}
       <rect x="4" y="8" width="3" height="4" fill="#87ceeb"/>
@@ -116,26 +116,26 @@ const CoopSprite = ({ gradeLevel = 1 }) => {
       <rect x="17" y="9" width="3" height="1" fill="#d2b48c"/>
       
       {/* 울타리 (더 큼) */}
-      <rect x="0" y="14" width="3" height="7" fill="#8b4513"/>
-      <rect x="0" y="15" width="3" height="1" fill="#a0522d"/>
-      <rect x="0" y="18" width="3" height="1" fill="#a0522d"/>
-      <rect x="21" y="14" width="3" height="7" fill="#8b4513"/>
-      <rect x="21" y="15" width="3" height="1" fill="#a0522d"/>
-      <rect x="21" y="18" width="3" height="1" fill="#a0522d"/>
+      <rect x="0" y="13" width="3" height="6" fill="#8b4513"/>
+      <rect x="0" y="14" width="3" height="1" fill="#a0522d"/>
+      <rect x="0" y="16" width="3" height="1" fill="#a0522d"/>
+      <rect x="21" y="13" width="3" height="6" fill="#8b4513"/>
+      <rect x="21" y="14" width="3" height="1" fill="#a0522d"/>
+      <rect x="21" y="16" width="3" height="1" fill="#a0522d"/>
       
       {/* 황금 장식 */}
       <rect x="3" y="6" width="2" height="1" fill="#ffd700"/>
       <rect x="19" y="6" width="2" height="1" fill="#ffd700"/>
       
       {/* 꽃 장식 */}
-      <rect x="0" y="20" width="1" height="1" fill="#f472b6"/>
-      <rect x="2" y="20" width="1" height="1" fill="#fbbf24"/>
-      <rect x="21" y="20" width="1" height="1" fill="#f472b6"/>
-      <rect x="23" y="20" width="1" height="1" fill="#fbbf24"/>
+      <rect x="0" y="18" width="1" height="1" fill="#f472b6"/>
+      <rect x="2" y="18" width="1" height="1" fill="#fbbf24"/>
+      <rect x="21" y="18" width="1" height="1" fill="#f472b6"/>
+      <rect x="23" y="18" width="1" height="1" fill="#fbbf24"/>
       
       {/* 풀 */}
-      <rect x="1" y="20" width="1" height="1" fill="#22c55e"/>
-      <rect x="22" y="20" width="1" height="1" fill="#22c55e"/>
+      <rect x="1" y="18" width="1" height="1" fill="#22c55e"/>
+      <rect x="22" y="18" width="1" height="1" fill="#22c55e"/>
     </svg>
   );
 };
@@ -146,8 +146,8 @@ export const CoopPreview = ({ size = 32 }) => (
     <rect x="2" y="0" width="12" height="1" fill="#8b4513"/>
     <rect x="1" y="1" width="14" height="2" fill="#a0522d"/>
     <rect x="2" y="3" width="12" height="1" fill="#8b4513"/>
-    <rect x="2" y="4" width="12" height="10" fill="#deb887"/>
-    <rect x="6" y="8" width="4" height="6" fill="#8b4513"/>
+    <rect x="2" y="4" width="12" height="8" fill="#deb887"/>
+    <rect x="6" y="7" width="4" height="5" fill="#8b4513"/>
     <rect x="3" y="5" width="2" height="2" fill="#87ceeb"/>
     <rect x="11" y="5" width="2" height="2" fill="#87ceeb"/>
   </svg>
