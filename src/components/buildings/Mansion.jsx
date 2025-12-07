@@ -1,4 +1,224 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import ReactDOM from 'react-dom';
+
+// 엔딩 텍스트
+const ENDING_TEXTS = [
+    "닭들은 오래된 숲 한가운데에 모여,\n드디어 서로 힘을 합쳐 나무성을 완성했어요.",
+    "예전엔 인간들이 남긴 시끄러운 흔적뿐이었지만,\n이제는 바람 소리만 들려서 모두가 한숨 돌렸습니다.",
+    '닭들은 성 꼭대기에서 서로를 바라보며\n"우리가… 정말 알 딛고 여기까지 왔네요!"\n하고 가볍게 꼬꼬댔어요.',
+    "밤이 되자 나무성에 달아둔 작은 불빛들이 반짝반짝 켜져서,\n마치 새로운 시대를 축하하는 것처럼 보였습니다.",
+    "그렇게 닭들은 자신들만의 세상이 열렸음을 깨닫고,\n조금 들뜬 발걸음으로 새로운 미래를 향해 걸어갔습니다.",
+];
+
+// 타이핑 효과 컴포넌트
+const TypewriterText = ({ text, onComplete }) => {
+  const [displayedText, setDisplayedText] = useState('');
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isCompleted, setIsCompleted] = useState(false);
+
+  // text가 변경되면 초기화
+  useEffect(() => {
+    setDisplayedText('');
+    setCurrentIndex(0);
+    setIsCompleted(false);
+  }, [text]);
+
+  useEffect(() => {
+    if (!text || isCompleted) return;
+    
+    if (currentIndex < text.length) {
+      const timer = setTimeout(() => {
+        setDisplayedText(prev => prev + text[currentIndex]);
+        setCurrentIndex(prev => prev + 1);
+      }, 50);
+      return () => clearTimeout(timer);
+    } else if (currentIndex === text.length && currentIndex > 0 && !isCompleted) {
+      setIsCompleted(true);
+      if (onComplete) {
+        onComplete();
+      }
+    }
+  }, [currentIndex, text, onComplete, isCompleted]);
+
+  return <span style={{ whiteSpace: 'pre-wrap' }}>{displayedText}</span>;
+};
+
+// 엔딩 오버레이
+const EndingOverlay = ({ isVisible, currentTextIndex, isTypingComplete, onTypingComplete, onContinue, onRestart }) => {
+  if (!isVisible) return null;
+
+  return ReactDOM.createPortal(
+    <div
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(30, 20, 10, 0.98)',
+        background: 'linear-gradient(135deg, rgba(40, 25, 15, 0.98) 0%, rgba(25, 15, 10, 0.98) 50%, rgba(35, 20, 12, 0.98) 100%)',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        zIndex: 10001,
+        padding: '40px',
+        animation: 'fadeIn 1s ease-in',
+      }}
+    >
+      <style>{`
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        @keyframes candleFlicker {
+          0%, 100% { 
+            opacity: 0.9;
+            filter: brightness(1);
+          }
+          25% { 
+            opacity: 0.95;
+            filter: brightness(1.1);
+          }
+          50% { 
+            opacity: 0.85;
+            filter: brightness(0.95);
+          }
+          75% { 
+            opacity: 1;
+            filter: brightness(1.05);
+          }
+        }
+        @keyframes candleGlow {
+          0%, 100% { 
+            text-shadow: 0 0 10px rgba(255, 200, 100, 0.8), 0 0 20px rgba(255, 180, 80, 0.5);
+          }
+          50% { 
+            text-shadow: 0 0 15px rgba(255, 200, 100, 1), 0 0 30px rgba(255, 180, 80, 0.7);
+          }
+        }
+      `}</style>
+
+      {/* 배경 촛불 장식 */}
+      <div style={{ position: 'absolute', top: '12%', left: '8%', fontSize: '28px', animation: 'candleFlicker 3s infinite, candleGlow 3s infinite' }}>🕯️</div>
+      <div style={{ position: 'absolute', top: '18%', right: '12%', fontSize: '24px', animation: 'candleFlicker 3.5s infinite, candleGlow 3.5s infinite' }}>🕯️</div>
+      <div style={{ position: 'absolute', bottom: '18%', left: '15%', fontSize: '26px', animation: 'candleFlicker 2.8s infinite, candleGlow 2.8s infinite' }}>🕯️</div>
+      <div style={{ position: 'absolute', top: '55%', right: '20%', fontSize: '22px', animation: 'candleFlicker 3.2s infinite, candleGlow 3.2s infinite' }}>🕯️</div>
+      <div style={{ position: 'absolute', bottom: '28%', left: '10%', fontSize: '24px', animation: 'candleFlicker 2.5s infinite, candleGlow 2.5s infinite' }}>🕯️</div>
+      <div style={{ position: 'absolute', top: '38%', left: '6%', fontSize: '20px', animation: 'candleFlicker 3.8s infinite, candleGlow 3.8s infinite' }}>🕯️</div>
+      <div style={{ position: 'absolute', bottom: '35%', right: '8%', fontSize: '28px', animation: 'candleFlicker 2.9s infinite, candleGlow 2.9s infinite' }}>🕯️</div>
+      <div style={{ position: 'absolute', top: '25%', left: '50%', fontSize: '22px', animation: 'candleFlicker 3.3s infinite, candleGlow 3.3s infinite' }}>🕯️</div>
+
+      {/* 제목 */}
+      <div
+        style={{
+          fontSize: '48px',
+          marginBottom: '20px',
+          animation: 'fadeIn 2s ease-in',
+        }}
+      >
+        🏰
+      </div>
+
+      <h1
+        style={{
+          fontSize: '32px',
+          fontWeight: 'bold',
+          color: '#ffcc80',
+          marginBottom: '40px',
+          textShadow: '0 0 20px rgba(255, 180, 80, 0.8), 0 0 40px rgba(255, 150, 50, 0.4)',
+          animation: 'fadeIn 2s ease-in',
+        }}
+      >
+        닭들의 나무 성
+      </h1>
+
+      {/* 엔딩 텍스트 */}
+      <div
+        style={{
+          maxWidth: '700px',
+          fontSize: '20px',
+          lineHeight: '2',
+          color: '#f5e6d3',
+          textAlign: 'center',
+          marginBottom: '60px',
+          minHeight: '160px',
+          textShadow: '0 2px 8px rgba(0, 0, 0, 0.5)',
+          whiteSpace: 'pre-wrap',
+          wordBreak: 'keep-all',
+        }}
+      >
+        <TypewriterText 
+          text={ENDING_TEXTS[currentTextIndex] || ''} 
+          onComplete={onTypingComplete}
+        />
+      </div>
+
+      {/* 버튼들 (마지막 텍스트에서만 표시) */}
+      {currentTextIndex === ENDING_TEXTS.length - 1 && isTypingComplete && (
+        <div
+          style={{
+            display: 'flex',
+            gap: '20px',
+            animation: 'fadeIn 1s ease-in',
+          }}
+        >
+          <button
+            onClick={onContinue}
+            style={{
+              padding: '14px 36px',
+              backgroundColor: '#8b4513',
+              border: 'none',
+              borderRadius: '8px',
+              fontSize: '18px',
+              fontWeight: 'bold',
+              color: 'white',
+              cursor: 'pointer',
+              boxShadow: '0 4px 12px rgba(139, 69, 19, 0.4)',
+              transition: 'all 0.3s',
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.transform = 'translateY(-2px)';
+              e.target.style.boxShadow = '0 6px 16px rgba(139, 69, 19, 0.6)';
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.transform = 'translateY(0)';
+              e.target.style.boxShadow = '0 4px 12px rgba(139, 69, 19, 0.4)';
+            }}
+          >
+            🌟 계속하기
+          </button>
+          <button
+            onClick={onRestart}
+            style={{
+              padding: '14px 36px',
+              backgroundColor: 'transparent',
+              border: '2px solid #8b4513',
+              borderRadius: '8px',
+              fontSize: '18px',
+              fontWeight: 'bold',
+              color: '#8b4513',
+              cursor: 'pointer',
+              transition: 'all 0.3s',
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.backgroundColor = 'rgba(139, 69, 19, 0.1)';
+              e.target.style.transform = 'translateY(-2px)';
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.backgroundColor = 'transparent';
+              e.target.style.transform = 'translateY(0)';
+            }}
+          >
+            🔄 처음으로
+          </button>
+        </div>
+      )}
+
+    </div>,
+    document.body
+  );
+};
 
 // 미리보기용 작은 나무 성
 export const MansionPreview = ({ size = 32 }) => (
@@ -93,13 +313,54 @@ export const MansionPreview = ({ size = 32 }) => (
   </svg>
 );
 
-const Mansion = ({ x, y, isSelected, onMouseDown }) => {
+const Mansion = ({ x, y, onClick, onRestart }) => {
   const [isHovered, setIsHovered] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [showEnding, setShowEnding] = useState(false);
+  const [endingTextIndex, setEndingTextIndex] = useState(0);
+  const [isTypingComplete, setIsTypingComplete] = useState(false);
   
-  const handleMouseDown = (e) => {
+  const handleClick = (e) => {
     e.stopPropagation();
     e.preventDefault();
-    onMouseDown?.(e);
+    setShowConfirm(true);
+  };
+  
+  const handleConfirm = () => {
+    setShowConfirm(false);
+    setShowEnding(true);
+  };
+  
+  const handleCancel = () => {
+    setShowConfirm(false);
+  };
+  
+  // 엔딩 텍스트 자동 진행 (타이핑 완료 후)
+  useEffect(() => {
+    if (!showEnding || !isTypingComplete) return;
+    
+    if (endingTextIndex < ENDING_TEXTS.length - 1) {
+      const timer = setTimeout(() => {
+        setEndingTextIndex(prev => prev + 1);
+        setIsTypingComplete(false);
+      }, 1500);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [showEnding, isTypingComplete, endingTextIndex]);
+
+  const handleContinue = () => {
+    setShowEnding(false);
+    setEndingTextIndex(0);
+    setIsTypingComplete(false);
+    onClick?.();
+  };
+
+  const handleRestartGame = () => {
+    setShowEnding(false);
+    setEndingTextIndex(0);
+    setIsTypingComplete(false);
+    onRestart?.();
   };
 
   return (
@@ -109,30 +370,14 @@ const Mansion = ({ x, y, isSelected, onMouseDown }) => {
         style={{ 
           left: x - 48, 
           top: y - 90,
-          cursor: isSelected ? 'grabbing' : 'grab',
-          zIndex: isSelected ? 100 : 18,
+          cursor: 'pointer',
+          zIndex: 18,
           userSelect: 'none',
         }}
-        onMouseDown={handleMouseDown}
+        onClick={handleClick}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        {/* 선택/이동 표시 */}
-        {isSelected && (
-          <div 
-            className="absolute -top-6 left-1/2 -translate-x-1/2 px-3 py-1 rounded-lg text-xs animate-pulse"
-            style={{ 
-              backgroundColor: '#fef3c7',
-              border: '2px solid #8b4513',
-              color: '#5d4037',
-              whiteSpace: 'nowrap',
-              zIndex: 10,
-              fontWeight: 'bold',
-            }}
-          >
-            🏰 이동 중
-          </div>
-        )}
         
         {/* 나무 성 본체 */}
         <svg 
@@ -258,6 +503,105 @@ const Mansion = ({ x, y, isSelected, onMouseDown }) => {
         </svg>
         
       </div>
+      
+      {/* 엔딩 오버레이 */}
+      <EndingOverlay 
+        isVisible={showEnding} 
+        currentTextIndex={endingTextIndex}
+        isTypingComplete={isTypingComplete}
+        onTypingComplete={() => setIsTypingComplete(true)}
+        onContinue={handleContinue}
+        onRestart={handleRestartGame}
+      />
+      
+      {/* 확인 창 */}
+      {showConfirm && ReactDOM.createPortal(
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.7)',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 10000,
+          }}
+          onClick={handleCancel}
+        >
+          <div
+            style={{
+              backgroundColor: '#fff8dc',
+              border: '4px solid #8b4513',
+              borderRadius: '16px',
+              padding: '32px',
+              maxWidth: '400px',
+              textAlign: 'center',
+              boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ fontSize: '48px', marginBottom: '16px' }}>🏰</div>
+            <div
+              style={{
+                fontSize: '20px',
+                fontWeight: 'bold',
+                color: '#5d4037',
+                marginBottom: '12px',
+                lineHeight: '1.5',
+              }}
+            >
+              성이 모두 완성되었어요!
+            </div>
+            <div
+              style={{
+                fontSize: '16px',
+                color: '#8b4513',
+                marginBottom: '24px',
+                lineHeight: '1.5',
+              }}
+            >
+              닭들을 모두 소집할까요?
+            </div>
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+              <button
+                onClick={handleConfirm}
+                style={{
+                  padding: '12px 32px',
+                  backgroundColor: '#8b4513',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  fontSize: '16px',
+                  fontWeight: 'bold',
+                  cursor: 'pointer',
+                  boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
+                }}
+              >
+                예
+              </button>
+              <button
+                onClick={handleCancel}
+                style={{
+                  padding: '12px 32px',
+                  backgroundColor: 'white',
+                  color: '#8b4513',
+                  border: '2px solid #8b4513',
+                  borderRadius: '8px',
+                  fontSize: '16px',
+                  fontWeight: 'bold',
+                  cursor: 'pointer',
+                }}
+              >
+                아니요
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
     </>
   );
 };

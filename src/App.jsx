@@ -639,8 +639,6 @@ export default function ChickenGame() {
           moveWindmill(movingBuilding.id, movingBuilding.x, movingBuilding.y);
         } else if (movingBuilding.type === 'spaceship') {
           moveSpaceship(movingBuilding.id, movingBuilding.x, movingBuilding.y);
-        } else if (movingBuilding.type === 'mansion') {
-          moveMansion(movingBuilding.id, movingBuilding.x, movingBuilding.y);
         }
         setMovingBuilding(null);
       }
@@ -774,13 +772,11 @@ export default function ChickenGame() {
     }
   }, [spaceships, gameState]);
   
-  const handleMansionMouseDown = useCallback((mansionId) => {
+  const handleMansionClick = useCallback(() => {
     if (gameState !== GAME_STATE.PLAYING) return;
-    const mansion = mansions.find(m => m.id === mansionId);
-    if (mansion) {
-      setMovingBuilding({ type: 'mansion', id: mansionId, x: mansion.x, y: mansion.y });
-    }
-  }, [mansions, gameState]);
+    // 엔딩 처리 후 게임 계속하기
+    continueGame();
+  }, [gameState, continueGame]);
 
   const handleSpaceshipClick = useCallback((spaceshipId) => {
     // 발사 애니메이션은 컴포넌트 내부에서 처리됨
@@ -1067,24 +1063,16 @@ export default function ChickenGame() {
                   />
                 ))}
                 
-                {/* 닭의 성들 (이동 가능) */}
-                {mansions.filter(m => !(movingBuilding?.type === 'mansion' && movingBuilding?.id === m.id)).map(mansion => (
+                {/* 닭의 성들 (이동 불가, 클릭하면 엔딩) */}
+                {mansions.map(mansion => (
                   <Mansion 
                     key={mansion.id}
                     x={mansion.x}
                     y={mansion.y}
-                    onMouseDown={() => handleMansionMouseDown(mansion.id)}
+                    onClick={handleMansionClick}
+                    onRestart={restartGame}
                   />
                 ))}
-                
-                {/* 이동 중인 닭의 성 */}
-                {movingBuilding?.type === 'mansion' && (
-                  <Mansion 
-                    x={movingBuilding.x}
-                    y={movingBuilding.y}
-                    isSelected={true}
-                  />
-                )}
                 
                 {/* 꽃덤불들 (이동 중이 아닌 것) */}
                 {flowerBushes.filter(fb => !(movingBuilding?.type === 'flowerBush' && movingBuilding?.id === fb.id)).map(bush => (
