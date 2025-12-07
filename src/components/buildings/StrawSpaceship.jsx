@@ -40,73 +40,64 @@ const LaunchFlames = ({ isLaunching }) => (
   </svg>
 );
 
-// 흰색 깃털 하나 (픽셀아트)
+// 흰색 깃털 하나 (픽셀아트 - 부드럽고 풍성한 디자인)
 const WhiteFeather = ({ x, y, rotation = 0, scale = 1 }) => {
   return (
     <g transform={`translate(${x}, ${y}) rotate(${rotation}) scale(${scale})`}>
       {/* 깃털 줄기 */}
-      <rect x="6" y="10" width="1" height="2" fill="#e8e4dc"/>
-      <rect x="6" y="8" width="1" height="2" fill="#f0ece4"/>
+      <rect x="7" y="12" width="1" height="3" fill="#e8e4dc"/>
+      <rect x="7" y="10" width="1" height="2" fill="#f0ece4"/>
       
-      {/* 깃털 몸통 - 흰색/크림 */}
-      <rect x="4" y="6" width="1" height="3" fill="#fdfcfa"/>
-      <rect x="5" y="4" width="1" height="5" fill="#ffffff"/>
-      <rect x="6" y="2" width="1" height="6" fill="#fefefe"/>
-      <rect x="7" y="3" width="1" height="5" fill="#ffffff"/>
-      <rect x="8" y="5" width="1" height="3" fill="#fdfcfa"/>
+      {/* 깃털 몸통 - 넓고 부드러운 형태 */}
+      <rect x="4" y="8" width="1" height="4" fill="#fdfcfa"/>
+      <rect x="5" y="6" width="1" height="6" fill="#ffffff"/>
+      <rect x="6" y="4" width="1" height="8" fill="#fefefe"/>
+      <rect x="7" y="2" width="1" height="10" fill="#ffffff"/>
+      <rect x="8" y="3" width="1" height="9" fill="#fefefe"/>
+      <rect x="9" y="5" width="1" height="7" fill="#ffffff"/>
+      <rect x="10" y="7" width="1" height="5" fill="#fdfcfa"/>
       
-      {/* 깃털 끝 */}
-      <rect x="5" y="2" width="1" height="2" fill="#fafafa"/>
-      <rect x="6" y="0" width="1" height="2" fill="#f8f8f8"/>
-      <rect x="7" y="1" width="1" height="2" fill="#fafafa"/>
+      {/* 깃털 끝 - 부드러운 곡선 */}
+      <rect x="5" y="3" width="1" height="3" fill="#fafafa"/>
+      <rect x="6" y="1" width="1" height="3" fill="#f8f8f8"/>
+      <rect x="7" y="0" width="1" height="2" fill="#ffffff"/>
+      <rect x="8" y="1" width="1" height="2" fill="#f8f8f8"/>
+      <rect x="9" y="3" width="1" height="2" fill="#fafafa"/>
+      
+      {/* 깃털 양쪽 곡선 (더 풍성한 느낌) */}
+      <rect x="3" y="10" width="1" height="2" fill="#fdfcfa" opacity="0.7"/>
+      <rect x="11" y="9" width="1" height="3" fill="#fdfcfa" opacity="0.7"/>
       
       {/* 깃털 테두리 (연한 그림자) */}
-      <rect x="4" y="9" width="1" height="1" fill="#e0dcd4" opacity="0.5"/>
-      <rect x="8" y="8" width="1" height="1" fill="#e0dcd4" opacity="0.5"/>
+      <rect x="4" y="12" width="1" height="1" fill="#e0dcd4" opacity="0.5"/>
+      <rect x="10" y="12" width="1" height="1" fill="#e0dcd4" opacity="0.5"/>
     </g>
   );
 };
 
-// 하단 깃털 다발 (좌우대칭, 원형 배치)
+// 하단 깃털 다발 (깃털 없음)
 const BottomFeatherCluster = () => (
   <g>
-    {/* === 왼쪽 깃털들 (하단에서 왼쪽으로 퍼짐) === */}
-    <WhiteFeather x={4} y={18} rotation={-130} scale={0.9} />
-    <WhiteFeather x={2} y={20} rotation={-150} scale={0.85} />
-    <WhiteFeather x={6} y={21} rotation={-110} scale={0.8} />
-    <WhiteFeather x={0} y={22} rotation={-165} scale={0.75} />
-    <WhiteFeather x={5} y={23} rotation={-125} scale={0.7} />
-    
-    {/* === 오른쪽 깃털들 (하단에서 오른쪽으로 퍼짐) - 좌우대칭 === */}
-    <WhiteFeather x={24} y={18} rotation={130} scale={0.9} />
-    <WhiteFeather x={26} y={20} rotation={150} scale={0.85} />
-    <WhiteFeather x={22} y={21} rotation={110} scale={0.8} />
-    <WhiteFeather x={28} y={22} rotation={165} scale={0.75} />
-    <WhiteFeather x={23} y={23} rotation={125} scale={0.7} />
-    
-    {/* === 중앙 하단 깃털들 (아래로 향함) === */}
-    <WhiteFeather x={12} y={22} rotation={180} scale={0.85} />
-    <WhiteFeather x={16} y={22} rotation={180} scale={0.85} />
-    <WhiteFeather x={14} y={24} rotation={180} scale={0.75} />
+    {/* 깃털 제거됨 */}
   </g>
 );
 
 // 짚단 우주선 본체
 const SpaceshipBody = () => (
   <svg 
-    width="80" 
-    height="85" 
+    width="110" 
+    height="115" 
     viewBox="0 0 32 32" 
     xmlns="http://www.w3.org/2000/svg"
     style={{ imageRendering: 'pixelated' }}
   >
-    {/* ===== 각진 로켓 몸통 (사각형) ===== */}
+    {/* ===== 둥근 로켓 몸통 (더 귀여운 형태) ===== */}
     {/* 외곽 - 어두운 짚색 */}
-    <rect x="10" y="4" width="12" height="16" fill="#c4a574" rx="0"/>
+    <rect x="10" y="4" width="12" height="16" fill="#c4a574" rx="2"/>
     {/* 내부 - 밝은 짚색 */}
-    <rect x="11" y="5" width="10" height="14" fill="#deb887"/>
+    <rect x="11" y="5" width="10" height="14" fill="#f5deb3" rx="1.5"/>
     {/* 하이라이트 */}
-    <rect x="12" y="6" width="8" height="12" fill="#f5deb3"/>
+    <rect x="12" y="6" width="8" height="12" fill="#ffe4b5" rx="1"/>
     
     {/* 짚 세로 텍스처 */}
     <rect x="13" y="5" width="1" height="14" fill="#c4a574" opacity="0.4"/>
@@ -117,27 +108,76 @@ const SpaceshipBody = () => (
     <rect x="10" y="7" width="12" height="2" fill="#a0522d"/>
     <rect x="10" y="14" width="12" height="2" fill="#a0522d"/>
     
-    {/* ===== 꼭대기 (삼각형 뾰족) ===== */}
-    <polygon points="16,0 22,4 10,4" fill="#deb887" stroke="#c4a574" strokeWidth="0.5"/>
-    <polygon points="16,1 20,4 12,4" fill="#f5deb3"/>
+    {/* ===== 꼭대기 (둥근 삼각형) ===== */}
+    <polygon points="16,0 22,4 10,4" fill="#f5deb3" stroke="#c4a574" strokeWidth="0.5"/>
+    <polygon points="16,1 20,4 12,4" fill="#ffe4b5"/>
     
-    {/* 꼭대기 깃털 장식 */}
-    <rect x="15" y="-3" width="2" height="3" fill="#ffd54f"/>
-    <rect x="15" y="-4" width="2" height="1" fill="#ffe082"/>
-    <rect x="14" y="-2" width="1" height="2" fill="#ffe082" opacity="0.7"/>
-    <rect x="17" y="-2" width="1" height="2" fill="#ffe082" opacity="0.7"/>
+    {/* 귀여운 별 장식 (꼭대기) */}
+    <circle cx="16" cy="-1" r="1.5" fill="#ffd700"/>
+    <rect x="15.5" y="-2.5" width="1" height="1" fill="#ffe082"/>
+    <rect x="15.5" y="0" width="1" height="0.5" fill="#ffe082"/>
+    <rect x="14.5" y="-1.5" width="0.5" height="1" fill="#ffe082"/>
+    <rect x="17" y="-1.5" width="0.5" height="1" fill="#ffe082"/>
     
-    {/* ===== 창문 (사각형) ===== */}
-    <rect x="12" y="9" width="8" height="4" fill="#87CEEB" stroke="#5d4037" strokeWidth="1"/>
-    <rect x="13" y="9.5" width="6" height="3" fill="#b0e0e6"/>
+    {/* ===== 창문 (둥근 사각형) ===== */}
+    <rect x="12" y="9" width="8" height="5" fill="#87CEEB" stroke="#8b7355" strokeWidth="0.8" rx="1"/>
+    <rect x="13" y="9.5" width="6" height="4" fill="#b0e0e6" rx="0.8"/>
     {/* 창문 반사 */}
-    <rect x="13" y="9.5" width="2" height="1" fill="#fff" opacity="0.5"/>
+    <rect x="13.5" y="10" width="2.5" height="2" fill="#fff" opacity="0.5" rx="0.5"/>
+    <rect x="14" y="10.5" width="1.5" height="1" fill="#fff" opacity="0.7" rx="0.3"/>
     
-    {/* 창문 안 닭 */}
-    <rect x="15" y="10.5" width="2" height="2" fill="#ffd54f"/>
-    <rect x="15.5" y="10" width="1" height="0.5" fill="#ff6b35"/>
-    <rect x="15" y="10.5" width="0.5" height="0.5" fill="#333"/>
-    <rect x="16.5" y="10.5" width="0.5" height="0.5" fill="#333"/>
+    {/* ===== 좌우 날개 (수직으로 붙은 깃털) ===== */}
+    {/* 왼쪽 깃털 날개 - 우주선 외곽에 수직 */}
+    <g>
+      {/* 중심 줄기 - 완전히 수직 (일직선) */}
+      <line x1="10" y1="10" x2="10" y2="18" stroke="#d8d8d8" strokeWidth="0.5" opacity="0.8"/>
+      
+      {/* 깃털 날 왼쪽으로 수평 퍼짐 (역삼각형) */}
+      {/* 상단 (가장 넓음) */}
+      <line x1="10" y1="10.5" x2="5.5" y2="10.5" stroke="#ffffff" strokeWidth="1.2" opacity="0.9" strokeLinecap="round"/>
+      <line x1="10" y1="11" x2="6" y2="11" stroke="#fefefe" strokeWidth="1" opacity="0.85" strokeLinecap="round"/>
+      
+      {/* 중상단 */}
+      <line x1="10" y1="12" x2="6.5" y2="12" stroke="#ffffff" strokeWidth="1.1" opacity="0.88" strokeLinecap="round"/>
+      <line x1="10" y1="12.5" x2="7" y2="12.5" stroke="#fefefe" strokeWidth="0.9" opacity="0.82" strokeLinecap="round"/>
+      
+      {/* 중간 */}
+      <line x1="10" y1="14" x2="7.5" y2="14" stroke="#ffffff" strokeWidth="0.9" opacity="0.85" strokeLinecap="round"/>
+      <line x1="10" y1="14.5" x2="8" y2="14.5" stroke="#f0f8ff" strokeWidth="0.8" opacity="0.8" strokeLinecap="round"/>
+      
+      {/* 중하단 */}
+      <line x1="10" y1="16" x2="8.5" y2="16" stroke="#e8f4fc" strokeWidth="0.7" opacity="0.75" strokeLinecap="round"/>
+      <line x1="10" y1="16.5" x2="9" y2="16.5" stroke="#d0e8f0" strokeWidth="0.6" opacity="0.7" strokeLinecap="round"/>
+      
+      {/* 하단 (가장 좁음) */}
+      <line x1="10" y1="17.5" x2="9.5" y2="17.5" stroke="#c0d8e8" strokeWidth="0.5" opacity="0.65" strokeLinecap="round"/>
+    </g>
+    
+    {/* 오른쪽 깃털 날개 - 우주선 외곽에 수직 */}
+    <g>
+      {/* 중심 줄기 - 완전히 수직 (일직선) */}
+      <line x1="22" y1="10" x2="22" y2="18" stroke="#d8d8d8" strokeWidth="0.5" opacity="0.8"/>
+      
+      {/* 깃털 날 오른쪽으로 수평 퍼짐 (역삼각형) */}
+      {/* 상단 (가장 넓음) */}
+      <line x1="22" y1="10.5" x2="26.5" y2="10.5" stroke="#ffffff" strokeWidth="1.2" opacity="0.9" strokeLinecap="round"/>
+      <line x1="22" y1="11" x2="26" y2="11" stroke="#fefefe" strokeWidth="1" opacity="0.85" strokeLinecap="round"/>
+      
+      {/* 중상단 */}
+      <line x1="22" y1="12" x2="25.5" y2="12" stroke="#ffffff" strokeWidth="1.1" opacity="0.88" strokeLinecap="round"/>
+      <line x1="22" y1="12.5" x2="25" y2="12.5" stroke="#fefefe" strokeWidth="0.9" opacity="0.82" strokeLinecap="round"/>
+      
+      {/* 중간 */}
+      <line x1="22" y1="14" x2="24.5" y2="14" stroke="#ffffff" strokeWidth="0.9" opacity="0.85" strokeLinecap="round"/>
+      <line x1="22" y1="14.5" x2="24" y2="14.5" stroke="#f0f8ff" strokeWidth="0.8" opacity="0.8" strokeLinecap="round"/>
+      
+      {/* 중하단 */}
+      <line x1="22" y1="16" x2="23.5" y2="16" stroke="#e8f4fc" strokeWidth="0.7" opacity="0.75" strokeLinecap="round"/>
+      <line x1="22" y1="16.5" x2="23" y2="16.5" stroke="#d0e8f0" strokeWidth="0.6" opacity="0.7" strokeLinecap="round"/>
+      
+      {/* 하단 (가장 좁음) */}
+      <line x1="22" y1="17.5" x2="22.5" y2="17.5" stroke="#c0d8e8" strokeWidth="0.5" opacity="0.65" strokeLinecap="round"/>
+    </g>
     
     {/* ===== 하단 깃털 다발 ===== */}
     <BottomFeatherCluster />
@@ -147,12 +187,13 @@ const SpaceshipBody = () => (
     <rect x="13" y="20" width="2" height="1" fill="#4a4a4a"/>
     <rect x="17" y="20" width="2" height="1" fill="#4a4a4a"/>
     
-    {/* 하트 장식 */}
-    <rect x="15" y="16" width="1" height="1" fill="#ff69b4"/>
-    <rect x="16" y="16" width="1" height="1" fill="#ff69b4"/>
-    <rect x="14.5" y="16.5" width="1" height="1" fill="#ff69b4"/>
-    <rect x="16.5" y="16.5" width="1" height="1" fill="#ff69b4"/>
-    <rect x="15" y="17" width="2" height="1" fill="#ff69b4"/>
+    {/* 귀여운 하트 장식 (더 크고 부드럽게) */}
+    <circle cx="15.5" cy="16.5" r="0.8" fill="#ff69b4"/>
+    <circle cx="16.5" cy="16.5" r="0.8" fill="#ff69b4"/>
+    <polygon points="14.7,16.5 16,18 17.3,16.5" fill="#ff69b4"/>
+    {/* 하트 하이라이트 */}
+    <circle cx="15.3" cy="16.2" r="0.3" fill="#ffb6d9" opacity="0.7"/>
+    <circle cx="16.3" cy="16.2" r="0.3" fill="#ffb6d9" opacity="0.7"/>
   </svg>
 );
 
@@ -180,12 +221,31 @@ export const StrawSpaceshipPreview = ({ size = 32 }) => (
     {/* 창문 */}
     <rect x="6" y="5" width="4" height="2" fill="#87CEEB" stroke="#5d4037" strokeWidth="0.3"/>
     
-    {/* 하단 깃털 다발 (좌우대칭) */}
-    <ellipse cx="3" cy="13" rx="2" ry="2" fill="#fff" opacity="0.9"/>
-    <ellipse cx="13" cy="13" rx="2" ry="2" fill="#fff" opacity="0.9"/>
-    <ellipse cx="5" cy="14" rx="1.5" ry="1.5" fill="#fefefe"/>
-    <ellipse cx="11" cy="14" rx="1.5" ry="1.5" fill="#fefefe"/>
-    <ellipse cx="8" cy="14" rx="2" ry="1.5" fill="#fff"/>
+    {/* 좌우 깃털 날개 (미리보기용, 길쭉한 형태) */}
+    {/* 왼쪽 깃털 */}
+    <g>
+      <rect x="4.5" y="4" width="0.3" height="8" fill="#e8e4dc"/>
+      <rect x="4.2" y="4.5" width="0.3" height="1.5" fill="#fafafa"/>
+      <rect x="4" y="6" width="0.5" height="2" fill="#ffffff"/>
+      <rect x="3.5" y="7" width="0.5" height="1.5" fill="#fefefe"/>
+      <rect x="4" y="8.5" width="0.5" height="2" fill="#ffffff"/>
+      <rect x="4.2" y="10.5" width="0.3" height="1.5" fill="#fafafa"/>
+      <line x1="3.5" y1="7" x2="4.8" y2="7" stroke="#e0e0e0" strokeWidth="0.15" opacity="0.4"/>
+      <line x1="3.5" y1="8.5" x2="4.8" y2="8.5" stroke="#e0e0e0" strokeWidth="0.15" opacity="0.4"/>
+      <line x1="4" y1="10" x2="4.8" y2="10" stroke="#e0e0e0" strokeWidth="0.15" opacity="0.4"/>
+    </g>
+    {/* 오른쪽 깃털 */}
+    <g>
+      <rect x="11.2" y="4" width="0.3" height="8" fill="#e8e4dc"/>
+      <rect x="11.5" y="4.5" width="0.3" height="1.5" fill="#fafafa"/>
+      <rect x="11.5" y="6" width="0.5" height="2" fill="#ffffff"/>
+      <rect x="12" y="7" width="0.5" height="1.5" fill="#fefefe"/>
+      <rect x="11.5" y="8.5" width="0.5" height="2" fill="#ffffff"/>
+      <rect x="11.5" y="10.5" width="0.3" height="1.5" fill="#fafafa"/>
+      <line x1="11.2" y1="7" x2="12.5" y2="7" stroke="#e0e0e0" strokeWidth="0.15" opacity="0.4"/>
+      <line x1="11.2" y1="8.5" x2="12.5" y2="8.5" stroke="#e0e0e0" strokeWidth="0.15" opacity="0.4"/>
+      <line x1="11.2" y1="10" x2="12" y2="10" stroke="#e0e0e0" strokeWidth="0.15" opacity="0.4"/>
+    </g>
     
     {/* 엔진 */}
     <rect x="6" y="11" width="4" height="1.5" fill="#8b4513"/>
@@ -576,8 +636,8 @@ const StrawSpaceship = ({ x, y, onClick, onRestart }) => {
       <div 
         className="absolute"
         style={{ 
-          left: x - 40, 
-          top: y - 70,
+          left: x - 55, 
+          top: y - 90,
           cursor: isLaunching ? 'default' : 'pointer',
           zIndex: isLaunching ? 200 : 19,
           userSelect: 'none',
