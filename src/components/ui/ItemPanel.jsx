@@ -172,11 +172,12 @@ const ItemPanel = ({
 
   return (
     <div 
-      className="w-20 rounded-lg p-2 flex flex-col gap-2"
+      className="rounded-lg p-2 flex flex-col gap-2"
       style={{
         backgroundColor: '#f5e6c8',
         border: '4px solid #8b7355',
         boxShadow: '4px 4px 0px #5d4037',
+        width: '172px',
       }}
     >
       {/* 타이틀 */}
@@ -191,20 +192,19 @@ const ItemPanel = ({
         🛠️ 아이템
       </div>
       
-      {/* 소모품 */}
-      {consumables.map(item => renderItem(item))}
+      {/* 첫 번째 줄: 소모품 + 장식 */}
+      <div className="grid grid-cols-2 gap-2">
+        {consumables.map(item => renderItem(item))}
+        {decorations.map(item => renderItem(item))}
+      </div>
       
       {/* 구분선 */}
       <div style={{ borderTop: '2px dashed #8b7355', margin: '2px 0' }} />
       
-      {/* 장식 */}
-      {decorations.map(item => renderItem(item))}
-      
-      {/* 구분선 */}
-      <div style={{ borderTop: '2px dashed #8b7355', margin: '2px 0' }} />
-      
-      {/* 건물 */}
-      {buildings.map(item => renderItem(item))}
+      {/* 두 번째 줄: 건물 */}
+      <div className="grid grid-cols-2 gap-2">
+        {buildings.map(item => renderItem(item))}
+      </div>
       
       {/* 황금 농장 전용 구분선 */}
       <div 
@@ -216,8 +216,10 @@ const ItemPanel = ({
         <div style={{ borderTop: '2px dashed #eab308', flex: 1 }} />
       </div>
       
-      {/* 황금 농장 전용 아이템 */}
-      {goldenItems.map(item => renderItem(item, true))}
+      {/* 세 번째 줄: 황금 농장 전용 */}
+      <div className="grid grid-cols-2 gap-2">
+        {goldenItems.map(item => renderItem(item, true))}
+      </div>
       
       {/* 우주선 특별 섹션 */}
       <div 

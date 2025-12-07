@@ -66,7 +66,7 @@ const Field = ({ children, onClick, placingCoop, cursor }) => {
   return (
     <div 
       id="game-field"
-      className="relative w-full h-80 rounded-lg overflow-hidden shadow-lg"
+      className="relative w-full h-60 rounded-lg overflow-hidden shadow-lg"
       onClick={onClick}
       style={{
         cursor: cursor || (placingCoop ? 'crosshair' : 'pointer'),
