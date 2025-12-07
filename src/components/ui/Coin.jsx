@@ -28,3 +28,4 @@ const Coin = ({ size = 24 }) => (
 
 export default Coin;
 
+

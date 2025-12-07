@@ -216,3 +216,4 @@ const Windmill = ({ x, y, isSelected, onMouseDown }) => {
 
 export default Windmill;
 
+

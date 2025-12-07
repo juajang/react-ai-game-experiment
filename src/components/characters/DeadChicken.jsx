@@ -39,3 +39,4 @@ const DeadChicken = ({ x, y, deathTime }) => {
 
 export default DeadChicken;
 
+

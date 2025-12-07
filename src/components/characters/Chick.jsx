@@ -78,3 +78,4 @@ const Chick = ({ x, y, frame, direction, state, growthProgress, isSelected, onCl
 
 export default Chick;
 
+

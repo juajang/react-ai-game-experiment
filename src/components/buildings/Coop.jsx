@@ -279,3 +279,4 @@ const Coop = ({ x, y, occupants = 0, capacity, isSelected, onMouseDown, gradeLev
 
 export default Coop;
 
+
