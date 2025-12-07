@@ -363,7 +363,15 @@ export default function ChickenGame() {
   const [investigatedTiles, setInvestigatedTiles] = useState(new Set());
   
   // 인벤토리 상태 (탐험에서 얻은 아이템)
-  const [inventory, setInventory] = useState({ shovel: false });
+  const [inventory, setInventory] = useState({ 
+    // 테스트용: 모든 아이템 소유
+    shovel: true,
+    blueprint: 1,
+    metal_scrap: 3,
+    fuel_cell: 1,
+    diary: 1,
+    antenna: 1,
+  });
   const [selectedTool, setSelectedTool] = useState(null);
   
   // 모험 중인 닭 상태

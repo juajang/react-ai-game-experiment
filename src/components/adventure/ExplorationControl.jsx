@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import ReactDOM from 'react-dom';
 
 // 장소별 설명 텍스트
 const TILE_DESCRIPTIONS = {
@@ -274,6 +275,8 @@ const ExplorationControl = ({
   const [remainingMoves, setRemainingMoves] = useState(0);
   const [isRolling, setIsRolling] = useState(false);
   const [message, setMessage] = useState(adventuringChicken ? "🎲 주사위를 클릭하여 탐험을 시작하세요!" : "🐔 먼저 닭을 모험에 보내세요!");
+  const [hoveredInventoryItem, setHoveredInventoryItem] = useState(null);
+  const [tooltipPosition, setTooltipPosition] = useState(null);
   
   // 현재 위치가 조사되었는지 체크
   const posKey = `${playerPosition.x},${playerPosition.y}`;
@@ -797,13 +800,23 @@ const ExplorationControl = ({
           {/* 삽 슬롯 (도구) */}
           <div
             onClick={() => inventory.shovel && onSelectTool?.(selectedTool === 'shovel' ? null : 'shovel')}
+            onMouseEnter={(e) => {
+              if (inventory.shovel) {
+                setHoveredInventoryItem('shovel');
+                const rect = e.currentTarget.getBoundingClientRect();
+                setTooltipPosition({ left: rect.left + rect.width / 2, top: rect.top });
+              }
+            }}
+            onMouseLeave={() => {
+              setHoveredInventoryItem(null);
+              setTooltipPosition(null);
+            }}
             className="flex items-center justify-center gap-1 px-1 py-1.5 rounded cursor-pointer transition-all"
             style={{
               backgroundColor: selectedTool === 'shovel' ? '#4caf50' : (inventory.shovel ? '#37474f' : '#2a2a3e'),
               border: '1px dashed #5d4037',
               opacity: inventory.shovel ? 1 : 0.4,
             }}
-            title={inventory.shovel ? (selectedTool === 'shovel' ? '삽 사용 중!' : '클릭하여 삽 선택') : '삽 없음'}
           >
             <span style={{ fontSize: '12px' }}>🪏</span>
             <span style={{ fontSize: '7px', color: selectedTool === 'shovel' ? '#fff' : (inventory.shovel ? '#a5d6a7' : '#455a64') }}>
@@ -813,13 +826,24 @@ const ExplorationControl = ({
           
           {/* 금속 조각 슬롯 */}
           <div
-            className="flex items-center justify-center gap-1 px-1 py-1.5 rounded"
+            onMouseEnter={(e) => {
+              if ((inventory.metal_scrap || 0) > 0) {
+                setHoveredInventoryItem('metal_scrap');
+                const rect = e.currentTarget.getBoundingClientRect();
+                setTooltipPosition({ left: rect.left + rect.width / 2, top: rect.top });
+              }
+            }}
+            onMouseLeave={() => {
+              setHoveredInventoryItem(null);
+              setTooltipPosition(null);
+            }}
+            className="flex items-center justify-center gap-1 px-1 py-1.5 rounded transition-all"
             style={{
               backgroundColor: (inventory.metal_scrap || 0) > 0 ? '#37474f' : '#2a2a3e',
               border: '1px dashed #5d4037',
               opacity: (inventory.metal_scrap || 0) > 0 ? 1 : 0.4,
+              cursor: (inventory.metal_scrap || 0) > 0 ? 'pointer' : 'default',
             }}
-            title={inventory.metal_scrap ? `금속 조각 x${inventory.metal_scrap}` : '금속 조각 없음'}
           >
             <span style={{ fontSize: '12px' }}>⚙️</span>
             <span style={{ fontSize: '7px', color: (inventory.metal_scrap || 0) > 0 ? '#4fc3f7' : '#455a64' }}>
@@ -829,13 +853,24 @@ const ExplorationControl = ({
           
           {/* 우주선 설계도 조각 슬롯 */}
           <div
-            className="flex items-center justify-center gap-1 px-1 py-1.5 rounded"
+            onMouseEnter={(e) => {
+              if ((inventory.blueprint || 0) > 0) {
+                setHoveredInventoryItem('blueprint');
+                const rect = e.currentTarget.getBoundingClientRect();
+                setTooltipPosition({ left: rect.left + rect.width / 2, top: rect.top });
+              }
+            }}
+            onMouseLeave={() => {
+              setHoveredInventoryItem(null);
+              setTooltipPosition(null);
+            }}
+            className="flex items-center justify-center gap-1 px-1 py-1.5 rounded transition-all"
             style={{
               backgroundColor: (inventory.blueprint || 0) > 0 ? '#37474f' : '#2a2a3e',
               border: '1px dashed #5d4037',
               opacity: (inventory.blueprint || 0) > 0 ? 1 : 0.4,
+              cursor: (inventory.blueprint || 0) > 0 ? 'pointer' : 'default',
             }}
-            title={inventory.blueprint ? `설계도 조각 x${inventory.blueprint}` : '설계도 조각 없음'}
           >
             <span style={{ fontSize: '12px' }}>📜</span>
             <span style={{ fontSize: '7px', color: (inventory.blueprint || 0) > 0 ? '#ce93d8' : '#455a64' }}>
@@ -845,13 +880,24 @@ const ExplorationControl = ({
           
           {/* 연료 전지 슬롯 */}
           <div
-            className="flex items-center justify-center gap-1 px-1 py-1.5 rounded"
+            onMouseEnter={(e) => {
+              if ((inventory.fuel_cell || 0) > 0) {
+                setHoveredInventoryItem('fuel_cell');
+                const rect = e.currentTarget.getBoundingClientRect();
+                setTooltipPosition({ left: rect.left + rect.width / 2, top: rect.top });
+              }
+            }}
+            onMouseLeave={() => {
+              setHoveredInventoryItem(null);
+              setTooltipPosition(null);
+            }}
+            className="flex items-center justify-center gap-1 px-1 py-1.5 rounded transition-all"
             style={{
               backgroundColor: (inventory.fuel_cell || 0) > 0 ? '#37474f' : '#2a2a3e',
               border: '1px dashed #5d4037',
               opacity: (inventory.fuel_cell || 0) > 0 ? 1 : 0.4,
+              cursor: (inventory.fuel_cell || 0) > 0 ? 'pointer' : 'default',
             }}
-            title={inventory.fuel_cell ? `연료 전지 x${inventory.fuel_cell}` : '연료 전지 없음'}
           >
             <span style={{ fontSize: '12px' }}>🔋</span>
             <span style={{ fontSize: '7px', color: (inventory.fuel_cell || 0) > 0 ? '#a5d6a7' : '#455a64' }}>
@@ -861,13 +907,24 @@ const ExplorationControl = ({
           
           {/* 낡은 일기장 슬롯 */}
           <div
-            className="flex items-center justify-center gap-1 px-1 py-1.5 rounded"
+            onMouseEnter={(e) => {
+              if ((inventory.diary || 0) > 0) {
+                setHoveredInventoryItem('diary');
+                const rect = e.currentTarget.getBoundingClientRect();
+                setTooltipPosition({ left: rect.left + rect.width / 2, top: rect.top });
+              }
+            }}
+            onMouseLeave={() => {
+              setHoveredInventoryItem(null);
+              setTooltipPosition(null);
+            }}
+            className="flex items-center justify-center gap-1 px-1 py-1.5 rounded transition-all"
             style={{
               backgroundColor: (inventory.diary || 0) > 0 ? '#37474f' : '#2a2a3e',
               border: '1px dashed #5d4037',
               opacity: (inventory.diary || 0) > 0 ? 1 : 0.4,
+              cursor: (inventory.diary || 0) > 0 ? 'pointer' : 'default',
             }}
-            title={inventory.diary ? `일기장 x${inventory.diary}` : '일기장 없음'}
           >
             <span style={{ fontSize: '12px' }}>📔</span>
             <span style={{ fontSize: '7px', color: (inventory.diary || 0) > 0 ? '#ffcc80' : '#455a64' }}>
@@ -877,13 +934,24 @@ const ExplorationControl = ({
           
           {/* 부서진 안테나 슬롯 */}
           <div
-            className="flex items-center justify-center gap-1 px-1 py-1.5 rounded"
+            onMouseEnter={(e) => {
+              if ((inventory.antenna || 0) > 0) {
+                setHoveredInventoryItem('antenna');
+                const rect = e.currentTarget.getBoundingClientRect();
+                setTooltipPosition({ left: rect.left + rect.width / 2, top: rect.top });
+              }
+            }}
+            onMouseLeave={() => {
+              setHoveredInventoryItem(null);
+              setTooltipPosition(null);
+            }}
+            className="flex items-center justify-center gap-1 px-1 py-1.5 rounded transition-all"
             style={{
               backgroundColor: (inventory.antenna || 0) > 0 ? '#37474f' : '#2a2a3e',
               border: '1px dashed #5d4037',
               opacity: (inventory.antenna || 0) > 0 ? 1 : 0.4,
+              cursor: (inventory.antenna || 0) > 0 ? 'pointer' : 'default',
             }}
-            title={inventory.antenna ? `안테나 x${inventory.antenna}` : '안테나 없음'}
           >
             <span style={{ fontSize: '12px' }}>📡</span>
             <span style={{ fontSize: '7px', color: (inventory.antenna || 0) > 0 ? '#90caf9' : '#455a64' }}>
@@ -907,6 +975,127 @@ const ExplorationControl = ({
           ))}
         </div>
       </div>
+      
+      {/* 아이템 설명 툴팁 (Portal) */}
+      {hoveredInventoryItem && tooltipPosition && ReactDOM.createPortal(
+        <div
+          style={{
+            position: 'fixed',
+            left: `${tooltipPosition.left}px`,
+            top: `${tooltipPosition.top}px`,
+            transform: 'translate(-50%, -100%) translateY(-8px)',
+            backgroundColor: '#0f172a',
+            border: '3px solid #7c3aed',
+            borderRadius: '8px',
+            padding: '12px',
+            color: '#ffffff',
+            zIndex: 999999,
+            pointerEvents: 'none',
+            fontSize: '10px',
+            boxShadow: '0 8px 24px rgba(0,0,0,0.9)',
+            maxWidth: '280px',
+            lineHeight: '1.5',
+          }}
+        >
+          {hoveredInventoryItem === 'shovel' && (
+            <>
+              <div style={{ fontWeight: 'bold', marginBottom: '6px', color: '#86efac', fontSize: '11px' }}>
+                🪏 신비한 삽
+              </div>
+              <div style={{ fontStyle: 'italic', color: '#e0e7ff', marginBottom: '6px' }}>
+                "꼬꼬댁! 이 막대기는 우리 부리보다 훨씬 강해요!"<br/><br/>
+                "똥을 파낼 수 있대요. 부리로는 절대 안 할 일이지만... 이 도구는 마법처럼 똥을 사라지게 만들어요!"<br/><br/>
+                <span style={{ color: '#4ade80' }}>"농장이 깨끗해지면 모두가 행복해질 거예요. 꼬꼬!"</span>
+              </div>
+              <div style={{ fontSize: '8px', color: '#94a3b8', borderTop: '1px solid #475569', paddingTop: '4px' }}>
+                똥을 제거할 수 있는 특수 도구입니다.
+              </div>
+            </>
+          )}
+          
+          {hoveredInventoryItem === 'metal_scrap' && (
+            <>
+              <div style={{ fontWeight: 'bold', marginBottom: '6px', color: '#4fc3f7', fontSize: '11px' }}>
+                🔩 신기한 금속 조각
+              </div>
+              <div style={{ fontStyle: 'italic', color: '#e0e7ff', marginBottom: '6px' }}>
+                "이건... 딱딱해요. 너무 딱딱해서 부리가 부러질 것 같아요!"<br/><br/>
+                "반짝반짝 빛나는 게 예쁘긴 한데, 먹을 수는 없나 봐요."<br/><br/>
+                <span style={{ color: '#4ade80' }}>"하지만 이걸로 뭔가 대단한 걸 만들 수 있다는 느낌이 들어요! 꼬꼬댁!"</span>
+              </div>
+              <div style={{ fontSize: '8px', color: '#94a3b8', borderTop: '1px solid #475569', paddingTop: '4px' }}>
+                우주선의 외벽 재료로 사용됩니다.
+              </div>
+            </>
+          )}
+          
+          {hoveredInventoryItem === 'blueprint' && (
+            <>
+              <div style={{ fontWeight: 'bold', marginBottom: '6px', color: '#ce93d8', fontSize: '11px' }}>
+                📜 우주선 설계도 조각
+              </div>
+              <div style={{ fontStyle: 'italic', color: '#e0e7ff', marginBottom: '6px' }}>
+                "꼬꼬댁... 이게 뭘까요? 종이에 이상한 그림이 가득해요."<br/><br/>
+                "화살표랑 숫자들... 아, 이건 어쩌면 우리를 하늘로 데려다줄 마법 상자의 비밀일지도 몰라요!"<br/><br/>
+                <span style={{ color: '#fde047' }}>"다른 조각들도 찾으면... 우리도 날 수 있을까요? 꼬꼬댁! ✨"</span>
+              </div>
+              <div style={{ fontSize: '8px', color: '#94a3b8', borderTop: '1px solid #475569', paddingTop: '4px' }}>
+                우주선 건설에 필요한 신비한 설계도입니다.
+              </div>
+            </>
+          )}
+          
+          {hoveredInventoryItem === 'fuel_cell' && (
+            <>
+              <div style={{ fontWeight: 'bold', marginBottom: '6px', color: '#a5d6a7', fontSize: '11px' }}>
+                ⚡ 연료 전지
+              </div>
+              <div style={{ fontStyle: 'italic', color: '#e0e7ff', marginBottom: '6px' }}>
+                <span style={{ color: '#4ade80', fontWeight: 'bold' }}>"이 장치는 우주선의 추진 엔진으로, 모터가 회전하며 거대한 힘을 만들어 앞으로 나아가게 합니다."</span><br/><br/>
+                <span style={{ color: '#fbbf24', fontWeight: 'bold' }}>"음… 닭 기준으로 설명하자면, 아주 거대한 부채질 같은 거라고 생각하면 됩니다."</span><br/><br/>
+                "다만 날개로 부채질하는 게 아니니, 여기서 진짜 날갯짓은 금지예요—불이 납니다."<br/><br/>
+                "만약 이걸 먹어도 되냐고 묻는다면, 대답은 단호하게 '아니요!'입니다."
+              </div>
+              <div style={{ fontSize: '8px', color: '#94a3b8', borderTop: '1px solid #475569', paddingTop: '4px' }}>
+                우주선의 추진 동력원입니다.
+              </div>
+            </>
+          )}
+          
+          {hoveredInventoryItem === 'diary' && (
+            <>
+              <div style={{ fontWeight: 'bold', marginBottom: '6px', color: '#ffcc80', fontSize: '11px' }}>
+                📔 낡은 일기장
+              </div>
+              <div style={{ fontStyle: 'italic', color: '#e0e7ff', marginBottom: '6px' }}>
+                "누군가의 일기장이에요. 페이지마다 손때가 가득하고, 글씨가 흐려져 있어요."<br/><br/>
+                "읽어봤는데... 대부분 '오늘도 외로웠다', '누가 없나' 같은 말뿐이에요."<br/><br/>
+                <span style={{ color: '#93c5fd' }}>"마지막 페이지에는 '하늘로 가고 싶다'고 적혀있어요. 꼬꼬... 슬퍼요."</span>
+              </div>
+              <div style={{ fontSize: '8px', color: '#94a3b8', borderTop: '1px solid #475569', paddingTop: '4px' }}>
+                옛날 누군가의 기록입니다. 힌트가 있을지도?
+              </div>
+            </>
+          )}
+          
+          {hoveredInventoryItem === 'antenna' && (
+            <>
+              <div style={{ fontWeight: 'bold', marginBottom: '6px', color: '#90caf9', fontSize: '11px' }}>
+                📡 부서진 안테나
+              </div>
+              <div style={{ fontStyle: 'italic', color: '#e0e7ff', marginBottom: '6px' }}>
+                "이 뾰족한 막대기... 위로 쭉 뻗어있어요. 꼭 커다란 벼 줄기 같아요!"<br/><br/>
+                "하지만 먹을 수는 없어요. 딱딱하고 차가워요."<br/><br/>
+                <span style={{ color: '#fbbf24' }}>"이걸로 뭔가 신호를 보낼 수 있다고 들었어요. 우주로요! 꼬꼬댁!"</span>
+              </div>
+              <div style={{ fontSize: '8px', color: '#94a3b8', borderTop: '1px solid #475569', paddingTop: '4px' }}>
+                통신 장비의 일부입니다. 수리하면 쓸모가 있을지도?
+              </div>
+            </>
+          )}
+        </div>,
+        document.body
+      )}
     </div>
   );
 };

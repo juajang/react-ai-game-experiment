@@ -126,7 +126,7 @@ export const GAME_CONFIG = {
     COST: 500,                       // 높은 가격 (엔드게임 컨텐츠)
     REQUIRED_ITEMS: {                // 필요 재료
       metal_scrap: 3,                // 신기한 금속 조각 3개
-      blueprint: 2,                  // 우주선 설계도 조각 2개
+      blueprint: 1,                  // 우주선 설계도 조각 1개
       fuel_cell: 1,                  // 연료 전지 1개
     },
   },

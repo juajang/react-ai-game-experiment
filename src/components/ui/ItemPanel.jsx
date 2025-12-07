@@ -278,7 +278,7 @@ const ItemPanel = ({
         <div style={{ fontSize: '7px', color: '#6b7280', marginTop: '2px' }}>
           <span style={{ color: (inventory.metal_scrap || 0) >= 3 ? '#22c55e' : '#ef4444' }}>⚙️{inventory.metal_scrap || 0}/3</span>
           {' '}
-          <span style={{ color: (inventory.blueprint || 0) >= 2 ? '#22c55e' : '#ef4444' }}>📜{inventory.blueprint || 0}/2</span>
+          <span style={{ color: (inventory.blueprint || 0) >= 1 ? '#22c55e' : '#ef4444' }}>📜{inventory.blueprint || 0}/1</span>
           {' '}
           <span style={{ color: (inventory.fuel_cell || 0) >= 1 ? '#22c55e' : '#ef4444' }}>🔋{inventory.fuel_cell || 0}/1</span>
         </div>
@@ -364,7 +364,7 @@ const ItemPanel = ({
               🔩 금속 조각 × {GAME_CONFIG.SPACESHIP.REQUIRED_ITEMS.metal_scrap} 
               <span style={{ color: '#cbd5e1' }}> ({inventory.metal_scrap || 0})</span>
             </div>
-            <div style={{ color: (inventory.blueprint || 0) >= 2 ? '#86efac' : '#fca5a5', fontWeight: 'bold' }}>
+            <div style={{ color: (inventory.blueprint || 0) >= 1 ? '#86efac' : '#fca5a5', fontWeight: 'bold' }}>
               📜 설계도 × {GAME_CONFIG.SPACESHIP.REQUIRED_ITEMS.blueprint}
               <span style={{ color: '#cbd5e1' }}> ({inventory.blueprint || 0})</span>
             </div>
