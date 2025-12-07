@@ -213,19 +213,28 @@ export const useGameLoop = (fieldSize, adventuringChickenId = null) => {
     ));
   };
 
-  // 우주선 추가 (테스트용: 조건 없음)
+  // 우주선 추가
   const addSpaceship = (x, y, inventory, consumeItems) => {
-    // TODO: 테스트 후 원래 조건 복원
-    // const totalChickens = chickensRef.current.length;
-    // const isGoldenFarm = totalChickens >= FARM_GRADE.GOLDEN_FARM.minChickens;
-    // const requiredItems = GAME_CONFIG.SPACESHIP?.REQUIRED_ITEMS || {};
-    // const hasAllMaterials = Object.entries(requiredItems).every(
-    //   ([item, count]) => (inventory[item] || 0) >= count
-    // );
+    const totalChickens = chickensRef.current.length;
+    const isGoldenFarm = totalChickens >= FARM_GRADE.GOLDEN_FARM.minChickens;
+    const requiredItems = GAME_CONFIG.SPACESHIP?.REQUIRED_ITEMS || {};
+    const hasAllMaterials = Object.entries(requiredItems).every(
+      ([item, count]) => (inventory[item] || 0) >= count
+    );
     
-    // 테스트용: 무조건 배치 가능
-    setSpaceships(prev => [...prev, { id: Date.now(), x, y }]);
-    return true;
+    // 황금 농장 + 코인 + 필요 재료 체크
+    if (isGoldenFarm && coins >= GAME_CONFIG.SPACESHIP.COST && hasAllMaterials) {
+      setSpaceships(prev => [...prev, { id: Date.now(), x, y }]);
+      setCoins(prev => prev - GAME_CONFIG.SPACESHIP.COST);
+      
+      // 재료 소모
+      Object.entries(requiredItems).forEach(([item, count]) => {
+        consumeItems(item, count);
+      });
+      
+      return true;
+    }
+    return false;
   };
 
   // 우주선 이동

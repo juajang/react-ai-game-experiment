@@ -1,42 +1,76 @@
 import { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 
-// 발사 불꽃 애니메이션
+// 발사 불꽃 애니메이션 (픽셀아트 역삼각형)
 const LaunchFlames = ({ isLaunching }) => (
   <svg 
-    width="60" 
-    height="40" 
-    viewBox="0 0 60 40" 
+    width="80" 
+    height="70" 
+    viewBox="0 0 20 18" 
     xmlns="http://www.w3.org/2000/svg"
     style={{
       position: 'absolute',
-      bottom: '-45px',
-      left: '10px',
+      bottom: '0px',
+      left: '15px',
       opacity: isLaunching ? 1 : 0,
       transition: 'opacity 0.3s',
       pointerEvents: 'none',
+      imageRendering: 'pixelated',
     }}
   >
-    {/* 불꽃 외곽 - 주황색 */}
-    <ellipse cx="30" cy="10" rx="20" ry="8" fill="#ff6b35">
-      <animate attributeName="ry" values="8;12;8" dur="0.15s" repeatCount="indefinite"/>
-    </ellipse>
-    <ellipse cx="30" cy="20" rx="15" ry="15" fill="#ff6b35">
-      <animate attributeName="ry" values="15;20;15" dur="0.12s" repeatCount="indefinite"/>
-    </ellipse>
+    {/* 역삼각형 불꽃 (위가 넓고 아래가 좁음) */}
     
-    {/* 불꽃 중앙 - 노란색 */}
-    <ellipse cx="30" cy="10" rx="12" ry="5" fill="#ffd700">
-      <animate attributeName="ry" values="5;8;5" dur="0.1s" repeatCount="indefinite"/>
-    </ellipse>
-    <ellipse cx="30" cy="18" rx="8" ry="10" fill="#ffd700">
-      <animate attributeName="ry" values="10;14;10" dur="0.08s" repeatCount="indefinite"/>
-    </ellipse>
+    {/* 최하단 (가장 좁음) - 주황색 */}
+    <rect x="9" y="17" width="2" height="1" fill="#ff4500"><animate attributeName="opacity" values="0.9;1;0.85" dur="0.1s" repeatCount="indefinite"/></rect>
     
-    {/* 불꽃 코어 - 흰색 */}
-    <ellipse cx="30" cy="12" rx="5" ry="6" fill="#fff">
-      <animate attributeName="ry" values="6;9;6" dur="0.1s" repeatCount="indefinite"/>
-    </ellipse>
+    {/* 하단 - 주황색 */}
+    <rect x="8" y="16" width="1" height="1" fill="#ff6b35"><animate attributeName="opacity" values="0.85;1;0.9" dur="0.12s" repeatCount="indefinite"/></rect>
+    <rect x="9" y="16" width="2" height="1" fill="#ff8c42"><animate attributeName="opacity" values="1;0.8;1" dur="0.11s" repeatCount="indefinite"/></rect>
+    <rect x="11" y="16" width="1" height="1" fill="#ff6b35"><animate attributeName="opacity" values="0.9;1;0.85" dur="0.13s" repeatCount="indefinite"/></rect>
+    
+    {/* 중하단 - 주황/노랑 */}
+    <rect x="7" y="15" width="1" height="1" fill="#ff8c42"><animate attributeName="opacity" values="0.8;1;0.8" dur="0.14s" repeatCount="indefinite"/></rect>
+    <rect x="8" y="15" width="2" height="1" fill="#ffa500"><animate attributeName="opacity" values="1;0.85;1" dur="0.12s" repeatCount="indefinite"/></rect>
+    <rect x="10" y="15" width="2" height="1" fill="#ffa500"><animate attributeName="opacity" values="0.9;1;0.9" dur="0.11s" repeatCount="indefinite"/></rect>
+    <rect x="12" y="15" width="1" height="1" fill="#ff8c42"><animate attributeName="opacity" values="0.85;1;0.8" dur="0.15s" repeatCount="indefinite"/></rect>
+    
+    {/* 중간 - 노란색 */}
+    <rect x="6" y="14" width="1" height="1" fill="#ffa500"><animate attributeName="opacity" values="0.8;1;0.85" dur="0.13s" repeatCount="indefinite"/></rect>
+    <rect x="7" y="14" width="2" height="1" fill="#ffd700"><animate attributeName="opacity" values="1;0.9;1" dur="0.12s" repeatCount="indefinite"/></rect>
+    <rect x="9" y="14" width="2" height="1" fill="#ffed4e"><animate attributeName="opacity" values="0.95;1;0.9" dur="0.1s" repeatCount="indefinite"/></rect>
+    <rect x="11" y="14" width="2" height="1" fill="#ffd700"><animate attributeName="opacity" values="1;0.85;1" dur="0.14s" repeatCount="indefinite"/></rect>
+    <rect x="13" y="14" width="1" height="1" fill="#ffa500"><animate attributeName="opacity" values="0.85;1;0.8" dur="0.16s" repeatCount="indefinite"/></rect>
+    
+    {/* 중상단 - 밝은 노란색 */}
+    <rect x="5" y="13" width="1" height="1" fill="#ffd700"><animate attributeName="opacity" values="0.75;1;0.8" dur="0.15s" repeatCount="indefinite"/></rect>
+    <rect x="6" y="13" width="2" height="1" fill="#ffed4e"><animate attributeName="opacity" values="1;0.9;1" dur="0.12s" repeatCount="indefinite"/></rect>
+    <rect x="8" y="13" width="2" height="1" fill="#fff"><animate attributeName="opacity" values="0.9;1;0.95" dur="0.1s" repeatCount="indefinite"/></rect>
+    <rect x="10" y="13" width="2" height="1" fill="#fff"><animate attributeName="opacity" values="1;0.9;1" dur="0.11s" repeatCount="indefinite"/></rect>
+    <rect x="12" y="13" width="2" height="1" fill="#ffed4e"><animate attributeName="opacity" values="0.95;1;0.9" dur="0.13s" repeatCount="indefinite"/></rect>
+    <rect x="14" y="13" width="1" height="1" fill="#ffd700"><animate attributeName="opacity" values="0.8;1;0.75" dur="0.17s" repeatCount="indefinite"/></rect>
+    
+    {/* 상단 (가장 넓음) - 흰색/노란색 */}
+    <rect x="4" y="12" width="1" height="1" fill="#ffed4e"><animate attributeName="opacity" values="0.7;1;0.75" dur="0.16s" repeatCount="indefinite"/></rect>
+    <rect x="5" y="12" width="2" height="1" fill="#fff"><animate attributeName="opacity" values="1;0.85;1" dur="0.11s" repeatCount="indefinite"/></rect>
+    <rect x="7" y="12" width="2" height="1" fill="#fff"><animate attributeName="opacity" values="0.9;1;0.9" dur="0.1s" repeatCount="indefinite"/></rect>
+    <rect x="9" y="12" width="2" height="1" fill="#fff"><animate attributeName="opacity" values="1;0.95;1" dur="0.09s" repeatCount="indefinite"/></rect>
+    <rect x="11" y="12" width="2" height="1" fill="#fff"><animate attributeName="opacity" values="0.95;1;0.9" dur="0.12s" repeatCount="indefinite"/></rect>
+    <rect x="13" y="12" width="2" height="1" fill="#fff"><animate attributeName="opacity" values="1;0.9;1" dur="0.13s" repeatCount="indefinite"/></rect>
+    <rect x="15" y="12" width="1" height="1" fill="#ffed4e"><animate attributeName="opacity" values="0.75;1;0.7" dur="0.18s" repeatCount="indefinite"/></rect>
+    
+    {/* 최상단 - 튀는 불똥 */}
+    <rect x="6" y="11" width="1" height="1" fill="#fff"><animate attributeName="opacity" values="0;1;0" dur="0.2s" repeatCount="indefinite"/></rect>
+    <rect x="9" y="11" width="2" height="1" fill="#fff"><animate attributeName="opacity" values="0.8;1;0.8" dur="0.15s" repeatCount="indefinite"/></rect>
+    <rect x="13" y="11" width="1" height="1" fill="#fff"><animate attributeName="opacity" values="0;1;0" dur="0.22s" repeatCount="indefinite" begin="0.1s"/></rect>
+    
+    <rect x="8" y="10" width="1" height="1" fill="#fff"><animate attributeName="opacity" values="0;0.9;0" dur="0.25s" repeatCount="indefinite"/></rect>
+    <rect x="11" y="10" width="1" height="1" fill="#fff"><animate attributeName="opacity" values="0;0.85;0" dur="0.28s" repeatCount="indefinite" begin="0.12s"/></rect>
+    
+    {/* 양쪽 불똥 */}
+    <rect x="3" y="13" width="1" height="1" fill="#ff8c42"><animate attributeName="opacity" values="0;0.8;0" dur="0.3s" repeatCount="indefinite"/></rect>
+    <rect x="16" y="13" width="1" height="1" fill="#ff8c42"><animate attributeName="opacity" values="0;0.9;0" dur="0.32s" repeatCount="indefinite" begin="0.1s"/></rect>
+    <rect x="2" y="14" width="1" height="1" fill="#ffd700"><animate attributeName="opacity" values="0;0.7;0" dur="0.35s" repeatCount="indefinite" begin="0.15s"/></rect>
+    <rect x="17" y="14" width="1" height="1" fill="#ffd700"><animate attributeName="opacity" values="0;0.75;0" dur="0.33s" repeatCount="indefinite" begin="0.08s"/></rect>
   </svg>
 );
 
@@ -646,42 +680,57 @@ const StrawSpaceship = ({ x, y, onClick, onRestart }) => {
         onMouseDown={handleMouseDown}
         onClick={handleClick}
       >
-        {/* 발사 안내 표시 - 클릭 통과 */}
-        {!isLaunching && (
-          <div 
-            className="absolute -top-6 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded text-xs animate-pulse"
-            style={{ 
-              backgroundColor: '#c4b5fd',
-              border: '2px solid #7c3aed',
-              color: '#4c1d95',
-              whiteSpace: 'nowrap',
-              zIndex: 10,
-              pointerEvents: 'none',
-            }}
-          >
-            🚀 클릭하여 발사!
-          </div>
-        )}
-        
         {/* 발사 불꽃 */}
         <LaunchFlames isLaunching={launchPhase === 2} />
         
         {/* 우주선 본체 */}
         <SpaceshipBody />
         
-        {/* 효과 아이콘 - 클릭 통과 */}
-        {!isLaunching && (
-          <div 
-            className="absolute -bottom-6 left-1/2 -translate-x-1/2 px-1.5 py-0.5 rounded"
-            style={{ 
-              backgroundColor: '#c4b5fd',
-              color: '#4c1d95',
-              fontSize: '9px',
-              pointerEvents: 'none',
-            }}
-          >
-            🚀
-          </div>
+        {/* 먼지/연기 효과 (카운트다운 중) */}
+        {launchPhase === 1 && (
+          <>
+            {/* 먼지 구름 1 (왼쪽) */}
+            <div 
+              className="absolute"
+              style={{
+                bottom: '0px',
+                left: '10px',
+                width: '50px',
+                height: '50px',
+                background: 'radial-gradient(circle, rgba(120,100,80,0.8) 0%, rgba(140,120,100,0.4) 40%, transparent 70%)',
+                animation: 'dustExpand1 0.8s ease-out infinite',
+                pointerEvents: 'none',
+              }}
+            />
+            {/* 먼지 구름 2 (오른쪽) */}
+            <div 
+              className="absolute"
+              style={{
+                bottom: '0px',
+                left: '50px',
+                width: '50px',
+                height: '50px',
+                background: 'radial-gradient(circle, rgba(100,80,60,0.7) 0%, rgba(130,110,90,0.3) 40%, transparent 70%)',
+                animation: 'dustExpand2 0.7s ease-out infinite',
+                animationDelay: '0.15s',
+                pointerEvents: 'none',
+              }}
+            />
+            {/* 중앙 먼지 입자들 */}
+            <div 
+              className="absolute"
+              style={{
+                bottom: '5px',
+                left: '35px',
+                width: '40px',
+                height: '40px',
+                background: 'radial-gradient(circle, rgba(140,120,100,0.6) 0%, rgba(160,140,120,0.2) 50%, transparent 70%)',
+                animation: 'dustPuff 0.6s ease-out infinite',
+                animationDelay: '0.3s',
+                pointerEvents: 'none',
+              }}
+            />
+          </>
         )}
         
         {/* 연기 효과 (발사 중) - 클릭 통과 */}
@@ -689,11 +738,11 @@ const StrawSpaceship = ({ x, y, onClick, onRestart }) => {
           <div 
             className="absolute"
             style={{
-              bottom: '-60px',
-              left: '0px',
-              width: '80px',
-              height: '60px',
-              background: 'radial-gradient(ellipse, rgba(200,200,200,0.8) 0%, transparent 70%)',
+              bottom: '0px',
+              left: '5px',
+              width: '100px',
+              height: '80px',
+              background: 'radial-gradient(ellipse, rgba(140,140,140,0.95) 0%, rgba(120,120,120,0.7) 40%, rgba(100,100,100,0.3) 70%, transparent 100%)',
               animation: 'smokeExpand 0.5s ease-out forwards',
               pointerEvents: 'none',
             }}
@@ -725,11 +774,44 @@ const StrawSpaceship = ({ x, y, onClick, onRestart }) => {
           
           @keyframes smokeExpand {
             0% { 
-              transform: scale(0.5);
-              opacity: 0.8;
+              transform: scale(0.8);
+              opacity: 0.9;
             }
             100% { 
-              transform: scale(3);
+              transform: scale(3.5);
+              opacity: 0;
+            }
+          }
+          
+          @keyframes dustExpand1 {
+            0% { 
+              transform: scale(0.3) translateX(0);
+              opacity: 0.6;
+            }
+            100% { 
+              transform: scale(1.5) translateX(-15px);
+              opacity: 0;
+            }
+          }
+          
+          @keyframes dustExpand2 {
+            0% { 
+              transform: scale(0.3) translateX(0);
+              opacity: 0.5;
+            }
+            100% { 
+              transform: scale(1.5) translateX(15px);
+              opacity: 0;
+            }
+          }
+          
+          @keyframes dustPuff {
+            0% { 
+              transform: scale(0.5) translateY(0);
+              opacity: 0.4;
+            }
+            100% { 
+              transform: scale(1.2) translateY(-10px);
               opacity: 0;
             }
           }

@@ -1,3 +1,5 @@
+import { useState, useRef, useEffect } from 'react';
+import ReactDOM from 'react-dom';
 import { GAME_CONFIG, FARM_GRADE } from '../../constants/gameConfig';
 import { CoopPreview } from '../buildings/Coop';
 import { FlowerPreview } from '../items/Flower';
@@ -39,6 +41,9 @@ const ItemPanel = ({
   inventory = {},
 }) => {
   const isGoldenFarm = farmGrade?.level === FARM_GRADE.GOLDEN_FARM.level;
+  const [hoveredItem, setHoveredItem] = useState(null);
+  const [tooltipPosition, setTooltipPosition] = useState(null);
+  const buttonRefs = useRef({});
   const consumables = [
     {
       id: 'feed',
@@ -90,14 +95,12 @@ const ItemPanel = ({
     },
   ];
 
-  // 우주선 재료 체크 (테스트용: 항상 건설 가능)
-  // TODO: 테스트 후 원래 조건 복원
-  // const requiredItems = GAME_CONFIG.SPACESHIP?.REQUIRED_ITEMS || {};
-  // const hasAllMaterials = Object.entries(requiredItems).every(
-  //   ([item, count]) => (inventory[item] || 0) >= count
-  // );
-  // const canBuildSpaceship = coins >= (GAME_CONFIG.SPACESHIP?.COST || 500) && hasAllMaterials && isGoldenFarm;
-  const canBuildSpaceship = true; // 테스트용
+  // 우주선 재료 체크
+  const requiredItems = GAME_CONFIG.SPACESHIP?.REQUIRED_ITEMS || {};
+  const hasAllMaterials = Object.entries(requiredItems).every(
+    ([item, count]) => (inventory[item] || 0) >= count
+  );
+  const canBuildSpaceship = coins >= (GAME_CONFIG.SPACESHIP?.COST || 500) && hasAllMaterials && isGoldenFarm;
 
   const renderItem = (item, isGoldenItem = false) => {
     const canAfford = coins >= item.cost;
@@ -105,19 +108,39 @@ const ItemPanel = ({
     const isSelected = selectedItem === item.id;
     const isDisabled = !canAfford || isLocked;
     
+    const handleMouseEnter = (e) => {
+      setHoveredItem(item.id);
+      const rect = e.currentTarget.getBoundingClientRect();
+      setTooltipPosition({
+        left: rect.right + 8,
+        top: rect.top,
+      });
+    };
+    
+    const handleMouseLeave = () => {
+      setHoveredItem(null);
+      setTooltipPosition(null);
+    };
+    
     return (
-      <button
+      <div
         key={item.id}
-        onClick={() => !isDisabled && onSelectItem(isSelected ? null : item.id)}
-        disabled={isDisabled}
-        className="flex flex-col items-center p-2 rounded transition-all w-full relative"
-        style={{
-          backgroundColor: isSelected ? '#fef3c7' : isGoldenItem ? '#fef08a' : '#e8d5b7',
-          border: isSelected ? '3px solid #f59e0b' : isGoldenItem ? '2px solid #eab308' : '2px solid #8b7355',
-          opacity: isDisabled ? 0.5 : 1,
-          cursor: isDisabled ? 'not-allowed' : 'pointer',
-        }}
+        ref={el => buttonRefs.current[item.id] = el}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        className="relative w-full"
       >
+        <button
+          onClick={() => !isDisabled && onSelectItem(isSelected ? null : item.id)}
+          className="flex flex-col items-center p-2 rounded transition-all w-full relative"
+          style={{
+            backgroundColor: isSelected ? '#fef3c7' : isGoldenItem ? '#fef08a' : '#e8d5b7',
+            border: isSelected ? '3px solid #f59e0b' : isGoldenItem ? '2px solid #eab308' : '2px solid #8b7355',
+            opacity: isDisabled ? 0.5 : 1,
+            cursor: isDisabled ? 'not-allowed' : 'pointer',
+          }}
+        >
+        
         {isLocked && (
           <div 
             className="absolute -top-1 -right-1 text-xs"
@@ -143,6 +166,7 @@ const ItemPanel = ({
           <span>{item.cost}</span>
         </div>
       </button>
+      </div>
     );
   };
 
@@ -206,18 +230,33 @@ const ItemPanel = ({
       </div>
       
       {/* 우주선 */}
-      <button
-        onClick={() => canBuildSpaceship && onSelectItem(selectedItem === 'spaceship' ? null : 'spaceship')}
-        disabled={!canBuildSpaceship}
-        className="flex flex-col items-center p-2 rounded transition-all w-full relative"
-        style={{
-          backgroundColor: selectedItem === 'spaceship' ? '#ddd6fe' : '#ede9fe',
-          border: selectedItem === 'spaceship' ? '3px solid #7c3aed' : '2px solid #a78bfa',
-          opacity: canBuildSpaceship ? 1 : 0.5,
-          cursor: canBuildSpaceship ? 'pointer' : 'not-allowed',
+      <div
+        ref={el => buttonRefs.current['spaceship'] = el}
+        onMouseEnter={(e) => {
+          setHoveredItem('spaceship');
+          const rect = e.currentTarget.getBoundingClientRect();
+          setTooltipPosition({
+            left: rect.right + 8,
+            top: rect.top,
+          });
         }}
-        title={!isGoldenFarm ? '황금 닭 농장 필요' : !hasAllMaterials ? '재료 부족' : '우주선 건설!'}
+        onMouseLeave={() => {
+          setHoveredItem(null);
+          setTooltipPosition(null);
+        }}
+        className="relative w-full"
       >
+        <button
+          onClick={() => canBuildSpaceship && onSelectItem(selectedItem === 'spaceship' ? null : 'spaceship')}
+          className="flex flex-col items-center p-2 rounded transition-all w-full relative"
+          style={{
+            backgroundColor: selectedItem === 'spaceship' ? '#ddd6fe' : '#ede9fe',
+            border: selectedItem === 'spaceship' ? '3px solid #7c3aed' : '2px solid #a78bfa',
+            opacity: canBuildSpaceship ? 1 : 0.5,
+            cursor: canBuildSpaceship ? 'pointer' : 'not-allowed',
+          }}
+        >
+        
         {!isGoldenFarm && (
           <div className="absolute -top-1 -right-1 text-xs">🔒</div>
         )}
@@ -244,6 +283,7 @@ const ItemPanel = ({
           <span style={{ color: (inventory.fuel_cell || 0) >= 1 ? '#22c55e' : '#ef4444' }}>🔋{inventory.fuel_cell || 0}/1</span>
         </div>
       </button>
+      </div>
       
       {/* 보유 개수 */}
       <div 
@@ -260,6 +300,85 @@ const ItemPanel = ({
         {windmillCount > 0 && <div>🌀 {windmillCount}개</div>}
         {spaceshipCount > 0 && <div style={{ color: '#7c3aed' }}>🚀 {spaceshipCount}개</div>}
       </div>
+      
+      {/* Portal 툴팁들 */}
+      {hoveredItem === 'windmill' && tooltipPosition && ReactDOM.createPortal(
+        <div 
+          style={{ 
+            position: 'fixed',
+            left: `${tooltipPosition.left}px`,
+            top: `${tooltipPosition.top}px`,
+            backgroundColor: '#0f172a',
+            border: '3px solid #eab308',
+            borderRadius: '8px',
+            padding: '8px 12px',
+            color: '#ffffff',
+            whiteSpace: 'nowrap',
+            zIndex: 999999,
+            pointerEvents: 'none',
+            fontSize: '10px',
+            boxShadow: '0 8px 24px rgba(0,0,0,0.8)',
+            minWidth: '160px',
+          }}
+        >
+          <div style={{ fontWeight: 'bold', marginBottom: '4px', color: '#fde047', fontSize: '11px' }}>
+            🌀 풍차 건설 조건
+          </div>
+          <div style={{ marginBottom: '3px' }}>💰 코인: <span style={{ color: '#ffd700', fontWeight: 'bold' }}>{GAME_CONFIG.WINDMILL.COST}</span></div>
+          <div style={{ fontSize: '9px', color: '#fde047', marginTop: '4px', borderTop: '2px solid #475569', paddingTop: '4px' }}>
+            ✨ 황금 닭 농장 필요<br/>
+            (닭 10마리 이상)
+          </div>
+        </div>,
+        document.body
+      )}
+      
+      {hoveredItem === 'spaceship' && tooltipPosition && ReactDOM.createPortal(
+        <div 
+          style={{ 
+            position: 'fixed',
+            left: `${tooltipPosition.left}px`,
+            top: `${tooltipPosition.top}px`,
+            backgroundColor: '#0f172a',
+            border: '3px solid #7c3aed',
+            borderRadius: '8px',
+            padding: '8px 12px',
+            color: '#ffffff',
+            whiteSpace: 'nowrap',
+            zIndex: 999999,
+            pointerEvents: 'none',
+            fontSize: '10px',
+            boxShadow: '0 8px 24px rgba(0,0,0,0.8)',
+            minWidth: '180px',
+          }}
+        >
+          <div style={{ fontWeight: 'bold', marginBottom: '4px', color: '#c4b5fd', fontSize: '11px' }}>
+            🚀 우주선 건설 조건
+          </div>
+          <div style={{ marginBottom: '3px' }}>💰 코인: <span style={{ color: '#ffd700', fontWeight: 'bold' }}>{GAME_CONFIG.SPACESHIP.COST}</span></div>
+          <div style={{ fontSize: '9px', color: '#a5b4fc', marginTop: '4px', borderTop: '2px solid #475569', paddingTop: '4px' }}>
+            필수 재료:
+          </div>
+          <div style={{ fontSize: '9px', paddingLeft: '8px' }}>
+            <div style={{ color: (inventory.metal_scrap || 0) >= 3 ? '#86efac' : '#fca5a5', fontWeight: 'bold' }}>
+              🔩 금속 조각 × {GAME_CONFIG.SPACESHIP.REQUIRED_ITEMS.metal_scrap} 
+              <span style={{ color: '#cbd5e1' }}> ({inventory.metal_scrap || 0})</span>
+            </div>
+            <div style={{ color: (inventory.blueprint || 0) >= 2 ? '#86efac' : '#fca5a5', fontWeight: 'bold' }}>
+              📜 설계도 × {GAME_CONFIG.SPACESHIP.REQUIRED_ITEMS.blueprint}
+              <span style={{ color: '#cbd5e1' }}> ({inventory.blueprint || 0})</span>
+            </div>
+            <div style={{ color: (inventory.fuel_cell || 0) >= 1 ? '#86efac' : '#fca5a5', fontWeight: 'bold' }}>
+              ⚡ 연료 전지 × {GAME_CONFIG.SPACESHIP.REQUIRED_ITEMS.fuel_cell}
+              <span style={{ color: '#cbd5e1' }}> ({inventory.fuel_cell || 0})</span>
+            </div>
+          </div>
+          <div style={{ fontSize: '9px', color: isGoldenFarm ? '#86efac' : '#fca5a5', marginTop: '4px', fontWeight: 'bold' }}>
+            {isGoldenFarm ? '✓' : '✗'} 황금 닭 농장 (10마리 이상)
+          </div>
+        </div>,
+        document.body
+      )}
     </div>
   );
 };
