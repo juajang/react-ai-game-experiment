@@ -1,5 +1,8 @@
 // 게임 설정 상수
 export const GAME_CONFIG = {
+  // 게임 전체 설정
+  MAX_CHICKENS: 30,                  // 최대 닭 마릿수
+  
   // 닭 기본 설정
   CHICKEN: {
     INITIAL_X: 200,

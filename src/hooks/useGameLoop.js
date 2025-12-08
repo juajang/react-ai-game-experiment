@@ -762,7 +762,11 @@ export const useGameLoop = (fieldSize, adventuringChickenId = null) => {
           warmth = Math.max(0, warmth - eggConfig.COOL_RATE);
         }
         
-        if (warmth >= eggConfig.HATCH_WARMTH && age >= eggConfig.HATCH_TIME) {
+        // 최대 닭 수 체크 (현재 닭 수 + 부화 예정 수가 최대치 미만일 때만 부화)
+        const currentChickenCount = currentChickens.length + newChicks.length;
+        const maxChickens = config.MAX_CHICKENS || 30;
+        
+        if (warmth >= eggConfig.HATCH_WARMTH && age >= eggConfig.HATCH_TIME && currentChickenCount < maxChickens) {
           state = EGG_STATE.HATCHING;
           hatchingEggIds.add(egg.id);
           newChicks.push({ x: egg.x, y: egg.y });
