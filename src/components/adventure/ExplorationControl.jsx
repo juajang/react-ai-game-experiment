@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
 
 // 장소별 설명 텍스트
@@ -317,6 +317,7 @@ const ExplorationControl = ({
         clearInterval(rollInterval);
         const finalResult = Math.floor(Math.random() * 6) + 1;
         setDiceResult(finalResult);
+        // 주사위 결과만큼 이동 가능 (한 번에 한 칸씩)
         setRemainingMoves(finalResult);
         setIsRolling(false);
         
@@ -343,10 +344,11 @@ const ExplorationControl = ({
       return;
     }
     
-    if (water <= 0) {
-      setMessage("💧 물이 부족합니다! 이동할 수 없습니다.");
-      return;
-    }
+    // 테스트용: 물 제한 비활성화
+    // if (water <= 0) {
+    //   setMessage("💧 물이 부족합니다! 이동할 수 없습니다.");
+    //   return;
+    // }
     
     const dirMap = {
       up: { dx: 0, dy: -1 },
@@ -403,10 +405,11 @@ const ExplorationControl = ({
       return;
     }
     
-    if (rice <= 0) {
-      setMessage("🌾 벼가 부족합니다! 조사할 수 없습니다.");
-      return;
-    }
+    // 테스트용: 벼 제한 비활성화
+    // if (rice <= 0) {
+    //   setMessage("🌾 벼가 부족합니다! 조사할 수 없습니다.");
+    //   return;
+    // }
     
     // 벼 소모 및 조사 완료 처리
     onConsumeRice?.(1);
@@ -463,49 +466,105 @@ const ExplorationControl = ({
   const canRoll = !isRolling && remainingMoves <= 0 && adventuringChicken && 
     (adventuringChicken.remainingDiceRolls > 0) && (adventuringChicken.tiredness < 100);
 
-  // 키보드 화살표 키로 이동
+  // Ref로 최신 값 유지 (useEffect 의존성 문제 해결)
+  const playerPositionRef = useRef(playerPosition);
+  const remainingMovesRef = useRef(remainingMoves);
+  const adventuringChickenRef = useRef(adventuringChicken);
+  const canPassRef = useRef(canPass);
+  const onPlayerMoveRef = useRef(onPlayerMove);
+  const pressedKeysRef = useRef(new Set());
+  
+  useEffect(() => {
+    playerPositionRef.current = playerPosition;
+  }, [playerPosition]);
+  
+  useEffect(() => {
+    remainingMovesRef.current = remainingMoves;
+  }, [remainingMoves]);
+  
+  useEffect(() => {
+    adventuringChickenRef.current = adventuringChicken;
+  }, [adventuringChicken]);
+  
+  useEffect(() => {
+    canPassRef.current = canPass;
+  }, [canPass]);
+  
+  useEffect(() => {
+    onPlayerMoveRef.current = onPlayerMove;
+  }, [onPlayerMove]);
+
+  // 키보드 화살표 키로 이동 (키를 한번 누르면 한칸만 이동)
   useEffect(() => {
     const handleKeyDown = (e) => {
-      // 이동 가능한 상태가 아니면 무시
-      if (remainingMoves <= 0 || !adventuringChicken) return;
+      // 이미 눌린 키는 무시 (연속 이동 방지)
+      if (pressedKeysRef.current.has(e.key)) return;
+      pressedKeysRef.current.add(e.key);
       
-      let newX = playerPosition.x;
-      let newY = playerPosition.y;
+      // 이동 가능한 상태가 아니면 무시
+      if (remainingMovesRef.current <= 0 || !adventuringChickenRef.current) return;
+      
+      const pos = playerPositionRef.current;
+      let newX = pos.x;
+      let newY = pos.y;
       
       switch (e.key) {
         case 'ArrowUp':
-          newY = playerPosition.y - 1;
+        case 'w':
+        case 'W':
+          newY = pos.y - 1;
           e.preventDefault();
           break;
         case 'ArrowDown':
-          newY = playerPosition.y + 1;
+        case 's':
+        case 'S':
+          newY = pos.y + 1;
           e.preventDefault();
           break;
         case 'ArrowLeft':
-          newX = playerPosition.x - 1;
+        case 'a':
+        case 'A':
+          newX = pos.x - 1;
           e.preventDefault();
           break;
         case 'ArrowRight':
-          newX = playerPosition.x + 1;
+        case 'd':
+        case 'D':
+          newX = pos.x + 1;
           e.preventDefault();
           break;
         default:
           return;
       }
       
-      // 맵 범위 체크 (30x25)
-      if (newX < 0 || newX >= 30 || newY < 0 || newY >= 25) {
+      // 맵 범위 체크 (35x25)
+      if (newX < 0 || newX >= 35 || newY < 0 || newY >= 25) {
+        return;
+      }
+      
+      // 통과 가능 여부 체크 (산, 물 등)
+      const passCheck = canPassRef.current?.(newX, newY);
+      if (!passCheck?.canPass) {
+        setMessage(`🚫 ${passCheck?.reason || '이동할 수 없습니다!'}`);
         return;
       }
       
       // 이동 처리
-      onPlayerMove({ x: newX, y: newY });
+      onPlayerMoveRef.current?.({ x: newX, y: newY });
       setRemainingMoves(prev => prev - 1);
     };
     
+    const handleKeyUp = (e) => {
+      pressedKeysRef.current.delete(e.key);
+    };
+    
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [remainingMoves, playerPosition, adventuringChicken, onPlayerMove]);
+    window.addEventListener('keyup', handleKeyUp);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+    };
+  }, []); // 의존성 없음 - ref로 최신 값 참조
 
   return (
     <div 

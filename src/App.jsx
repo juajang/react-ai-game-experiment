@@ -332,7 +332,7 @@ export default function ChickenGame() {
   const [heldChicken, setHeldChicken] = useState(null);
   
   // 플레이어 위치 (월드맵용)
-  const [playerPosition, setPlayerPosition] = useState({ x: 15, y: 12 });
+  const [playerPosition, setPlayerPosition] = useState({ x: 17, y: 12 });
   
   // 탐험한 타일들 (fog of war)
   const [exploredTiles, setExploredTiles] = useState(() => {

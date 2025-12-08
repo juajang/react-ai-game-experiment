@@ -4,7 +4,7 @@ import ExplorationControl from './ExplorationControl';
 
 const AdventurePanel = ({ 
   chickens = [],
-  playerPosition = { x: 15, y: 12 },
+  playerPosition = { x: 17, y: 12 },
   onPlayerMove,
   onTileClick,
   exploredTiles,

@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 
 // 맵 타일 타입 정의
 const TILE_TYPES = {
@@ -66,7 +66,128 @@ const generateIslandMap = (width, height, seed = 42) => {
   return map;
 };
 
-// 포인트 오브 인터레스트 생성
+// 두 점 사이에 직선 경로를 생성 (산/물 위에도 길 생성, 단 해당 타일은 통과 불가로 유지)
+const createStraightPath = (map, x1, y1, x2, y2) => {
+  let x = x1;
+  let y = y1;
+  
+  while (x !== x2 || y !== y2) {
+    // 현재 타일이 초원, 숲, 해변이면 길로 변경
+    const tile = map[y]?.[x];
+    if (tile === 'GRASS' || tile === 'FOREST' || tile === 'BEACH') {
+      map[y][x] = 'PATH';
+    }
+    
+    // 수평 이동 우선, 그 다음 수직 이동
+    if (x !== x2) {
+      x += x < x2 ? 1 : -1;
+    } else if (y !== y2) {
+      y += y < y2 ? 1 : -1;
+    }
+  }
+};
+
+// POI 주변에 접근로 생성 (4방향)
+const createAccessPaths = (map, poi, length = 5) => {
+  const { x, y } = poi;
+  const height = map.length;
+  const width = map[0].length;
+  
+  // 4방향으로 접근로 생성
+  const directions = [
+    { dx: 0, dy: -1, name: '북' },  // 북
+    { dx: 0, dy: 1, name: '남' },   // 남
+    { dx: -1, dy: 0, name: '서' },  // 서
+    { dx: 1, dy: 0, name: '동' },   // 동
+  ];
+  
+  directions.forEach(({ dx, dy }) => {
+    for (let i = 1; i <= length; i++) {
+      const nx = x + dx * i;
+      const ny = y + dy * i;
+      
+      if (nx < 0 || nx >= width || ny < 0 || ny >= height) break;
+      
+      const tile = map[ny]?.[nx];
+      // 산이나 물을 만나면 해당 방향 접근로 중단
+      if (tile === 'MOUNTAIN' || tile === 'WATER') break;
+      
+      if (tile === 'GRASS' || tile === 'FOREST' || tile === 'BEACH') {
+        map[ny][nx] = 'PATH';
+      }
+    }
+  });
+};
+
+// POI들을 연결하는 메인 도로 생성
+const connectPOIsWithPaths = (map, pois) => {
+  const height = map.length;
+  const width = map[0].length;
+  const centerX = Math.floor(width / 2);
+  const centerY = Math.floor(height / 2);
+  
+  // 마을(중심)을 찾음
+  const village = pois.find(p => p.type === 'VILLAGE') || { x: centerX, y: centerY };
+  
+  // 동서남북 메인 도로 생성 (마을에서 맵 가장자리까지)
+  // 북쪽 도로
+  for (let y = village.y; y >= 3; y--) {
+    if (map[y]?.[village.x] && map[y][village.x] !== 'WATER' && map[y][village.x] !== 'MOUNTAIN') {
+      map[y][village.x] = 'PATH';
+    }
+  }
+  // 남쪽 도로
+  for (let y = village.y; y < height - 3; y++) {
+    if (map[y]?.[village.x] && map[y][village.x] !== 'WATER' && map[y][village.x] !== 'MOUNTAIN') {
+      map[y][village.x] = 'PATH';
+    }
+  }
+  // 서쪽 도로
+  for (let x = village.x; x >= 3; x--) {
+    if (map[village.y]?.[x] && map[village.y][x] !== 'WATER' && map[village.y][x] !== 'MOUNTAIN') {
+      map[village.y][x] = 'PATH';
+    }
+  }
+  // 동쪽 도로
+  for (let x = village.x; x < width - 3; x++) {
+    if (map[village.y]?.[x] && map[village.y][x] !== 'WATER' && map[village.y][x] !== 'MOUNTAIN') {
+      map[village.y][x] = 'PATH';
+    }
+  }
+  
+  // 각 POI에 4방향 접근로 생성
+  pois.forEach(poi => {
+    createAccessPaths(map, poi, 6);
+  });
+  
+  // POI들을 직선으로 연결 (산/물은 건너뛰지 않음)
+  pois.forEach(poi => {
+    if (poi.type !== 'VILLAGE') {
+      createStraightPath(map, village.x, village.y, poi.x, poi.y);
+    }
+  });
+  
+  // 가로 보조 도로 (상단, 하단)
+  const upperY = Math.floor(height / 3);
+  const lowerY = Math.floor(height * 2 / 3);
+  
+  for (let x = 5; x < width - 5; x++) {
+    if (map[upperY]?.[x] && map[upperY][x] !== 'WATER' && map[upperY][x] !== 'MOUNTAIN') {
+      map[upperY][x] = 'PATH';
+    }
+    if (map[lowerY]?.[x] && map[lowerY][x] !== 'WATER' && map[lowerY][x] !== 'MOUNTAIN') {
+      map[lowerY][x] = 'PATH';
+    }
+  }
+};
+
+// 타일이 통과 가능한지 체크
+const isPassableTile = (map, x, y) => {
+  const tile = map[y]?.[x];
+  return tile && tile !== 'WATER' && tile !== 'MOUNTAIN';
+};
+
+// 포인트 오브 인터레스트 생성 (자동 점프 없음 - 통과 가능한 곳에만 배치)
 const generatePOIs = (map, seed = 42) => {
   const pois = [];
   const height = map.length;
@@ -77,41 +198,56 @@ const generatePOIs = (map, seed = 42) => {
     return n - Math.floor(n);
   };
   
+  // 중심 좌표
+  const centerX = Math.floor(width / 2);
+  const centerY = Math.floor(height / 2);
+  
+  // POI를 추가 (통과 가능한 곳에만)
+  const addPOI = (x, y, type, name) => {
+    if (isPassableTile(map, x, y)) {
+      pois.push({ x, y, type, name });
+    }
+  };
+  
   // 기본 POI
-  pois.push({ x: Math.floor(width / 2), y: Math.floor(height / 2) + 2, type: 'VILLAGE', name: '마을' });
-  pois.push({ x: Math.floor(width / 2) - 2, y: Math.floor(height / 2), type: 'FARM', name: '농장' });
-  pois.push({ x: Math.floor(width / 3), y: Math.floor(height / 3), type: 'OUTPOST', name: '북서 전초기지' });
-  pois.push({ x: Math.floor(width * 2 / 3), y: Math.floor(height / 3), type: 'OUTPOST', name: '북동 전초기지' });
+  addPOI(centerX, centerY + 2, 'VILLAGE', '마을');
+  addPOI(centerX - 3, centerY, 'FARM', '농장');
+  addPOI(Math.floor(width / 4), Math.floor(height / 3), 'OUTPOST', '북서 전초기지');
+  addPOI(Math.floor(width * 3 / 4), Math.floor(height / 3), 'OUTPOST', '북동 전초기지');
   
-  // 🚀 발사장 - 맵 가장자리 (마을에서 멀지 않은 곳)
-  pois.push({ x: Math.floor(width * 3 / 4), y: Math.floor(height / 2), type: 'LAUNCH_SITE', name: '발사장' });
+  // 🚀 발사장 - 동쪽 가장자리 근처
+  addPOI(Math.floor(width * 4 / 5), centerY, 'LAUNCH_SITE', '발사장');
   
-  // 📡 통신탑 - 발사장 근처
-  pois.push({ x: Math.floor(width * 3 / 4) - 3, y: Math.floor(height / 2) - 2, type: 'TOWER', name: '벼락 맞은 통신탑' });
+  // 📡 통신탑 - 발사장과 마을 사이
+  addPOI(Math.floor(width * 3 / 5), centerY - 3, 'TOWER', '벼락 맞은 통신탑');
   
   // 🏚️ 버려진 민가들 - 숲속에 드문드문 배치
   const housePositions = [
-    { x: Math.floor(width / 4), y: Math.floor(height / 2) - 1 },
-    { x: Math.floor(width / 3) + 2, y: Math.floor(height * 2 / 3) },
-    { x: Math.floor(width * 2 / 3) - 2, y: Math.floor(height * 2 / 3) + 1 },
-    { x: Math.floor(width / 4) + 1, y: Math.floor(height / 3) + 2 },
+    { x: Math.floor(width / 5), y: centerY },
+    { x: Math.floor(width / 3), y: Math.floor(height * 2 / 3) },
+    { x: Math.floor(width * 2 / 3), y: Math.floor(height * 2 / 3) },
+    { x: Math.floor(width / 4), y: Math.floor(height / 3) + 3 },
+    { x: Math.floor(width * 3 / 4) - 5, y: Math.floor(height * 2 / 3) - 2 },
   ];
   
+  const houseNames = ['낡은 오두막', '버려진 민가', '폐허가 된 집', '잊혀진 주거지', '무너진 헛간'];
   housePositions.forEach((pos, i) => {
-    if (map[pos.y]?.[pos.x] === 'GRASS' || map[pos.y]?.[pos.x] === 'FOREST') {
-      const houseNames = ['낡은 오두막', '버려진 민가', '폐허가 된 집', '잊혀진 주거지'];
+    if (isPassableTile(map, pos.x, pos.y)) {
       pois.push({ x: pos.x, y: pos.y, type: 'HOUSE', name: houseNames[i % houseNames.length] });
     }
   });
   
-  // 자원 포인트
-  for (let i = 0; i < 5; i++) {
-    const x = Math.floor(seededRandom(i * 2) * (width - 10)) + 5;
+  // 자원 포인트 - 더 많이 배치
+  for (let i = 0; i < 8; i++) {
+    const x = Math.floor(seededRandom(i * 2) * (width - 14)) + 7;
     const y = Math.floor(seededRandom(i * 2 + 1) * (height - 10)) + 5;
-    if (map[y]?.[x] === 'GRASS' || map[y]?.[x] === 'FOREST') {
+    if (isPassableTile(map, x, y)) {
       pois.push({ x, y, type: 'RESOURCE', name: '자원' });
     }
   }
+  
+  // POI들을 길로 연결
+  connectPOIsWithPaths(map, pois);
   
   return pois;
 };
@@ -131,7 +267,7 @@ const getVisibleTiles = (playerX, playerY, radius = 2) => {
 };
 
 const WorldMap = ({ 
-  playerPosition = { x: 15, y: 12 },
+  playerPosition = { x: 17, y: 12 },
   chickens = [],
   onTileClick,
   exploredTiles,
@@ -144,6 +280,7 @@ const WorldMap = ({
   const mapHeight = 25;
   
   const [hoveredTile, setHoveredTile] = useState(null);
+  const mapContainerRef = useRef(null);
   
   // 맵과 POI 생성 (메모이제이션)
   const { baseMap, pois } = useMemo(() => {
@@ -167,6 +304,8 @@ const WorldMap = ({
     }
   }, [playerPosition.x, playerPosition.y, onExplore]);
   
+  // 자동 스크롤 제거됨 - 수동으로 스크롤
+  
   // 마을까지의 거리 계산
   const village = pois.find(p => p.type === 'VILLAGE');
   const distanceToVillage = village 
@@ -174,9 +313,11 @@ const WorldMap = ({
     : 0;
   
   // 타일이 탐험되었는지 체크
+  // 테스트용: 모든 타일 밝힘
   const isExplored = (x, y) => {
-    if (!exploredTiles) return true;
-    return exploredTiles.has(`${x},${y}`);
+    return true; // 테스트용 - 항상 탐험됨
+    // if (!exploredTiles) return true;
+    // return exploredTiles.has(`${x},${y}`);
   };
   
   const renderTile = (x, y) => {
@@ -233,15 +374,26 @@ const WorldMap = ({
     
     const isHovered = hoveredTile?.x === x && hoveredTile?.y === y;
     
+    // 타일 크기 (정사각형)
+    const tileSize = 10;
+    
     return (
       <span
         key={`${x}-${y}`}
         style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: `${tileSize}px`,
+          height: `${tileSize}px`,
           color: color,
           backgroundColor: isHovered ? 'rgba(255,255,255,0.3)' : 'transparent',
           cursor: 'pointer',
           fontWeight: isPlayer || poi ? 'bold' : 'normal',
           opacity: isInvestigated ? 1 : 0.7,
+          fontSize: '8px',
+          lineHeight: 1,
+          overflow: 'hidden',
         }}
         onMouseEnter={() => setHoveredTile({ x, y, poi, baseTile, isInvestigated })}
         onMouseLeave={() => setHoveredTile(null)}
@@ -281,16 +433,14 @@ const WorldMap = ({
       
       {/* 맵 */}
       <div 
+        ref={mapContainerRef}
         className="p-1 overflow-auto"
         style={{ 
-          fontSize: '8px',
-          lineHeight: '9px',
-          letterSpacing: '0.5px',
-          maxHeight: '160px',
+          maxHeight: '180px',
         }}
       >
         {baseMap.map((row, y) => (
-          <div key={y} style={{ whiteSpace: 'nowrap' }}>
+          <div key={y} style={{ display: 'flex', height: '10px' }}>
             {row.map((_, x) => renderTile(x, y))}
           </div>
         ))}
