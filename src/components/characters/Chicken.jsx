@@ -69,3 +69,4 @@ const Chicken = ({ x, y, frame, direction, state, isSelected, onClick, name, isH
 export default Chicken;
 
 
+

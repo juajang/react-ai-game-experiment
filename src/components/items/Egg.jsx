@@ -88,3 +88,4 @@ const Egg = ({ x, y, state, warmth }) => {
 export default Egg;
 
 
+

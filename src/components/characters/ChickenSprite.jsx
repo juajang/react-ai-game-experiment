@@ -99,3 +99,4 @@ const ChickenSprite = ({ frame, direction, isHeld }) => {
 export default ChickenSprite;
 
 
+
