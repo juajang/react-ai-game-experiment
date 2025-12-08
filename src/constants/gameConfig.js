@@ -1,7 +1,7 @@
 // 게임 설정 상수
 export const GAME_CONFIG = {
   // 게임 전체 설정
-  MAX_CHICKENS: 30,                  // 최대 닭 마릿수
+  MAX_CHICKENS: 10,                  // 최대 닭 마릿수
   
   // 닭 기본 설정
   CHICKEN: {
@@ -91,14 +91,15 @@ export const GAME_CONFIG = {
   FLOWER: {
     COST: 10,                        // 가격 인하 (20 → 10)
     EFFECT_RADIUS: 70,               // 효과 범위 증가 (50 → 70)
-    HAPPINESS_BOOST: 0.15,           // 효과 증가
+    HAPPINESS_BOOST: 0.1,            // 꽃 행복도 효과 (소폭)
   },
   
   // 연못 관련
   POND: {
-    COST: 25,                        // 가격 인하 (40 → 25)
+    COST: 100,                       // 가격 (100원)
     EFFECT_RADIUS: 80,               // 효과 범위 증가 (60 → 80)
-    HEALTH_BOOST: 0.2,               // 효과 증가 (0.15 → 0.2)
+    HEALTH_BOOST: 0.2,               // 건강 효과 (0.15 → 0.2)
+    HAPPINESS_BOOST: 0.5,            // 행복도 증가 효과 (0.25 → 0.5)
   },
   
   // 풍차 관련 (황금 농장 전용)
@@ -110,14 +111,14 @@ export const GAME_CONFIG = {
   
   // 꽃덤불 관련
   FLOWER_BUSH: {
-    COST: 20,                        // 중간 가격
+    COST: 100,                       // 가격 (100원)
     EFFECT_RADIUS: 55,               // 효과 범위
-    HAPPINESS_BOOST: 0.2,            // 꽃보다 강한 행복도 효과
+    HAPPINESS_BOOST: 0.15,           // 꽃덤불 행복도 효과 (소폭)
   },
   
   // 똥 관련
   POOP: {
-    DROP_CHANCE: 0.5,                // 똥 싸는 확률 감소 (2% → 0.5%)
+    DROP_CHANCE: 0.25,               // 똥 싸는 확률 (0.25%)
     EFFECT_RADIUS: 50,               // 영향 범위
     HAPPINESS_PENALTY: 0.15,         // 주변 닭 행복도 감소
     STINK_THRESHOLD: 50,             // 냄새나기 시작하는 나이

@@ -228,13 +228,13 @@ const generatePOIs = (map, seed = 42) => {
   // 🔬 버려진 과학기지 - 발사장 근처 (연료전지 100% 획득)
   addPOI(Math.floor(width * 3 / 4), centerY + 4, 'ABANDONED_LAB', '버려진 과학기지');
   
-  // 🏚️ 버려진 민가들 - 숲속에 드문드문 배치
+  // 🏚️ 버려진 민가들 - 숲속에 드문드문 배치 (첫 번째는 시작점 근처)
   const housePositions = [
+    { x: centerX - 3, y: centerY - 2 },  // 시작점 근처 (삽 획득용)
     { x: Math.floor(width / 5), y: centerY },
     { x: Math.floor(width / 3), y: Math.floor(height * 2 / 3) },
     { x: Math.floor(width * 2 / 3), y: Math.floor(height * 2 / 3) },
     { x: Math.floor(width / 4), y: Math.floor(height / 3) + 3 },
-    { x: Math.floor(width * 3 / 4) - 5, y: Math.floor(height * 2 / 3) - 2 },
   ];
   
   const houseNames = ['낡은 오두막', '버려진 민가', '폐허가 된 집', '잊혀진 주거지', '무너진 헛간'];

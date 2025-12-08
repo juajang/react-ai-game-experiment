@@ -159,7 +159,8 @@ const ItemPanel = ({
           className="flex flex-col items-center p-2 rounded transition-all w-full relative"
           style={{
             backgroundColor: isSelected ? '#fef3c7' : isGoldenItem ? '#fef08a' : '#e8d5b7',
-            border: isSelected ? '3px solid #f59e0b' : isGoldenItem ? '2px solid #eab308' : '2px solid #8b7355',
+            border: isSelected ? '2px solid #f59e0b' : isGoldenItem ? '2px solid #eab308' : '2px solid #8b7355',
+            boxShadow: isSelected ? '0 0 0 2px #f59e0b' : 'none',
             opacity: isDisabled ? 0.5 : 1,
             cursor: isDisabled ? 'not-allowed' : 'pointer',
           }}
@@ -278,7 +279,8 @@ const ItemPanel = ({
             className="flex flex-col items-center p-2 rounded transition-all w-full relative"
             style={{
               backgroundColor: selectedItem === 'scienceBase' ? '#bfdbfe' : '#dbeafe',
-              border: selectedItem === 'scienceBase' ? '3px solid #3b82f6' : '2px solid #60a5fa',
+              border: '2px solid #60a5fa',
+              boxShadow: selectedItem === 'scienceBase' ? '0 0 0 2px #3b82f6' : 'none',
               opacity: canBuildScienceBase ? 1 : 0.5,
               cursor: canBuildScienceBase ? 'pointer' : 'not-allowed',
             }}
@@ -327,7 +329,8 @@ const ItemPanel = ({
             className="flex flex-col items-center p-2 rounded transition-all w-full relative"
             style={{
               backgroundColor: selectedItem === 'autoFeeder' ? '#dcfce7' : '#f0fdf4',
-              border: selectedItem === 'autoFeeder' ? '3px solid #22c55e' : '2px solid #4ade80',
+              border: '2px solid #4ade80',
+              boxShadow: selectedItem === 'autoFeeder' ? '0 0 0 2px #22c55e' : 'none',
               opacity: canBuildAutoFeeder ? 1 : 0.5,
               cursor: canBuildAutoFeeder ? 'pointer' : 'not-allowed',
             }}
@@ -389,7 +392,8 @@ const ItemPanel = ({
             className="flex flex-col items-center p-2 rounded transition-all w-full relative"
             style={{
               backgroundColor: selectedItem === 'mansion' ? '#ddd6fe' : '#ede9fe',
-              border: selectedItem === 'mansion' ? '3px solid #f59e0b' : '2px solid #a78bfa',
+              border: '2px solid #a78bfa',
+              boxShadow: selectedItem === 'mansion' ? '0 0 0 2px #f59e0b' : 'none',
               opacity: canBuildMansion ? 1 : 0.5,
               cursor: canBuildMansion ? 'pointer' : 'not-allowed',
             }}
@@ -405,7 +409,6 @@ const ItemPanel = ({
             </div>
             {/* 필요 재료 표시 (세로 두 줄) */}
             <div style={{ fontSize: '7px', color: '#6b7280', marginTop: '2px', display: 'flex', flexDirection: 'column', gap: '1px' }}>
-              {isGoldenFarm && <span style={{ color: '#22c55e' }}>✨달성</span>}
               <span style={{ color: (inventory.twisted_vine || 0) >= 1 ? '#22c55e' : '#ef4444' }}>🌿{inventory.twisted_vine || 0}/1</span>
               <span style={{ color: (inventory.branch_pile || 0) >= 3 ? '#22c55e' : '#ef4444' }}>🪵{inventory.branch_pile || 0}/3</span>
             </div>
@@ -434,7 +437,8 @@ const ItemPanel = ({
           className="flex flex-col items-center p-2 rounded transition-all w-full relative"
           style={{
             backgroundColor: selectedItem === 'spaceship' ? '#ddd6fe' : '#ede9fe',
-            border: selectedItem === 'spaceship' ? '3px solid #7c3aed' : '2px solid #a78bfa',
+            border: '2px solid #a78bfa',
+            boxShadow: selectedItem === 'spaceship' ? '0 0 0 2px #7c3aed' : 'none',
             opacity: canBuildSpaceship ? 1 : 0.5,
             cursor: canBuildSpaceship ? 'pointer' : 'not-allowed',
           }}

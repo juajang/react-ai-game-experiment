@@ -278,7 +278,7 @@ export const useGameLoop = (fieldSize, adventuringChickenId = null) => {
       ([item, count]) => (inventory[item] || 0) >= count
     );
     
-    if (coinsRef.current < (GAME_CONFIG.SCIENCE_BASE?.COST || 0) || !hasAllMaterials) {
+    if (coins < (GAME_CONFIG.SCIENCE_BASE?.COST || 0) || !hasAllMaterials) {
       return false;
     }
     
@@ -530,17 +530,23 @@ export const useGameLoop = (fieldSize, adventuringChickenId = null) => {
           if (nearFlowerBush) {
             happinessChange += config.FLOWER_BUSH.HAPPINESS_BOOST;
           }
+          // 연못 주변이면 행복도 증가
+          if (nearPond) {
+            happinessChange += config.POND.HAPPINESS_BOOST || 0.3;
+          }
           // 풍차 주변이면 모든 스탯 증가
           if (nearWindmill) {
             happinessChange += config.WINDMILL.ALL_BOOST;
           }
-          // 똥 주변이면 행복도 감소
-          if (nearPoop) {
-            happinessChange -= config.POOP.HAPPINESS_PENALTY;
-          }
-          // 오래된 똥 주변이면 더 많이 감소
-          if (nearOldPoop) {
-            happinessChange -= config.POOP.HAPPINESS_PENALTY;
+          // 똥 주변이면 행복도 감소 (단, 연못 근처에 있으면 무시)
+          if (!nearPond) {
+            if (nearPoop) {
+              happinessChange -= config.POOP.HAPPINESS_PENALTY;
+            }
+            // 오래된 똥 주변이면 더 많이 감소
+            if (nearOldPoop) {
+              happinessChange -= config.POOP.HAPPINESS_PENALTY;
+            }
           }
           happiness = Math.min(config.HAPPINESS.MAX, Math.max(config.HAPPINESS.MIN, happiness + happinessChange));
         } else {
