@@ -304,7 +304,27 @@ const WorldMap = ({
     }
   }, [playerPosition.x, playerPosition.y, onExplore]);
   
-  // 자동 스크롤 제거됨 - 수동으로 스크롤
+  // 플레이어 위치에 따라 자동 스크롤
+  useEffect(() => {
+    if (mapContainerRef.current) {
+      const container = mapContainerRef.current;
+      const tileSize = 10; // 타일 크기와 동일
+      const containerHeight = container.clientHeight;
+      const containerWidth = container.clientWidth;
+      const playerY = playerPosition.y * tileSize;
+      const playerX = playerPosition.x * tileSize;
+      
+      // 플레이어가 보이는 영역 중앙에 오도록 스크롤
+      const targetScrollY = playerY - containerHeight / 2 + tileSize / 2;
+      const targetScrollX = playerX - containerWidth / 2 + tileSize / 2;
+      
+      container.scrollTo({
+        top: Math.max(0, targetScrollY),
+        left: Math.max(0, targetScrollX),
+        behavior: 'smooth'
+      });
+    }
+  }, [playerPosition.x, playerPosition.y]);
   
   // 마을까지의 거리 계산
   const village = pois.find(p => p.type === 'VILLAGE');

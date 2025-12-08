@@ -317,8 +317,8 @@ const ExplorationControl = ({
         clearInterval(rollInterval);
         const finalResult = Math.floor(Math.random() * 6) + 1;
         setDiceResult(finalResult);
-        // 주사위 결과만큼 이동 가능 (한 번에 한 칸씩)
-        setRemainingMoves(finalResult);
+        // 테스트용: 이동횟수 제한 해제 (999칸)
+        setRemainingMoves(999);
         setIsRolling(false);
         
         // 피로도 증가 (레벨에 따라 다름) 및 주사위 횟수 감소
@@ -836,12 +836,15 @@ const ExplorationControl = ({
         {message}
       </div>
       
-      {/* 조사한 장소 목록 - 남은 공간 채움, 내부 스크롤 */}
+      {/* 조사한 장소 목록 - 고정 높이, 내부 스크롤 */}
       <div 
-        className="px-2 py-1 flex flex-col flex-1 min-h-0"
+        className="px-2 py-1 flex flex-col"
         style={{ 
           backgroundColor: '#1e1e30',
           borderTop: '2px solid #5d4037',
+          height: '120px',
+          minHeight: '120px',
+          maxHeight: '120px',
         }}
       >
         <div 
@@ -859,8 +862,12 @@ const ExplorationControl = ({
           </div>
         ) : (
           <div 
-            className="flex flex-col gap-1 flex-1 overflow-y-auto pr-1"
-            style={{ scrollbarWidth: 'thin', scrollbarColor: '#5d4037 #1e1e30' }}
+            className="flex flex-col gap-1 overflow-y-auto pr-1"
+            style={{ 
+              scrollbarWidth: 'thin', 
+              scrollbarColor: '#5d4037 #1e1e30',
+              flex: 1,
+            }}
           >
             {explorationLog.slice(-10).reverse().map((log, idx) => (
               <div 
