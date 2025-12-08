@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useRef } from 'react';
+import { useState, useMemo, useEffect, useRef, useCallback, memo } from 'react';
 
 // 맵 타일 타입 정의
 const TILE_TYPES = {
@@ -283,10 +283,13 @@ const WorldMap = ({
   const mapContainerRef = useRef(null);
   
   // 맵과 POI 생성 (메모이제이션)
-  const { baseMap, pois } = useMemo(() => {
+  const { baseMap, pois, poiMap } = useMemo(() => {
     const base = generateIslandMap(mapWidth, mapHeight);
     const points = generatePOIs(base);
-    return { baseMap: base, pois: points };
+    // POI를 좌표로 빠르게 찾기 위한 Map 생성
+    const poiLookup = new Map();
+    points.forEach(p => poiLookup.set(`${p.x},${p.y}`, p));
+    return { baseMap: base, pois: points, poiMap: poiLookup };
   }, []);
   
   // 맵 데이터를 부모에게 전달
@@ -332,24 +335,36 @@ const WorldMap = ({
     ? Math.abs(playerPosition.x - village.x) + Math.abs(playerPosition.y - village.y)
     : 0;
   
-  // 타일이 탐험되었는지 체크
-  const isExplored = (x, y) => {
-    if (!exploredTiles) return true;
-    return exploredTiles.has(`${x},${y}`);
-  };
+  // 닭 위치 맵 (O(1) 탐색용)
+  const chickenMap = useMemo(() => {
+    const map = new Map();
+    chickens.forEach(c => {
+      const key = `${Math.floor(c.mapX || 0)},${Math.floor(c.mapY || 0)}`;
+      map.set(key, c);
+    });
+    return map;
+  }, [chickens]);
   
-  const renderTile = (x, y) => {
-    const explored = isExplored(x, y);
+  // 타일 렌더링 함수 (useCallback으로 메모이제이션)
+  const renderTile = useCallback((x, y) => {
+    const posKey = `${x},${y}`;
+    const explored = exploredTiles ? exploredTiles.has(posKey) : true;
     const baseTile = baseMap[y]?.[x] || 'WATER';
     
     if (!explored) {
       return (
         <span
-          key={`${x}-${y}`}
+          key={posKey}
           style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '10px',
+            height: '10px',
             color: '#2a2a3e',
             backgroundColor: 'transparent',
             cursor: 'default',
+            fontSize: '8px',
           }}
         >
           ░
@@ -357,14 +372,11 @@ const WorldMap = ({
       );
     }
     
-    const poi = pois.find(p => p.x === x && p.y === y);
+    // O(1) 탐색으로 변경
+    const poi = poiMap.get(posKey);
     const isPlayer = playerPosition.x === x && playerPosition.y === y;
-    const chicken = chickens.find(c => 
-      Math.floor(c.mapX || 0) === x && Math.floor(c.mapY || 0) === y
-    );
-    
-    // 조사 완료 여부
-    const isInvestigated = investigatedTiles.has(`${x},${y}`);
+    const chicken = chickenMap.get(posKey);
+    const isInvestigated = investigatedTiles.has(posKey);
     
     let displayTile = TILE_TYPES[baseTile];
     let char = displayTile.char;
@@ -382,28 +394,22 @@ const WorldMap = ({
     }
     
     // 모험 중인 닭 위치 표시
-    const isAdventuringChicken = adventuringChicken && 
-      playerPosition.x === x && playerPosition.y === y;
-    
-    if (isAdventuringChicken) {
+    if (adventuringChicken && isPlayer) {
       char = '🐔';
       color = '#ffd54f';
     }
     
     const isHovered = hoveredTile?.x === x && hoveredTile?.y === y;
     
-    // 타일 크기 (정사각형)
-    const tileSize = 10;
-    
     return (
       <span
-        key={`${x}-${y}`}
+        key={posKey}
         style={{
           display: 'inline-flex',
           alignItems: 'center',
           justifyContent: 'center',
-          width: `${tileSize}px`,
-          height: `${tileSize}px`,
+          width: '10px',
+          height: '10px',
           color: color,
           backgroundColor: isHovered ? 'rgba(255,255,255,0.3)' : 'transparent',
           cursor: 'pointer',
@@ -421,7 +427,7 @@ const WorldMap = ({
         {char}
       </span>
     );
-  };
+  }, [baseMap, poiMap, chickenMap, playerPosition, adventuringChicken, exploredTiles, investigatedTiles, hoveredTile, onTileClick]);
 
   const currentTile = baseMap[playerPosition.y]?.[playerPosition.x] || 'UNKNOWN';
   const currentPoi = pois.find(p => p.x === playerPosition.x && p.y === playerPosition.y);

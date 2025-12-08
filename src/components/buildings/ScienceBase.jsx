@@ -1,8 +1,8 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, memo, useCallback } from 'react';
 import ReactDOM from 'react-dom';
 
 // 과학기지 - 나무로 만들어진 연구 시설
-const ScienceBase = ({ x, y, onClick, onMouseDown, inventory = {}, onConsumeItems, onAddItem }) => {
+const ScienceBase = memo(({ x, y, onClick, onMouseDown, inventory = {}, onConsumeItems, onAddItem }) => {
   const [showResearchPanel, setShowResearchPanel] = useState(false);
   const [researchState, setResearchState] = useState('idle'); // idle, researching, complete, done
   const [researchProgress, setResearchProgress] = useState(0);
@@ -459,10 +459,10 @@ const ScienceBase = ({ x, y, onClick, onMouseDown, inventory = {}, onConsumeItem
       )}
     </div>
   );
-};
+});
 
 // 미리보기용 컴포넌트
-const ScienceBasePreview = ({ size = 28 }) => (
+const ScienceBasePreview = memo(({ size = 28 }) => (
   <svg width={size} height={size} viewBox="0 0 48 48">
     {/* 베이스 */}
     <rect x="8" y="38" width="32" height="4" fill="#5d4037" />
@@ -490,7 +490,7 @@ const ScienceBasePreview = ({ size = 28 }) => (
     {/* 과학 기호 */}
     <circle cx="24" cy="14" r="2" fill="#fff176" />
   </svg>
-);
+));
 
 export { ScienceBase, ScienceBasePreview };
 export default ScienceBase;
