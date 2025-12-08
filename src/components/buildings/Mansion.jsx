@@ -387,10 +387,18 @@ const Mansion = ({ x, y, onMouseDown, onClick, onRestart }) => {
         <svg 
           width="96" 
           height="96" 
-          viewBox="0 0 32 32" 
+          viewBox="0 -5 32 37" 
           xmlns="http://www.w3.org/2000/svg"
-          style={{ imageRendering: 'pixelated' }}
+          style={{ imageRendering: 'pixelated', filter: 'drop-shadow(0 0 8px rgba(255, 235, 59, 0.3))' }}
         >
+          <defs>
+            {/* 창문 빛 효과 필터 */}
+            <filter id="windowGlow">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="2" result="blur"/>
+              <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+            </filter>
+          </defs>
+          
           {/* 왼쪽 기둥 */}
           <rect x="1" y="10" width="3" height="14" fill="#a0522d"/>
           <rect x="1.5" y="10.5" width="2" height="13" fill="#cd853f"/>
@@ -402,11 +410,20 @@ const Mansion = ({ x, y, onMouseDown, onClick, onRestart }) => {
           <rect x="0.5" y="5" width="4" height="5" fill="#a0522d"/>
           <rect x="1" y="5.5" width="3" height="4" fill="#cd853f"/>
           <polygon points="2.5,3 0.5,5 4.5,5" fill="#8b4513"/>
+          {/* 왼쪽 망루 창문 글로우 - 외곽 */}
+          <rect x="0.8" y="6.3" width="3.4" height="2.8" fill="#ffd700" opacity="0.15">
+            <animate attributeName="opacity" values="0.1;0.25;0.1" dur="2s" repeatCount="indefinite"/>
+          </rect>
+          {/* 왼쪽 망루 창문 글로우 - 중간 */}
+          <rect x="1.1" y="6.6" width="2.8" height="2.2" fill="#ffeb3b" opacity="0.3">
+            <animate attributeName="opacity" values="0.2;0.4;0.2" dur="2s" repeatCount="indefinite"/>
+          </rect>
+          {/* 왼쪽 망루 창문 글로우 - 내부 */}
+          <rect x="1.3" y="6.8" width="2.4" height="1.8" fill="#ffe082" opacity="0.5">
+            <animate attributeName="opacity" values="0.3;0.6;0.3" dur="2s" repeatCount="indefinite"/>
+          </rect>
           <rect x="1.5" y="7" width="2" height="1.5" fill="#ffe082">
             <animate attributeName="opacity" values="0.7;1;0.7" dur="2s" repeatCount="indefinite"/>
-          </rect>
-          <rect x="1.5" y="7" width="2" height="1.5" fill="#ffeb3b" opacity="0.4">
-            <animate attributeName="opacity" values="0.2;0.5;0.2" dur="2s" repeatCount="indefinite"/>
           </rect>
           
           {/* 오른쪽 기둥 */}
@@ -420,16 +437,72 @@ const Mansion = ({ x, y, onMouseDown, onClick, onRestart }) => {
           <rect x="27.5" y="5" width="4" height="5" fill="#a0522d"/>
           <rect x="28" y="5.5" width="3" height="4" fill="#cd853f"/>
           <polygon points="29.5,3 27.5,5 31.5,5" fill="#8b4513"/>
+          {/* 오른쪽 망루 창문 글로우 - 외곽 */}
+          <rect x="27.8" y="6.3" width="3.4" height="2.8" fill="#ffd700" opacity="0.15">
+            <animate attributeName="opacity" values="0.1;0.25;0.1" dur="2.2s" repeatCount="indefinite"/>
+          </rect>
+          {/* 오른쪽 망루 창문 글로우 - 중간 */}
+          <rect x="28.1" y="6.6" width="2.8" height="2.2" fill="#ffeb3b" opacity="0.3">
+            <animate attributeName="opacity" values="0.2;0.4;0.2" dur="2.2s" repeatCount="indefinite"/>
+          </rect>
+          {/* 오른쪽 망루 창문 글로우 - 내부 */}
+          <rect x="28.3" y="6.8" width="2.4" height="1.8" fill="#ffe082" opacity="0.5">
+            <animate attributeName="opacity" values="0.3;0.6;0.3" dur="2.2s" repeatCount="indefinite"/>
+          </rect>
           <rect x="28.5" y="7" width="2" height="1.5" fill="#ffe082">
             <animate attributeName="opacity" values="0.7;1;0.7" dur="2.2s" repeatCount="indefinite"/>
-          </rect>
-          <rect x="28.5" y="7" width="2" height="1.5" fill="#ffeb3b" opacity="0.4">
-            <animate attributeName="opacity" values="0.2;0.5;0.2" dur="2.2s" repeatCount="indefinite"/>
           </rect>
           
           {/* 삼각형 지붕 */}
           <polygon points="16,2 5,6 27,6" fill="#8b4513"/>
           <polygon points="16,3 7,6 25,6" fill="#a0522d"/>
+          
+          {/* 깃발 기둥 */}
+          <rect x="15.7" y="-3" width="0.6" height="5.5" fill="#6b4423"/>
+          <rect x="15.8" y="-3" width="0.4" height="5.5" fill="#8b6f47"/>
+          
+          {/* 깃발 천 (바람에 흔들림) */}
+          <g>
+            <path d="M 16.3,-2.5 L 20,-2.5 Q 20.5,-2.3 20,-2.1 L 16.3,-2.1 Z" fill="#dc2626">
+              <animate attributeName="d" 
+                values="M 16.3,-2.5 L 20,-2.5 Q 20.5,-2.3 20,-2.1 L 16.3,-2.1 Z;
+                        M 16.3,-2.5 L 20,-2.5 Q 20.3,-2.3 20.2,-2.1 L 16.3,-2.1 Z;
+                        M 16.3,-2.5 L 20,-2.5 Q 20.5,-2.3 20,-2.1 L 16.3,-2.1 Z" 
+                dur="1.5s" repeatCount="indefinite"/>
+            </path>
+            <path d="M 16.3,-2.1 L 20,-2.1 Q 20.5,-1.9 20,-1.7 L 16.3,-1.7 Z" fill="#b91c1c">
+              <animate attributeName="d" 
+                values="M 16.3,-2.1 L 20,-2.1 Q 20.5,-1.9 20,-1.7 L 16.3,-1.7 Z;
+                        M 16.3,-2.1 L 20,-2.1 Q 20.3,-1.9 20.2,-1.7 L 16.3,-1.7 Z;
+                        M 16.3,-2.1 L 20,-2.1 Q 20.5,-1.9 20,-1.7 L 16.3,-1.7 Z" 
+                dur="1.5s" repeatCount="indefinite"/>
+            </path>
+            <path d="M 16.3,-1.7 L 20,-1.7 Q 20.5,-1.5 20,-1.3 L 16.3,-1.3 Z" fill="#dc2626">
+              <animate attributeName="d" 
+                values="M 16.3,-1.7 L 20,-1.7 Q 20.5,-1.5 20,-1.3 L 16.3,-1.3 Z;
+                        M 16.3,-1.7 L 20,-1.7 Q 20.3,-1.5 20.2,-1.3 L 16.3,-1.3 Z;
+                        M 16.3,-1.7 L 20,-1.7 Q 20.5,-1.5 20,-1.3 L 16.3,-1.3 Z" 
+                dur="1.5s" repeatCount="indefinite"/>
+            </path>
+            
+            {/* 깃발 위의 닭 실루엣 */}
+            <g transform="translate(17.5, -2)">
+              {/* 닭 머리 */}
+              <circle cx="0.5" cy="0" r="0.35" fill="#fbbf24"/>
+              {/* 닭 볏 */}
+              <path d="M 0.4,-0.35 L 0.5,-0.5 L 0.6,-0.35 Z" fill="#ef4444"/>
+              {/* 닭 부리 */}
+              <path d="M 0.85,-0.05 L 1,-0.05 L 0.85,0.05 Z" fill="#f59e0b"/>
+              {/* 닭 눈 */}
+              <circle cx="0.6" cy="-0.05" r="0.08" fill="#1f2937"/>
+              {/* 닭 몸통 */}
+              <ellipse cx="0.2" cy="0.3" rx="0.5" ry="0.4" fill="#fbbf24"/>
+              {/* 닭 날개 */}
+              <ellipse cx="0.3" cy="0.25" rx="0.3" ry="0.25" fill="#f59e0b" opacity="0.8"/>
+              {/* 닭 꼬리 */}
+              <path d="M -0.2,0.2 Q -0.4,0 -0.5,0.3 Q -0.4,0.5 -0.2,0.4 Z" fill="#f59e0b"/>
+            </g>
+          </g>
           
           {/* 성벽 (나무 통나무) */}
           <rect x="6" y="6" width="20" height="18" fill="#cd853f"/>
@@ -465,11 +538,20 @@ const Mansion = ({ x, y, onMouseDown, onClick, onRestart }) => {
           <circle cx="18" cy="20" r="0.3" fill="#a8a8a8"/>
           
           {/* 좌우 세로로 긴 창문 (십자가 모양) */}
+          {/* 왼쪽 창문 글로우 - 외곽 */}
+          <rect x="7" y="8" width="4.5" height="8" fill="#ffd700" opacity="0.15">
+            <animate attributeName="opacity" values="0.1;0.25;0.1" dur="2.5s" repeatCount="indefinite"/>
+          </rect>
+          {/* 왼쪽 창문 글로우 - 중간 */}
+          <rect x="7.4" y="8.4" width="3.7" height="7.2" fill="#ffeb3b" opacity="0.25">
+            <animate attributeName="opacity" values="0.15;0.35;0.15" dur="2.5s" repeatCount="indefinite"/>
+          </rect>
+          {/* 왼쪽 창문 글로우 - 내부 */}
+          <rect x="7.7" y="8.7" width="3.1" height="6.6" fill="#ffe082" opacity="0.4">
+            <animate attributeName="opacity" values="0.25;0.5;0.25" dur="2.5s" repeatCount="indefinite"/>
+          </rect>
           <rect x="8" y="9" width="2.5" height="6" fill="#ffe082">
             <animate attributeName="opacity" values="0.8;1;0.8" dur="2.5s" repeatCount="indefinite"/>
-          </rect>
-          <rect x="8" y="9" width="2.5" height="6" fill="#ffeb3b" opacity="0.3">
-            <animate attributeName="opacity" values="0.15;0.4;0.15" dur="2.5s" repeatCount="indefinite"/>
           </rect>
           <rect x="9" y="9" width="0.6" height="6" fill="#cd853f" opacity="0.3"/>
           <rect x="8" y="11.5" width="2.5" height="0.6" fill="#cd853f" opacity="0.3"/>
@@ -481,11 +563,20 @@ const Mansion = ({ x, y, onMouseDown, onClick, onRestart }) => {
           <circle cx="9.2" cy="14.7" r="0.3" fill="#fbbf24"/>
           <circle cx="10" cy="14.8" r="0.35" fill="#f87171"/>
           
+          {/* 오른쪽 창문 글로우 - 외곽 */}
+          <rect x="20.5" y="8" width="4.5" height="8" fill="#ffd700" opacity="0.15">
+            <animate attributeName="opacity" values="0.1;0.25;0.1" dur="2.7s" repeatCount="indefinite"/>
+          </rect>
+          {/* 오른쪽 창문 글로우 - 중간 */}
+          <rect x="20.9" y="8.4" width="3.7" height="7.2" fill="#ffeb3b" opacity="0.25">
+            <animate attributeName="opacity" values="0.15;0.35;0.15" dur="2.7s" repeatCount="indefinite"/>
+          </rect>
+          {/* 오른쪽 창문 글로우 - 내부 */}
+          <rect x="21.2" y="8.7" width="3.1" height="6.6" fill="#ffe082" opacity="0.4">
+            <animate attributeName="opacity" values="0.25;0.5;0.25" dur="2.7s" repeatCount="indefinite"/>
+          </rect>
           <rect x="21.5" y="9" width="2.5" height="6" fill="#ffe082">
             <animate attributeName="opacity" values="0.8;1;0.8" dur="2.7s" repeatCount="indefinite"/>
-          </rect>
-          <rect x="21.5" y="9" width="2.5" height="6" fill="#ffeb3b" opacity="0.3">
-            <animate attributeName="opacity" values="0.15;0.4;0.15" dur="2.7s" repeatCount="indefinite"/>
           </rect>
           <rect x="22.4" y="9" width="0.6" height="6" fill="#cd853f" opacity="0.3"/>
           <rect x="21.5" y="11.5" width="2.5" height="0.6" fill="#cd853f" opacity="0.3"/>
@@ -530,7 +621,7 @@ const Mansion = ({ x, y, onMouseDown, onClick, onRestart }) => {
         <div
           style={{
             position: 'absolute',
-            top: '72px',
+            top: '79px',
             left: '50%',
             transform: 'translateX(-50%)',
             pointerEvents: 'auto',
