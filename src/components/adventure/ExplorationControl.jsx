@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 
 // 장소별 설명 텍스트
@@ -462,6 +462,50 @@ const ExplorationControl = ({
 
   const canRoll = !isRolling && remainingMoves <= 0 && adventuringChicken && 
     (adventuringChicken.remainingDiceRolls > 0) && (adventuringChicken.tiredness < 100);
+
+  // 키보드 화살표 키로 이동
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // 이동 가능한 상태가 아니면 무시
+      if (remainingMoves <= 0 || !adventuringChicken) return;
+      
+      let newX = playerPosition.x;
+      let newY = playerPosition.y;
+      
+      switch (e.key) {
+        case 'ArrowUp':
+          newY = playerPosition.y - 1;
+          e.preventDefault();
+          break;
+        case 'ArrowDown':
+          newY = playerPosition.y + 1;
+          e.preventDefault();
+          break;
+        case 'ArrowLeft':
+          newX = playerPosition.x - 1;
+          e.preventDefault();
+          break;
+        case 'ArrowRight':
+          newX = playerPosition.x + 1;
+          e.preventDefault();
+          break;
+        default:
+          return;
+      }
+      
+      // 맵 범위 체크 (30x25)
+      if (newX < 0 || newX >= 30 || newY < 0 || newY >= 25) {
+        return;
+      }
+      
+      // 이동 처리
+      onPlayerMove({ x: newX, y: newY });
+      setRemainingMoves(prev => prev - 1);
+    };
+    
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [remainingMoves, playerPosition, adventuringChicken, onPlayerMove]);
 
   return (
     <div 
