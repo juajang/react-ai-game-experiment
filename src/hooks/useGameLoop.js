@@ -301,9 +301,22 @@ export const useGameLoop = (fieldSize, adventuringChickenId = null) => {
     ));
   };
 
-  // 자동사료 배분기 추가 (테스트용: 조건 없음)
+  // 자동사료 배분기 추가
   const addAutoFeeder = (x, y, inventory, consumeItems) => {
-    // 테스트용: 무조건 배치 가능
+    const cost = GAME_CONFIG.AUTO_FEEDER?.COST || 100;
+    const requiredItems = GAME_CONFIG.AUTO_FEEDER?.REQUIRED_ITEMS || { metal_scrap: 1, branch_pile: 2 };
+    
+    // 비용 및 재료 체크
+    if (coins < cost) return false;
+    const hasItems = Object.entries(requiredItems).every(
+      ([item, count]) => (inventory[item] || 0) >= count
+    );
+    if (!hasItems) return false;
+    
+    // 비용 차감 및 재료 소모
+    setCoins(prev => prev - cost);
+    consumeItems(requiredItems);
+    
     setAutoFeeders(prev => [...prev, { id: Date.now(), x, y, lastFeedTime: 0 }]);
     return true;
   };
@@ -574,6 +587,8 @@ export const useGameLoop = (fieldSize, adventuringChickenId = null) => {
           if (growthProgress >= 100) {
             stage = GROWTH_STAGE.ADULT;
             growthProgress = 100;
+            // 성체가 되면 쿨다운부터 시작 (태어나자마자 알 낳기 방지)
+            eggCooldown = config.EGG.LAY_COOLDOWN * 2;
           }
         }
 

@@ -119,13 +119,12 @@ const ItemPanel = ({
   );
   const canBuildScienceBase = coins >= (GAME_CONFIG.SCIENCE_BASE?.COST || 0) && hasScienceBaseMaterials;
 
-  // 자동사료 배분기 재료 체크 (테스트용: 항상 건설 가능)
+  // 자동사료 배분기 재료 체크
   const autoFeederRequiredItems = GAME_CONFIG.AUTO_FEEDER?.REQUIRED_ITEMS || {};
   const hasAutoFeederMaterials = Object.entries(autoFeederRequiredItems).every(
     ([item, count]) => (inventory[item] || 0) >= count
   );
-  const canBuildAutoFeeder = true; // 테스트용
-  // const canBuildAutoFeeder = coins >= (GAME_CONFIG.AUTO_FEEDER?.COST || 0) && hasAutoFeederMaterials;
+  const canBuildAutoFeeder = coins >= (GAME_CONFIG.AUTO_FEEDER?.COST || 0) && hasAutoFeederMaterials;
 
   const renderItem = (item, isGoldenItem = false) => {
     const canAfford = coins >= item.cost;

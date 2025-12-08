@@ -353,11 +353,9 @@ const WorldMap = ({
   }, [chickens]);
   
   // 타일 렌더링 함수 (useCallback으로 메모이제이션)
-  // 테스트용: 모든 타일 밝힘
   const renderTile = useCallback((x, y) => {
     const posKey = `${x},${y}`;
-    const explored = true; // 테스트용 - 항상 탐험됨
-    // const explored = exploredTiles ? exploredTiles.has(posKey) : true;
+    const explored = exploredTiles ? exploredTiles.has(posKey) : false;
     const baseTile = baseMap[y]?.[x] || 'WATER';
     
     if (!explored) {

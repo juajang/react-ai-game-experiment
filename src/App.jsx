@@ -406,6 +406,23 @@ export default function ChickenGame() {
   // 플레이어 이동 핸들러
   const handlePlayerMove = useCallback((newPos) => {
     setPlayerPosition(newPos);
+    
+    // 이동한 타일과 주변 타일 탐험 (시야 반경 1)
+    const newExploredTiles = [];
+    for (let dy = -1; dy <= 1; dy++) {
+      for (let dx = -1; dx <= 1; dx++) {
+        const nx = newPos.x + dx;
+        const ny = newPos.y + dy;
+        if (nx >= 0 && nx < 35 && ny >= 0 && ny < 25) {
+          newExploredTiles.push(`${nx},${ny}`);
+        }
+      }
+    }
+    setExploredTiles(prev => {
+      const updated = new Set(prev);
+      newExploredTiles.forEach(tile => updated.add(tile));
+      return updated;
+    });
   }, []);
   
   // 물 소모 핸들러

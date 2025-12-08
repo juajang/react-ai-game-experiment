@@ -47,16 +47,16 @@ export const GAME_CONFIG = {
   
   // 알 관련
   EGG: {
-    LAY_CHANCE: 4,                   // 알 낳을 확률 증가 (2 → 4)
-    LAY_COOLDOWN: 80,                // 쿨다운 감소 (150 → 80)
+    LAY_CHANCE: 1.5,                 // 알 낳을 확률 감소 (4 → 1.5)
+    LAY_COOLDOWN: 150,               // 쿨다운 증가 (80 → 150)
     HATCH_TIME: 120,                 // 부화 시간 감소 (150 → 120)
     WARM_DISTANCE: 50,               // 따뜻해지는 거리 증가 (40 → 50)
     WARM_RATE: 1.5,                  // 따뜻해지는 속도 (1 → 1.5)
     COOL_RATE: 0.3,                  // 천천히 식음 (0.8 → 0.3)
     HATCH_WARMTH: 100,
-    // 알 낳기 조건 (완화)
+    // 알 낳기 조건
     MIN_HUNGER: 40,                  // (60 → 40)
-    MIN_HAPPINESS: 35,               // (50 → 35)
+    MIN_HAPPINESS: 80,               // 행복도 80% 이상일 때만 알 낳음
     MIN_HEALTH: 50,                  // (70 → 50)
   },
   
@@ -114,7 +114,7 @@ export const GAME_CONFIG = {
   
   // 똥 관련
   POOP: {
-    DROP_CHANCE: 2,                  // 똥 싸는 확률 (2%)
+    DROP_CHANCE: 0.5,                // 똥 싸는 확률 감소 (2% → 0.5%)
     EFFECT_RADIUS: 50,               // 영향 범위
     HAPPINESS_PENALTY: 0.15,         // 주변 닭 행복도 감소
     STINK_THRESHOLD: 50,             // 냄새나기 시작하는 나이
