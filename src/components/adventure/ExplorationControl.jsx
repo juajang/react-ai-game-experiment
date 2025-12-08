@@ -212,9 +212,9 @@ const LOOT_TABLE = {
     { item: null, chance: 1.0 },
   ],
   FOREST: [
-    { item: null, chance: 0.3 },
-    { item: 'twisted_vine', chance: 0.15, name: '비틀어진 덩굴줄기' },
-    { item: 'branch_pile', chance: 0.5, name: '나뭇가지 더미' },
+    { item: null, chance: 0.45 },
+    { item: 'twisted_vine', chance: 0.2, name: '비틀어진 덩굴줄기' },
+    { item: 'branch_pile', chance: 0.3, name: '나뭇가지 더미' },
     { item: 'shovel', chance: 0.05, name: '삽' },
   ],
   BEACH: [
