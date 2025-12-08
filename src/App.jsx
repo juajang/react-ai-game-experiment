@@ -639,6 +639,8 @@ export default function ChickenGame() {
           moveWindmill(movingBuilding.id, movingBuilding.x, movingBuilding.y);
         } else if (movingBuilding.type === 'spaceship') {
           moveSpaceship(movingBuilding.id, movingBuilding.x, movingBuilding.y);
+        } else if (movingBuilding.type === 'mansion') {
+          moveMansion(movingBuilding.id, movingBuilding.x, movingBuilding.y);
         }
         setMovingBuilding(null);
       }
@@ -651,7 +653,7 @@ export default function ChickenGame() {
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [movingBuilding, moveCoop, movePond, moveFlowerBush, moveWindmill, moveSpaceship]);
+  }, [movingBuilding, moveCoop, movePond, moveFlowerBush, moveWindmill, moveSpaceship, moveMansion]);
 
   // 닭 들기/놓기 처리
   useEffect(() => {
@@ -772,6 +774,14 @@ export default function ChickenGame() {
     }
   }, [spaceships, gameState]);
   
+  const handleMansionMouseDown = useCallback((mansionId) => {
+    if (gameState !== GAME_STATE.PLAYING) return;
+    const mansion = mansions.find(m => m.id === mansionId);
+    if (mansion) {
+      setMovingBuilding({ type: 'mansion', id: mansionId, x: mansion.x, y: mansion.y });
+    }
+  }, [mansions, gameState]);
+
   const handleMansionClick = useCallback(() => {
     if (gameState !== GAME_STATE.PLAYING) return;
     // 엔딩 처리 후 게임 계속하기
@@ -871,7 +881,7 @@ export default function ChickenGame() {
       return `✋ ${chicken?.name || '닭'}을(를) 들고 있어요!`;
     }
     if (movingBuilding) {
-      const nameMap = { coop: '닭집', pond: '연못', flowerBush: '꽃덤불', windmill: '풍차', spaceship: '우주선' };
+      const nameMap = { coop: '닭집', pond: '연못', flowerBush: '꽃덤불', windmill: '풍차', spaceship: '우주선', mansion: '닭의 성' };
       return `📍 ${nameMap[movingBuilding.type]} 이동 중`;
     }
     if (selectedItem === 'coop') return `🏠 닭집 배치 (💰${GAME_CONFIG.COOP.COST})`;
@@ -1063,16 +1073,29 @@ export default function ChickenGame() {
                   />
                 ))}
                 
-                {/* 닭의 성들 (이동 불가, 클릭하면 엔딩) */}
-                {mansions.map(mansion => (
+                {/* 닭의 성들 (이동 중이 아닌 것) */}
+                {mansions
+                  .filter(mansion => movingBuilding?.type !== 'mansion' || movingBuilding?.id !== mansion.id)
+                  .map(mansion => (
+                    <Mansion 
+                      key={mansion.id}
+                      x={mansion.x}
+                      y={mansion.y}
+                      onMouseDown={() => handleMansionMouseDown(mansion.id)}
+                      onClick={handleMansionClick}
+                      onRestart={restartGame}
+                    />
+                  ))}
+                
+                {/* 이동 중인 닭의 성 */}
+                {movingBuilding?.type === 'mansion' && (
                   <Mansion 
-                    key={mansion.id}
-                    x={mansion.x}
-                    y={mansion.y}
+                    x={movingBuilding.x}
+                    y={movingBuilding.y}
                     onClick={handleMansionClick}
                     onRestart={restartGame}
                   />
-                ))}
+                )}
                 
                 {/* 꽃덤불들 (이동 중이 아닌 것) */}
                 {flowerBushes.filter(fb => !(movingBuilding?.type === 'flowerBush' && movingBuilding?.id === fb.id)).map(bush => (

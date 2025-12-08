@@ -3,10 +3,10 @@ import ReactDOM from 'react-dom';
 
 // 엔딩 텍스트
 const ENDING_TEXTS = [
-    "닭들은 오래된 숲 한가운데에 모여,\n드디어 서로 힘을 합쳐 나무성을 완성했어요.",
+    "닭들은 오래된 숲 한가운데에 모여,\n드디어 서로 힘을 합쳐 닭의 성을 완성했어요.",
     "예전엔 인간들이 남긴 시끄러운 흔적뿐이었지만,\n이제는 바람 소리만 들려서 모두가 한숨 돌렸습니다.",
     '닭들은 성 꼭대기에서 서로를 바라보며\n"우리가… 정말 알 딛고 여기까지 왔네요!"\n하고 가볍게 꼬꼬댔어요.',
-    "밤이 되자 나무성에 달아둔 작은 불빛들이 반짝반짝 켜져서,\n마치 새로운 시대를 축하하는 것처럼 보였습니다.",
+    "밤이 되자 성에 달아둔 작은 불빛들이 반짝반짝 켜져서,\n마치 새로운 시대를 축하하는 것처럼 보였습니다.",
     "그렇게 닭들은 자신들만의 세상이 열렸음을 깨닫고,\n조금 들뜬 발걸음으로 새로운 미래를 향해 걸어갔습니다.",
 ];
 
@@ -313,14 +313,15 @@ export const MansionPreview = ({ size = 32 }) => (
   </svg>
 );
 
-const Mansion = ({ x, y, onClick, onRestart }) => {
+const Mansion = ({ x, y, onMouseDown, onClick, onRestart }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [showEnding, setShowEnding] = useState(false);
   const [endingTextIndex, setEndingTextIndex] = useState(0);
   const [isTypingComplete, setIsTypingComplete] = useState(false);
+  const [isButtonHovered, setIsButtonHovered] = useState(false);
   
-  const handleClick = (e) => {
+  const handleSummonClick = (e) => {
     e.stopPropagation();
     e.preventDefault();
     setShowConfirm(true);
@@ -370,11 +371,14 @@ const Mansion = ({ x, y, onClick, onRestart }) => {
         style={{ 
           left: x - 48, 
           top: y - 90,
-          cursor: 'pointer',
+          cursor: 'move',
           zIndex: 18,
           userSelect: 'none',
         }}
-        onClick={handleClick}
+        onMouseDown={(e) => {
+          e.stopPropagation();
+          onMouseDown?.(e);
+        }}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
@@ -398,7 +402,12 @@ const Mansion = ({ x, y, onClick, onRestart }) => {
           <rect x="0.5" y="5" width="4" height="5" fill="#a0522d"/>
           <rect x="1" y="5.5" width="3" height="4" fill="#cd853f"/>
           <polygon points="2.5,3 0.5,5 4.5,5" fill="#8b4513"/>
-          <rect x="1.5" y="7" width="2" height="1.5" fill="#ffe082"/>
+          <rect x="1.5" y="7" width="2" height="1.5" fill="#ffe082">
+            <animate attributeName="opacity" values="0.7;1;0.7" dur="2s" repeatCount="indefinite"/>
+          </rect>
+          <rect x="1.5" y="7" width="2" height="1.5" fill="#ffeb3b" opacity="0.4">
+            <animate attributeName="opacity" values="0.2;0.5;0.2" dur="2s" repeatCount="indefinite"/>
+          </rect>
           
           {/* 오른쪽 기둥 */}
           <rect x="28" y="10" width="3" height="14" fill="#a0522d"/>
@@ -411,7 +420,12 @@ const Mansion = ({ x, y, onClick, onRestart }) => {
           <rect x="27.5" y="5" width="4" height="5" fill="#a0522d"/>
           <rect x="28" y="5.5" width="3" height="4" fill="#cd853f"/>
           <polygon points="29.5,3 27.5,5 31.5,5" fill="#8b4513"/>
-          <rect x="28.5" y="7" width="2" height="1.5" fill="#ffe082"/>
+          <rect x="28.5" y="7" width="2" height="1.5" fill="#ffe082">
+            <animate attributeName="opacity" values="0.7;1;0.7" dur="2.2s" repeatCount="indefinite"/>
+          </rect>
+          <rect x="28.5" y="7" width="2" height="1.5" fill="#ffeb3b" opacity="0.4">
+            <animate attributeName="opacity" values="0.2;0.5;0.2" dur="2.2s" repeatCount="indefinite"/>
+          </rect>
           
           {/* 삼각형 지붕 */}
           <polygon points="16,2 5,6 27,6" fill="#8b4513"/>
@@ -451,7 +465,12 @@ const Mansion = ({ x, y, onClick, onRestart }) => {
           <circle cx="18" cy="20" r="0.3" fill="#a8a8a8"/>
           
           {/* 좌우 세로로 긴 창문 (십자가 모양) */}
-          <rect x="8" y="9" width="2.5" height="6" fill="#ffe082"/>
+          <rect x="8" y="9" width="2.5" height="6" fill="#ffe082">
+            <animate attributeName="opacity" values="0.8;1;0.8" dur="2.5s" repeatCount="indefinite"/>
+          </rect>
+          <rect x="8" y="9" width="2.5" height="6" fill="#ffeb3b" opacity="0.3">
+            <animate attributeName="opacity" values="0.15;0.4;0.15" dur="2.5s" repeatCount="indefinite"/>
+          </rect>
           <rect x="9" y="9" width="0.6" height="6" fill="#cd853f" opacity="0.3"/>
           <rect x="8" y="11.5" width="2.5" height="0.6" fill="#cd853f" opacity="0.3"/>
           
@@ -462,7 +481,12 @@ const Mansion = ({ x, y, onClick, onRestart }) => {
           <circle cx="9.2" cy="14.7" r="0.3" fill="#fbbf24"/>
           <circle cx="10" cy="14.8" r="0.35" fill="#f87171"/>
           
-          <rect x="21.5" y="9" width="2.5" height="6" fill="#ffe082"/>
+          <rect x="21.5" y="9" width="2.5" height="6" fill="#ffe082">
+            <animate attributeName="opacity" values="0.8;1;0.8" dur="2.7s" repeatCount="indefinite"/>
+          </rect>
+          <rect x="21.5" y="9" width="2.5" height="6" fill="#ffeb3b" opacity="0.3">
+            <animate attributeName="opacity" values="0.15;0.4;0.15" dur="2.7s" repeatCount="indefinite"/>
+          </rect>
           <rect x="22.4" y="9" width="0.6" height="6" fill="#cd853f" opacity="0.3"/>
           <rect x="21.5" y="11.5" width="2.5" height="0.6" fill="#cd853f" opacity="0.3"/>
           
@@ -501,6 +525,43 @@ const Mansion = ({ x, y, onClick, onRestart }) => {
           <circle cx="26" cy="23.5" r="0.6" fill="#fbbf24"/>
           <circle cx="28" cy="24" r="0.8" fill="#f472b6"/>
         </svg>
+        
+        {/* 소집 버튼 */}
+        <div
+          style={{
+            position: 'absolute',
+            top: '72px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            pointerEvents: 'auto',
+          }}
+        >
+          <button
+            onClick={handleSummonClick}
+            onMouseDown={(e) => {
+              e.stopPropagation();
+            }}
+            onMouseEnter={() => setIsButtonHovered(true)}
+            onMouseLeave={() => setIsButtonHovered(false)}
+            style={{
+              padding: '2px 8px',
+              backgroundColor: isButtonHovered ? '#6b4423' : '#8b4513',
+              color: 'white',
+              border: 'none',
+              borderRadius: '3px',
+              fontSize: '10px',
+              fontWeight: 'bold',
+              cursor: 'pointer',
+              boxShadow: isButtonHovered 
+                ? '0 2px 6px rgba(139, 69, 19, 0.4)' 
+                : '0 1px 4px rgba(139, 69, 19, 0.3)',
+              transition: 'all 0.2s',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            소집
+          </button>
+        </div>
         
       </div>
       
