@@ -22,7 +22,9 @@ export {
   StrawSpaceship,
   StrawSpaceshipPreview,
   Mansion,
-  MansionPreview
+  MansionPreview,
+  ScienceBase,
+  ScienceBasePreview
 } from './buildings';
 
 // 아이템 컴포넌트

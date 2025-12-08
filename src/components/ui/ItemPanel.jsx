@@ -8,6 +8,7 @@ import { PondPreview } from '../buildings/Pond';
 import { WindmillPreview } from '../buildings/Windmill';
 import { StrawSpaceshipPreview } from '../buildings/StrawSpaceship';
 import { MansionPreview } from '../buildings/Mansion';
+import { ScienceBasePreview } from '../buildings/ScienceBase';
 import Coin from './Coin';
 
 // 사료 미리보기
@@ -103,12 +104,19 @@ const ItemPanel = ({
   );
   const canBuildSpaceship = coins >= (GAME_CONFIG.SPACESHIP?.COST || 500) && hasAllMaterials && isGoldenFarm;
 
-  // 닭의 성 재료 체크
+  // 닭의 성 재료 체크 (황금농장 필요)
   const mansionRequiredItems = GAME_CONFIG.MANSION?.REQUIRED_ITEMS || {};
   const hasMansionMaterials = Object.entries(mansionRequiredItems).every(
     ([item, count]) => (inventory[item] || 0) >= count
   );
-  const canBuildMansion = coins >= (GAME_CONFIG.MANSION?.COST || 0) && hasMansionMaterials;
+  const canBuildMansion = coins >= (GAME_CONFIG.MANSION?.COST || 0) && hasMansionMaterials && isGoldenFarm;
+
+  // 과학기지 재료 체크
+  const scienceBaseRequiredItems = GAME_CONFIG.SCIENCE_BASE?.REQUIRED_ITEMS || {};
+  const hasScienceBaseMaterials = Object.entries(scienceBaseRequiredItems).every(
+    ([item, count]) => (inventory[item] || 0) >= count
+  );
+  const canBuildScienceBase = coins >= (GAME_CONFIG.SCIENCE_BASE?.COST || 0) && hasScienceBaseMaterials;
 
   const renderItem = (item, isGoldenItem = false) => {
     const canAfford = coins >= item.cost;
@@ -229,17 +237,78 @@ const ItemPanel = ({
         {goldenItems.map(item => renderItem(item, true))}
       </div>
       
-      {/* 엔딩 건물 섹션 */}
+      {/* 특수 건물 섹션 (4번째 줄) */}
+      <div 
+        className="flex items-center gap-1" 
+        style={{ margin: '2px 0' }}
+      >
+        <div style={{ borderTop: '2px dashed #42a5f5', flex: 1 }} />
+        <span style={{ fontSize: '8px', color: '#42a5f5' }}>🔬</span>
+        <div style={{ borderTop: '2px dashed #42a5f5', flex: 1 }} />
+      </div>
+      
+      {/* 과학기지 */}
+      <div className="grid grid-cols-2 gap-2">
+        <div
+          ref={el => buttonRefs.current['scienceBase'] = el}
+          onMouseEnter={(e) => {
+            setHoveredItem('scienceBase');
+            const rect = e.currentTarget.getBoundingClientRect();
+            setTooltipPosition({
+              left: rect.right + 8,
+              top: rect.top,
+            });
+          }}
+          onMouseLeave={() => {
+            setHoveredItem(null);
+            setTooltipPosition(null);
+          }}
+          className="relative w-full"
+        >
+          <button
+            onClick={() => canBuildScienceBase && onSelectItem(selectedItem === 'scienceBase' ? null : 'scienceBase')}
+            className="flex flex-col items-center p-2 rounded transition-all w-full relative"
+            style={{
+              backgroundColor: selectedItem === 'scienceBase' ? '#bfdbfe' : '#dbeafe',
+              border: selectedItem === 'scienceBase' ? '3px solid #3b82f6' : '2px solid #60a5fa',
+              opacity: canBuildScienceBase ? 1 : 0.5,
+              cursor: canBuildScienceBase ? 'pointer' : 'not-allowed',
+            }}
+          >
+            {!hasScienceBaseMaterials && (
+              <div className="absolute -top-1 -right-1 text-xs">🔧</div>
+            )}
+            {canBuildScienceBase && (
+              <div className="absolute -top-1 -right-1 text-xs animate-pulse">✨</div>
+            )}
+            <div className="mb-1"><ScienceBasePreview size={28} /></div>
+            <div style={{ fontSize: '9px', color: '#1e40af', fontWeight: 'bold' }}>
+              과학기지
+            </div>
+            <div className="flex items-center gap-0.5 mt-1" style={{ fontSize: '8px', color: '#3b82f6' }}>
+              <Coin size={10} />
+              <span>{GAME_CONFIG.SCIENCE_BASE?.COST || 150}</span>
+            </div>
+            {/* 필요 재료 표시 */}
+            <div style={{ fontSize: '7px', color: '#6b7280', marginTop: '2px', display: 'flex', flexDirection: 'column', gap: '1px' }}>
+              <span style={{ color: (inventory.branch_pile || 0) >= 3 ? '#22c55e' : '#ef4444' }}>🪵{inventory.branch_pile || 0}/3</span>
+              <span style={{ color: (inventory.antenna || 0) >= 1 ? '#22c55e' : '#ef4444' }}>📡{inventory.antenna || 0}/1</span>
+            </div>
+          </button>
+        </div>
+      </div>
+      
+      {/* 엔딩 건물 섹션 (5번째 줄) */}
       <div 
         className="flex items-center gap-1" 
         style={{ margin: '2px 0' }}
       >
         <div style={{ borderTop: '2px dashed #7c3aed', flex: 1 }} />
-        <span style={{ fontSize: '8px', color: '#7c3aed' }}>✨</span>
+        <span style={{ fontSize: '8px', color: '#7c3aed' }}>🚀</span>
         <div style={{ borderTop: '2px dashed #7c3aed', flex: 1 }} />
       </div>
       
-      {/* 엔딩 건물들 (2줄) */}
+      {/* 엔딩 건물들 */}
       <div className="grid grid-cols-2 gap-2">
         {/* 닭의 성 */}
         <div
@@ -279,6 +348,7 @@ const ItemPanel = ({
             </div>
             {/* 필요 재료 표시 (세로 두 줄) */}
             <div style={{ fontSize: '7px', color: '#6b7280', marginTop: '2px', display: 'flex', flexDirection: 'column', gap: '1px' }}>
+              {isGoldenFarm && <span style={{ color: '#22c55e' }}>✨달성</span>}
               <span style={{ color: (inventory.twisted_vine || 0) >= 1 ? '#22c55e' : '#ef4444' }}>🌿{inventory.twisted_vine || 0}/1</span>
               <span style={{ color: (inventory.branch_pile || 0) >= 3 ? '#22c55e' : '#ef4444' }}>🪵{inventory.branch_pile || 0}/3</span>
             </div>
@@ -332,7 +402,7 @@ const ItemPanel = ({
         </div>
         {/* 필요 재료 표시 */}
         <div style={{ fontSize: '7px', color: '#6b7280', marginTop: '2px' }}>
-          <span style={{ color: (inventory.metal_scrap || 0) >= 3 ? '#22c55e' : '#ef4444' }}>⚙️{inventory.metal_scrap || 0}/3</span>
+          <span style={{ color: (inventory.spaceship_plate || 0) >= 1 ? '#22c55e' : '#ef4444' }}>🛸{inventory.spaceship_plate || 0}/1</span>
           {' '}
           <span style={{ color: (inventory.blueprint || 0) >= 1 ? '#22c55e' : '#ef4444' }}>📜{inventory.blueprint || 0}/1</span>
           {' '}
@@ -340,22 +410,6 @@ const ItemPanel = ({
         </div>
       </button>
       </div>
-      </div>
-      
-      {/* 보유 개수 */}
-      <div 
-        className="mt-1 pt-1 text-center"
-        style={{ 
-          borderTop: '2px dashed #8b7355',
-          fontSize: '9px',
-          color: '#8b7355',
-        }}
-      >
-        <div>🌸 {(flowerCount || 0) + (flowerBushCount || 0)}개</div>
-        <div>💧 {pondCount || 0}개</div>
-        <div>🏠 {coopCount}개</div>
-        {windmillCount > 0 && <div>🌀 {windmillCount}개</div>}
-        {spaceshipCount > 0 && <div style={{ color: '#7c3aed' }}>🚀 {spaceshipCount}개</div>}
       </div>
       
       {/* Portal 툴팁들 */}
@@ -390,14 +444,14 @@ const ItemPanel = ({
         document.body
       )}
       
-      {hoveredItem === 'mansion' && tooltipPosition && ReactDOM.createPortal(
+      {hoveredItem === 'scienceBase' && tooltipPosition && ReactDOM.createPortal(
         <div 
           style={{ 
             position: 'fixed',
             left: `${tooltipPosition.left}px`,
             top: `${tooltipPosition.top}px`,
             backgroundColor: '#0f172a',
-            border: '3px solid #a78bfa',
+            border: '3px solid #3b82f6',
             borderRadius: '8px',
             padding: '8px 12px',
             color: '#ffffff',
@@ -409,22 +463,68 @@ const ItemPanel = ({
             minWidth: '200px',
           }}
         >
-          <div style={{ fontWeight: 'bold', marginBottom: '4px', color: '#c4b5fd', fontSize: '11px' }}>
+          <div style={{ fontWeight: 'bold', marginBottom: '4px', color: '#93c5fd', fontSize: '11px' }}>
+            🔬 과학기지 건설 조건
+          </div>
+          <div style={{ marginBottom: '3px' }}>💰 코인: <span style={{ color: '#ffd700', fontWeight: 'bold' }}>{GAME_CONFIG.SCIENCE_BASE?.COST || 150}</span></div>
+          <div style={{ fontSize: '9px', color: '#93c5fd', marginTop: '4px', borderTop: '2px solid #475569', paddingTop: '4px' }}>
+            필수 재료 (숲/통신탑에서 획득):
+          </div>
+          <div style={{ fontSize: '9px', paddingLeft: '8px' }}>
+            <div style={{ color: (inventory.branch_pile || 0) >= 3 ? '#86efac' : '#fca5a5', fontWeight: 'bold' }}>
+              🪵 나뭇가지 더미 × {GAME_CONFIG.SCIENCE_BASE?.REQUIRED_ITEMS?.branch_pile || 3}
+              <span style={{ color: '#cbd5e1' }}> ({inventory.branch_pile || 0})</span>
+            </div>
+            <div style={{ color: (inventory.antenna || 0) >= 1 ? '#86efac' : '#fca5a5', fontWeight: 'bold' }}>
+              📡 부서진 안테나 × {GAME_CONFIG.SCIENCE_BASE?.REQUIRED_ITEMS?.antenna || 1}
+              <span style={{ color: '#cbd5e1' }}> ({inventory.antenna || 0})</span>
+            </div>
+          </div>
+          <div style={{ fontSize: '9px', color: '#93c5fd', marginTop: '4px', fontStyle: 'italic' }}>
+            닭들이 연구를 시작할 수 있어요! 🐔
+          </div>
+        </div>,
+        document.body
+      )}
+      
+      {hoveredItem === 'mansion' && tooltipPosition && ReactDOM.createPortal(
+        <div 
+          style={{ 
+            position: 'fixed',
+            left: `${tooltipPosition.left}px`,
+            top: `${tooltipPosition.top}px`,
+            backgroundColor: '#2d1810',
+            border: '3px solid #c9a66b',
+            borderRadius: '8px',
+            padding: '8px 12px',
+            color: '#f5e6c8',
+            whiteSpace: 'nowrap',
+            zIndex: 999999,
+            pointerEvents: 'none',
+            fontSize: '10px',
+            boxShadow: '0 8px 24px rgba(0,0,0,0.8)',
+            minWidth: '180px',
+          }}
+        >
+          <div style={{ fontWeight: 'bold', marginBottom: '4px', color: '#e8d5b7', fontSize: '11px' }}>
             🏰 닭의 성 건설 조건
           </div>
           <div style={{ marginBottom: '3px' }}>💰 코인: <span style={{ color: '#ffd700', fontWeight: 'bold' }}>{GAME_CONFIG.MANSION.COST}</span></div>
-          <div style={{ fontSize: '9px', color: '#a5b4fc', marginTop: '4px', borderTop: '2px solid #475569', paddingTop: '4px' }}>
-            필수 재료 (숲에서 획득):
+          <div style={{ fontSize: '9px', color: '#c9a66b', marginTop: '4px', borderTop: '2px solid #5d4037', paddingTop: '4px' }}>
+            필수 재료:
           </div>
           <div style={{ fontSize: '9px', paddingLeft: '8px' }}>
-            <div style={{ color: (inventory.twisted_vine || 0) >= 1 ? '#86efac' : '#fca5a5', fontWeight: 'bold' }}>
+            <div style={{ color: (inventory.twisted_vine || 0) >= 1 ? '#a5d6a7' : '#ef9a9a', fontWeight: 'bold' }}>
               🌿 비틀어진 덩굴줄기 × {GAME_CONFIG.MANSION.REQUIRED_ITEMS.twisted_vine} 
-              <span style={{ color: '#cbd5e1' }}> ({inventory.twisted_vine || 0})</span>
+              <span style={{ color: '#d7ccc8' }}> ({inventory.twisted_vine || 0})</span>
             </div>
-            <div style={{ color: (inventory.branch_pile || 0) >= 3 ? '#86efac' : '#fca5a5', fontWeight: 'bold' }}>
+            <div style={{ color: (inventory.branch_pile || 0) >= 3 ? '#a5d6a7' : '#ef9a9a', fontWeight: 'bold' }}>
               🪵 나뭇가지 더미 × {GAME_CONFIG.MANSION.REQUIRED_ITEMS.branch_pile}
-              <span style={{ color: '#cbd5e1' }}> ({inventory.branch_pile || 0})</span>
+              <span style={{ color: '#d7ccc8' }}> ({inventory.branch_pile || 0})</span>
             </div>
+          </div>
+          <div style={{ fontSize: '9px', color: isGoldenFarm ? '#a5d6a7' : '#ef9a9a', marginTop: '4px', fontWeight: 'bold' }}>
+            {isGoldenFarm ? '✓' : '✗'} 황금 닭 농장 (10마리 이상)
           </div>
         </div>,
         document.body
@@ -457,9 +557,9 @@ const ItemPanel = ({
             필수 재료:
           </div>
           <div style={{ fontSize: '9px', paddingLeft: '8px' }}>
-            <div style={{ color: (inventory.metal_scrap || 0) >= 3 ? '#86efac' : '#fca5a5', fontWeight: 'bold' }}>
-              🔩 금속 조각 × {GAME_CONFIG.SPACESHIP.REQUIRED_ITEMS.metal_scrap} 
-              <span style={{ color: '#cbd5e1' }}> ({inventory.metal_scrap || 0})</span>
+            <div style={{ color: (inventory.spaceship_plate || 0) >= 1 ? '#86efac' : '#fca5a5', fontWeight: 'bold' }}>
+              🛸 우주선 플레이트 × {GAME_CONFIG.SPACESHIP.REQUIRED_ITEMS.spaceship_plate} 
+              <span style={{ color: '#cbd5e1' }}> ({inventory.spaceship_plate || 0})</span>
             </div>
             <div style={{ color: (inventory.blueprint || 0) >= 1 ? '#86efac' : '#fca5a5', fontWeight: 'bold' }}>
               📜 설계도 × {GAME_CONFIG.SPACESHIP.REQUIRED_ITEMS.blueprint}

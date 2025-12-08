@@ -1,5 +1,5 @@
 import { useRef, useCallback, useState, useEffect } from 'react';
-import { Chicken, Chick, Juvenile, DeadChicken, Egg, Feed, Flower, FlowerBush, Pond, Windmill, StrawSpaceship, Mansion, Poop, Field, GameInfo, Coop, ItemPanel, AdventurePanel, StatusBar } from './components';
+import { Chicken, Chick, Juvenile, DeadChicken, Egg, Feed, Flower, FlowerBush, Pond, Windmill, StrawSpaceship, Mansion, ScienceBase, Poop, Field, GameInfo, Coop, ItemPanel, AdventurePanel, StatusBar } from './components';
 import { useGameLoop } from './hooks/useGameLoop';
 import { useFieldSize } from './hooks/useFieldSize';
 import { GROWTH_STAGE, GAME_CONFIG, GAME_STATE, FARM_GRADE } from './constants/gameConfig';
@@ -286,6 +286,7 @@ export default function ChickenGame() {
     ponds,
     windmills,
     mansions,
+    scienceBases,
     coops,
     poops,
     coins,
@@ -306,6 +307,8 @@ export default function ChickenGame() {
     moveSpaceship,
     addMansion,
     moveMansion,
+    addScienceBase,
+    moveScienceBase,
     addCoop,
     moveCoop,
     removePoop,
@@ -601,6 +604,22 @@ export default function ChickenGame() {
     setInventory(prev => ({ ...prev, [item]: Math.max(0, (prev[item] || 0) - amount) }));
   }, []);
   
+  // 인벤토리 아이템 소모 (여러 아이템 한번에)
+  const handleConsumeMultipleItems = useCallback((items) => {
+    setInventory(prev => {
+      const newInventory = { ...prev };
+      Object.entries(items).forEach(([item, amount]) => {
+        newInventory[item] = Math.max(0, (newInventory[item] || 0) - amount);
+      });
+      return newInventory;
+    });
+  }, []);
+  
+  // 인벤토리 아이템 추가
+  const handleAddInventoryItem = useCallback((item, amount = 1) => {
+    setInventory(prev => ({ ...prev, [item]: (prev[item] || 0) + amount }));
+  }, []);
+  
   // 도구 선택 핸들러
   const handleSelectTool = useCallback((tool) => {
     setSelectedTool(tool);
@@ -641,6 +660,8 @@ export default function ChickenGame() {
           moveSpaceship(movingBuilding.id, movingBuilding.x, movingBuilding.y);
         } else if (movingBuilding.type === 'mansion') {
           moveMansion(movingBuilding.id, movingBuilding.x, movingBuilding.y);
+        } else if (movingBuilding.type === 'scienceBase') {
+          moveScienceBase(movingBuilding.id, movingBuilding.x, movingBuilding.y);
         }
         setMovingBuilding(null);
       }
@@ -653,7 +674,7 @@ export default function ChickenGame() {
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [movingBuilding, moveCoop, movePond, moveFlowerBush, moveWindmill, moveSpaceship, moveMansion]);
+  }, [movingBuilding, moveCoop, movePond, moveFlowerBush, moveWindmill, moveSpaceship, moveMansion, moveScienceBase]);
 
   // 닭 들기/놓기 처리
   useEffect(() => {
@@ -707,6 +728,10 @@ export default function ChickenGame() {
       }
     } else if (selectedItem === 'mansion') {
       if (addMansion(x, y)) {
+        setSelectedItem('feed');
+      }
+    } else if (selectedItem === 'scienceBase') {
+      if (addScienceBase(x, y, inventory, handleConsumeInventoryItem)) {
         setSelectedItem('feed');
       }
     } else if (selectedItem === 'flowerBush') {
@@ -787,6 +812,14 @@ export default function ChickenGame() {
     // 엔딩 처리 후 게임 계속하기
     continueGame();
   }, [gameState, continueGame]);
+
+  const handleScienceBaseMouseDown = useCallback((scienceBaseId) => {
+    if (gameState !== GAME_STATE.PLAYING) return;
+    const scienceBase = scienceBases.find(sb => sb.id === scienceBaseId);
+    if (scienceBase) {
+      setMovingBuilding({ type: 'scienceBase', id: scienceBaseId, x: scienceBase.x, y: scienceBase.y });
+    }
+  }, [scienceBases, gameState]);
 
   const handleSpaceshipClick = useCallback((spaceshipId) => {
     // 발사 애니메이션은 컴포넌트 내부에서 처리됨
@@ -881,7 +914,7 @@ export default function ChickenGame() {
       return `✋ ${chicken?.name || '닭'}을(를) 들고 있어요!`;
     }
     if (movingBuilding) {
-      const nameMap = { coop: '닭집', pond: '연못', flowerBush: '꽃덤불', windmill: '풍차', spaceship: '우주선', mansion: '닭의 성' };
+      const nameMap = { coop: '닭집', pond: '연못', flowerBush: '꽃덤불', windmill: '풍차', spaceship: '우주선', mansion: '닭의 성', scienceBase: '과학기지' };
       return `📍 ${nameMap[movingBuilding.type]} 이동 중`;
     }
     if (selectedItem === 'coop') return `🏠 닭집 배치 (💰${GAME_CONFIG.COOP.COST})`;
@@ -1094,6 +1127,29 @@ export default function ChickenGame() {
                     y={movingBuilding.y}
                     onClick={handleMansionClick}
                     onRestart={restartGame}
+                  />
+                )}
+                
+                {/* 과학기지들 (이동 중이 아닌 것) */}
+                {scienceBases
+                  .filter(sb => movingBuilding?.type !== 'scienceBase' || movingBuilding?.id !== sb.id)
+                  .map(scienceBase => (
+                    <ScienceBase 
+                      key={scienceBase.id}
+                      x={scienceBase.x}
+                      y={scienceBase.y}
+                      onMouseDown={() => handleScienceBaseMouseDown(scienceBase.id)}
+                      inventory={inventory}
+                      onConsumeItems={handleConsumeMultipleItems}
+                      onAddItem={handleAddInventoryItem}
+                    />
+                  ))}
+                
+                {/* 이동 중인 과학기지 */}
+                {movingBuilding?.type === 'scienceBase' && (
+                  <ScienceBase 
+                    x={movingBuilding.x}
+                    y={movingBuilding.y}
                   />
                 )}
                 

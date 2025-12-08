@@ -125,7 +125,7 @@ export const GAME_CONFIG = {
   SPACESHIP: {
     COST: 500,                       // 높은 가격 (엔드게임 컨텐츠)
     REQUIRED_ITEMS: {                // 필요 재료
-      metal_scrap: 3,                // 신기한 금속 조각 3개
+      spaceship_plate: 1,            // 우주선 플레이트 1개 (과학기지에서 제작)
       blueprint: 1,                  // 우주선 설계도 조각 1개
       fuel_cell: 1,                  // 연료 전지 1개
     },
@@ -138,6 +138,16 @@ export const GAME_CONFIG = {
       twisted_vine: 1,               // 비틀어진 덩굴줄기 1개
       branch_pile: 3,                // 나뭇가지 더미 3개
     },
+  },
+  
+  // 과학기지 관련
+  SCIENCE_BASE: {
+    COST: 150,                       // 150코인
+    REQUIRED_ITEMS: {                // 필요 재료
+      branch_pile: 3,                // 나뭇가지 더미 3개
+      antenna: 1,                    // 부서진 안테나 1개
+    },
+    EFFECT_RADIUS: 80,               // 효과 범위
   },
   
   // 필드 관련

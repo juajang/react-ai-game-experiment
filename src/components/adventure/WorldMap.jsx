@@ -333,11 +333,9 @@ const WorldMap = ({
     : 0;
   
   // 타일이 탐험되었는지 체크
-  // 테스트용: 모든 타일 밝힘
   const isExplored = (x, y) => {
-    return true; // 테스트용 - 항상 탐험됨
-    // if (!exploredTiles) return true;
-    // return exploredTiles.has(`${x},${y}`);
+    if (!exploredTiles) return true;
+    return exploredTiles.has(`${x},${y}`);
   };
   
   const renderTile = (x, y) => {

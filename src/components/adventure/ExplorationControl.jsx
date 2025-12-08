@@ -213,9 +213,9 @@ const LOOT_TABLE = {
   ],
   // 🏚️ 버려진 민가 - 인간의 유품
   HOUSE: [
-    { item: null, chance: 0.5 },
-    { item: 'diary', chance: 0.3, name: '낡은 일기장' },
-    { item: 'shovel', chance: 0.2, name: '삽' },
+    { item: null, chance: 0.4 },
+    { item: 'metal_scrap', chance: 0.3, name: '신기한 금속 조각' },
+    { item: 'shovel', chance: 0.3, name: '삽' },
   ],
   // 🚀 발사장 - 우주 관련 아이템
   LAUNCH_SITE: [
@@ -317,8 +317,7 @@ const ExplorationControl = ({
         clearInterval(rollInterval);
         const finalResult = Math.floor(Math.random() * 6) + 1;
         setDiceResult(finalResult);
-        // 테스트용: 이동횟수 제한 해제 (999칸)
-        setRemainingMoves(999);
+        setRemainingMoves(finalResult);
         setIsRolling(false);
         
         // 피로도 증가 (레벨에 따라 다름) 및 주사위 횟수 감소
@@ -344,11 +343,10 @@ const ExplorationControl = ({
       return;
     }
     
-    // 테스트용: 물 제한 비활성화
-    // if (water <= 0) {
-    //   setMessage("💧 물이 부족합니다! 이동할 수 없습니다.");
-    //   return;
-    // }
+    if (water <= 0) {
+      setMessage("💧 물이 부족합니다! 이동할 수 없습니다.");
+      return;
+    }
     
     const dirMap = {
       up: { dx: 0, dy: -1 },
@@ -405,11 +403,10 @@ const ExplorationControl = ({
       return;
     }
     
-    // 테스트용: 벼 제한 비활성화
-    // if (rice <= 0) {
-    //   setMessage("🌾 벼가 부족합니다! 조사할 수 없습니다.");
-    //   return;
-    // }
+    if (rice <= 0) {
+      setMessage("🌾 벼가 부족합니다! 조사할 수 없습니다.");
+      return;
+    }
     
     // 벼 소모 및 조사 완료 처리
     onConsumeRice?.(1);
@@ -427,11 +424,11 @@ const ExplorationControl = ({
       // 아이템별 처리
       const itemEmojis = {
         shovel: '🪏',
-        diary: '📔',
         blueprint: '📜',
         fuel_cell: '🔋',
         metal_scrap: '⚙️',
         antenna: '📡',
+        spaceship_plate: '🛸',
         twisted_vine: '🌿',
         branch_pile: '🪵',
       };
@@ -1019,11 +1016,11 @@ const ExplorationControl = ({
             </span>
           </div>
           
-          {/* 낡은 일기장 슬롯 */}
+          {/* 우주선 플레이트 슬롯 */}
           <div
             onMouseEnter={(e) => {
-              if ((inventory.diary || 0) > 0) {
-                setHoveredInventoryItem('diary');
+              if ((inventory.spaceship_plate || 0) > 0) {
+                setHoveredInventoryItem('spaceship_plate');
                 const rect = e.currentTarget.getBoundingClientRect();
                 setTooltipPosition({ left: rect.left + rect.width / 2, top: rect.top });
               }
@@ -1034,15 +1031,15 @@ const ExplorationControl = ({
             }}
             className="flex items-center justify-center gap-1 px-1 py-1.5 rounded transition-all"
             style={{
-              backgroundColor: (inventory.diary || 0) > 0 ? '#37474f' : '#2a2a3e',
-              border: '1px dashed #5d4037',
-              opacity: (inventory.diary || 0) > 0 ? 1 : 0.4,
-              cursor: (inventory.diary || 0) > 0 ? 'pointer' : 'default',
+              backgroundColor: (inventory.spaceship_plate || 0) > 0 ? '#37474f' : '#2a2a3e',
+              border: '1px dashed #7c3aed',
+              opacity: (inventory.spaceship_plate || 0) > 0 ? 1 : 0.4,
+              cursor: (inventory.spaceship_plate || 0) > 0 ? 'pointer' : 'default',
             }}
           >
-            <span style={{ fontSize: '12px' }}>📔</span>
-            <span style={{ fontSize: '7px', color: (inventory.diary || 0) > 0 ? '#ffcc80' : '#455a64' }}>
-              {(inventory.diary || 0) > 0 ? inventory.diary : '-'}
+            <span style={{ fontSize: '12px' }}>🛸</span>
+            <span style={{ fontSize: '7px', color: (inventory.spaceship_plate || 0) > 0 ? '#c4b5fd' : '#455a64' }}>
+              {(inventory.spaceship_plate || 0) > 0 ? inventory.spaceship_plate : '-'}
             </span>
           </div>
           
@@ -1215,18 +1212,18 @@ const ExplorationControl = ({
             </>
           )}
           
-          {hoveredInventoryItem === 'diary' && (
+          {hoveredInventoryItem === 'spaceship_plate' && (
             <>
-              <div style={{ fontWeight: 'bold', marginBottom: '6px', color: '#ffcc80', fontSize: '11px' }}>
-                📔 낡은 일기장
+              <div style={{ fontWeight: 'bold', marginBottom: '6px', color: '#c4b5fd', fontSize: '11px' }}>
+                🛸 우주선 플레이트
               </div>
               <div style={{ fontStyle: 'italic', color: '#e0e7ff', marginBottom: '6px' }}>
-                "누군가의 일기장이에요. 페이지마다 손때가 가득하고, 글씨가 흐려져 있어요."<br/><br/>
-                "읽어봤는데... 대부분 '오늘도 외로웠다', '누가 없나' 같은 말뿐이에요."<br/><br/>
-                <span style={{ color: '#93c5fd' }}>"마지막 페이지에는 '하늘로 가고 싶다'고 적혀있어요. 꼬꼬... 슬퍼요."</span>
+                <span style={{ color: '#a78bfa', fontWeight: 'bold' }}>"과학기지에서 금속 조각과 설계도를 연구해서 만든 특별한 부품이에요!"</span><br/><br/>
+                "반짝반짝 빛나고, 아주 튼튼해요. 우주의 차가운 바람도 막아줄 수 있대요!"<br/><br/>
+                <span style={{ color: '#fbbf24' }}>"이걸로 드디어 우주선을 만들 수 있어요! 꼬꼬댁!"</span>
               </div>
               <div style={{ fontSize: '8px', color: '#94a3b8', borderTop: '1px solid #475569', paddingTop: '4px' }}>
-                옛날 누군가의 기록입니다. 힌트가 있을지도?
+                우주선 건설에 필요한 핵심 부품입니다.
               </div>
             </>
           )}

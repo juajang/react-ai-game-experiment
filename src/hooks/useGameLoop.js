@@ -96,6 +96,7 @@ export const useGameLoop = (fieldSize, adventuringChickenId = null) => {
   const [windmills, setWindmills] = useState([]);
   const [spaceships, setSpaceships] = useState([]);
   const [mansions, setMansions] = useState([]);
+  const [scienceBases, setScienceBases] = useState([]);
   const [coops, setCoops] = useState([]);
   const [poops, setPoops] = useState([]);
   const [coins, setCoins] = useState(100); // 시작 코인
@@ -245,9 +246,15 @@ export const useGameLoop = (fieldSize, adventuringChickenId = null) => {
     ));
   };
   
-  // 오두막 추가 (테스트용: 조건 없음)
+  // 오두막 추가 (황금농장 달성 필요)
   const addMansion = (x, y) => {
-    // 테스트용: 무조건 배치 가능
+    const totalChickens = chickensRef.current.length;
+    const isGoldenFarm = totalChickens >= FARM_GRADE.GOLDEN_FARM.minChickens;
+    
+    if (!isGoldenFarm) {
+      return false; // 황금농장 미달성
+    }
+    
     setMansions(prev => [...prev, { id: Date.now(), x, y }]);
     return true;
   };
@@ -256,6 +263,36 @@ export const useGameLoop = (fieldSize, adventuringChickenId = null) => {
   const moveMansion = (mansionId, newX, newY) => {
     setMansions(prev => prev.map(m => 
       m.id === mansionId ? { ...m, x: newX, y: newY } : m
+    ));
+  };
+
+  // 과학기지 추가 (코인 + 재료 필요)
+  const addScienceBase = (x, y, inventory, consumeItems) => {
+    const requiredItems = GAME_CONFIG.SCIENCE_BASE?.REQUIRED_ITEMS || {};
+    const hasAllMaterials = Object.entries(requiredItems).every(
+      ([item, count]) => (inventory[item] || 0) >= count
+    );
+    
+    if (coinsRef.current < (GAME_CONFIG.SCIENCE_BASE?.COST || 0) || !hasAllMaterials) {
+      return false;
+    }
+    
+    // 코인 소모
+    setCoins(prev => prev - GAME_CONFIG.SCIENCE_BASE.COST);
+    
+    // 재료 소모
+    Object.entries(requiredItems).forEach(([item, count]) => {
+      consumeItems(item, count);
+    });
+    
+    setScienceBases(prev => [...prev, { id: Date.now(), x, y }]);
+    return true;
+  };
+  
+  // 과학기지 이동
+  const moveScienceBase = (scienceBaseId, newX, newY) => {
+    setScienceBases(prev => prev.map(sb => 
+      sb.id === scienceBaseId ? { ...sb, x: newX, y: newY } : sb
     ));
   };
 
@@ -848,6 +885,9 @@ export const useGameLoop = (fieldSize, adventuringChickenId = null) => {
     moveSpaceship,
     addMansion,
     moveMansion,
+    scienceBases,
+    addScienceBase,
+    moveScienceBase,
     addCoop,
     moveCoop,
     removePoop,
