@@ -131,6 +131,15 @@ export const GAME_CONFIG = {
     },
   },
   
+  // 닭의 성 관련
+  MANSION: {
+    COST: 200,                       // 200코인
+    REQUIRED_ITEMS: {                // 필요 재료
+      twisted_vine: 1,               // 비틀어진 덩굴줄기 1개
+      branch_pile: 3,                // 나뭇가지 더미 3개
+    },
+  },
+  
   // 필드 관련
   FIELD: {
     DEFAULT_WIDTH: 400,

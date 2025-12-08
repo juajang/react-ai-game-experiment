@@ -190,8 +190,10 @@ const LOOT_TABLE = {
     { item: 'shovel', chance: 0.15, name: '삽' },
   ],
   FOREST: [
-    { item: null, chance: 0.7 },
-    { item: 'shovel', chance: 0.3, name: '삽' },
+    { item: null, chance: 0.4 },
+    { item: 'twisted_vine', chance: 0.2, name: '비틀어진 덩굴줄기' },
+    { item: 'branch_pile', chance: 0.3, name: '나뭇가지 더미' },
+    { item: 'shovel', chance: 0.1, name: '삽' },
   ],
   BEACH: [
     { item: null, chance: 0.75 },
@@ -427,6 +429,8 @@ const ExplorationControl = ({
         fuel_cell: '🔋',
         metal_scrap: '⚙️',
         antenna: '📡',
+        twisted_vine: '🌿',
+        branch_pile: '🪵',
       };
       
       const emoji = itemEmojis[loot.item] || '🎁';
@@ -959,20 +963,59 @@ const ExplorationControl = ({
             </span>
           </div>
           
-          {/* 빈 슬롯들 (2개) */}
-          {[...Array(2)].map((_, idx) => (
-            <div
-              key={idx}
-              className="flex items-center justify-center px-1 py-1.5 rounded"
-              style={{
-                backgroundColor: '#2a2a3e',
-                border: '1px dashed #5d4037',
-                opacity: 0.4,
-              }}
-            >
-              <span style={{ fontSize: '8px', color: '#455a64' }}>-</span>
-            </div>
-          ))}
+          {/* 비틀어진 덩굴줄기 슬롯 */}
+          <div
+            onMouseEnter={(e) => {
+              if ((inventory.twisted_vine || 0) > 0) {
+                setHoveredInventoryItem('twisted_vine');
+                const rect = e.currentTarget.getBoundingClientRect();
+                setTooltipPosition({ left: rect.left + rect.width / 2, top: rect.top });
+              }
+            }}
+            onMouseLeave={() => {
+              setHoveredInventoryItem(null);
+              setTooltipPosition(null);
+            }}
+            className="flex items-center justify-center gap-1 px-1 py-1.5 rounded transition-all"
+            style={{
+              backgroundColor: (inventory.twisted_vine || 0) > 0 ? '#37474f' : '#2a2a3e',
+              border: '1px dashed #5d4037',
+              opacity: (inventory.twisted_vine || 0) > 0 ? 1 : 0.4,
+              cursor: (inventory.twisted_vine || 0) > 0 ? 'pointer' : 'default',
+            }}
+          >
+            <span style={{ fontSize: '12px' }}>🌿</span>
+            <span style={{ fontSize: '7px', color: (inventory.twisted_vine || 0) > 0 ? '#81c784' : '#455a64' }}>
+              {(inventory.twisted_vine || 0) > 0 ? inventory.twisted_vine : '-'}
+            </span>
+          </div>
+          
+          {/* 나뭇가지 더미 슬롯 */}
+          <div
+            onMouseEnter={(e) => {
+              if ((inventory.branch_pile || 0) > 0) {
+                setHoveredInventoryItem('branch_pile');
+                const rect = e.currentTarget.getBoundingClientRect();
+                setTooltipPosition({ left: rect.left + rect.width / 2, top: rect.top });
+              }
+            }}
+            onMouseLeave={() => {
+              setHoveredInventoryItem(null);
+              setTooltipPosition(null);
+            }}
+            className="flex items-center justify-center gap-1 px-1 py-1.5 rounded transition-all"
+            style={{
+              backgroundColor: (inventory.branch_pile || 0) > 0 ? '#37474f' : '#2a2a3e',
+              border: '1px dashed #5d4037',
+              opacity: (inventory.branch_pile || 0) > 0 ? 1 : 0.4,
+              cursor: (inventory.branch_pile || 0) > 0 ? 'pointer' : 'default',
+            }}
+          >
+            <span style={{ fontSize: '12px' }}>🪵</span>
+            <span style={{ fontSize: '7px', color: (inventory.branch_pile || 0) > 0 ? '#bcaaa4' : '#455a64' }}>
+              {(inventory.branch_pile || 0) > 0 ? inventory.branch_pile : '-'}
+            </span>
+          </div>
         </div>
       </div>
       
@@ -1090,6 +1133,38 @@ const ExplorationControl = ({
               </div>
               <div style={{ fontSize: '8px', color: '#94a3b8', borderTop: '1px solid #475569', paddingTop: '4px' }}>
                 통신 장비의 일부입니다. 수리하면 쓸모가 있을지도?
+              </div>
+            </>
+          )}
+          
+          {hoveredInventoryItem === 'twisted_vine' && (
+            <>
+              <div style={{ fontWeight: 'bold', marginBottom: '6px', color: '#81c784', fontSize: '11px' }}>
+                🌿 비틀어진 덩굴줄기
+              </div>
+              <div style={{ fontStyle: 'italic', color: '#e0e7ff', marginBottom: '6px' }}>
+                "숲 깊은 곳에서 찾은 튼튼한 덩굴이에요! 꼬불꼬불하지만 정말 질겨요."<br/><br/>
+                "이걸로 뭔가를 묶거나... 엮을 수 있을 것 같아요!"<br/><br/>
+                <span style={{ color: '#4ade80', fontWeight: 'bold' }}>"우리 성을 지을 때 기둥을 단단히 고정하는 데 딱 좋겠어요! 꼬꼬댁!"</span>
+              </div>
+              <div style={{ fontSize: '8px', color: '#94a3b8', borderTop: '1px solid #475569', paddingTop: '4px' }}>
+                닭의 성 건설에 필요한 튼튼한 덩굴입니다.
+              </div>
+            </>
+          )}
+          
+          {hoveredInventoryItem === 'branch_pile' && (
+            <>
+              <div style={{ fontWeight: 'bold', marginBottom: '6px', color: '#bcaaa4', fontSize: '11px' }}>
+                🪵 나뭇가지 더미
+              </div>
+              <div style={{ fontStyle: 'italic', color: '#e0e7ff', marginBottom: '6px' }}>
+                "숲에서 모은 나뭇가지들이에요. 크기도 다양하고 튼튼해요!"<br/><br/>
+                "이걸로 둥지를 틀면... 아니, 우리만의 집을 지을 수 있어요!"<br/><br/>
+                <span style={{ color: '#fbbf24', fontWeight: 'bold' }}>"나뭇가지를 쌓고 쌓으면... 멋진 성벽이 될 거예요! 꼬꼬댁!"</span>
+              </div>
+              <div style={{ fontSize: '8px', color: '#94a3b8', borderTop: '1px solid #475569', paddingTop: '4px' }}>
+                닭의 성 건설에 필요한 건축 재료입니다.
               </div>
             </>
           )}

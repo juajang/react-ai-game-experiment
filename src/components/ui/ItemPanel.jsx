@@ -103,6 +103,13 @@ const ItemPanel = ({
   );
   const canBuildSpaceship = coins >= (GAME_CONFIG.SPACESHIP?.COST || 500) && hasAllMaterials && isGoldenFarm;
 
+  // 닭의 성 재료 체크
+  const mansionRequiredItems = GAME_CONFIG.MANSION?.REQUIRED_ITEMS || {};
+  const hasMansionMaterials = Object.entries(mansionRequiredItems).every(
+    ([item, count]) => (inventory[item] || 0) >= count
+  );
+  const canBuildMansion = coins >= (GAME_CONFIG.MANSION?.COST || 0) && hasMansionMaterials;
+
   const renderItem = (item, isGoldenItem = false) => {
     const canAfford = coins >= item.cost;
     const isLocked = isGoldenItem && !isGoldenFarm;
@@ -252,12 +259,13 @@ const ItemPanel = ({
           className="relative w-full"
         >
           <button
-            onClick={() => onSelectItem(selectedItem === 'mansion' ? null : 'mansion')}
+            onClick={() => canBuildMansion && onSelectItem(selectedItem === 'mansion' ? null : 'mansion')}
             className="flex flex-col items-center p-2 rounded transition-all w-full relative"
             style={{
               backgroundColor: selectedItem === 'mansion' ? '#ddd6fe' : '#ede9fe',
               border: selectedItem === 'mansion' ? '3px solid #f59e0b' : '2px solid #a78bfa',
-              cursor: 'pointer',
+              opacity: canBuildMansion ? 1 : 0.5,
+              cursor: canBuildMansion ? 'pointer' : 'not-allowed',
             }}
           >
             <div className="absolute -top-1 -right-1 text-xs animate-pulse">✨</div>
@@ -267,7 +275,12 @@ const ItemPanel = ({
             </div>
             <div className="flex items-center gap-0.5 mt-1" style={{ fontSize: '8px', color: '#a16207' }}>
               <Coin size={10} />
-              <span>0</span>
+              <span>{GAME_CONFIG.MANSION.COST}</span>
+            </div>
+            {/* 필요 재료 표시 (세로 두 줄) */}
+            <div style={{ fontSize: '7px', color: '#6b7280', marginTop: '2px', display: 'flex', flexDirection: 'column', gap: '1px' }}>
+              <span style={{ color: (inventory.twisted_vine || 0) >= 1 ? '#22c55e' : '#ef4444' }}>🌿{inventory.twisted_vine || 0}/1</span>
+              <span style={{ color: (inventory.branch_pile || 0) >= 3 ? '#22c55e' : '#ef4444' }}>🪵{inventory.branch_pile || 0}/3</span>
             </div>
           </button>
         </div>
@@ -372,6 +385,46 @@ const ItemPanel = ({
           <div style={{ fontSize: '9px', color: '#fde047', marginTop: '4px', borderTop: '2px solid #475569', paddingTop: '4px' }}>
             ✨ 황금 닭 농장 필요<br/>
             (닭 10마리 이상)
+          </div>
+        </div>,
+        document.body
+      )}
+      
+      {hoveredItem === 'mansion' && tooltipPosition && ReactDOM.createPortal(
+        <div 
+          style={{ 
+            position: 'fixed',
+            left: `${tooltipPosition.left}px`,
+            top: `${tooltipPosition.top}px`,
+            backgroundColor: '#0f172a',
+            border: '3px solid #a78bfa',
+            borderRadius: '8px',
+            padding: '8px 12px',
+            color: '#ffffff',
+            whiteSpace: 'nowrap',
+            zIndex: 999999,
+            pointerEvents: 'none',
+            fontSize: '10px',
+            boxShadow: '0 8px 24px rgba(0,0,0,0.8)',
+            minWidth: '200px',
+          }}
+        >
+          <div style={{ fontWeight: 'bold', marginBottom: '4px', color: '#c4b5fd', fontSize: '11px' }}>
+            🏰 닭의 성 건설 조건
+          </div>
+          <div style={{ marginBottom: '3px' }}>💰 코인: <span style={{ color: '#ffd700', fontWeight: 'bold' }}>{GAME_CONFIG.MANSION.COST}</span></div>
+          <div style={{ fontSize: '9px', color: '#a5b4fc', marginTop: '4px', borderTop: '2px solid #475569', paddingTop: '4px' }}>
+            필수 재료 (숲에서 획득):
+          </div>
+          <div style={{ fontSize: '9px', paddingLeft: '8px' }}>
+            <div style={{ color: (inventory.twisted_vine || 0) >= 1 ? '#86efac' : '#fca5a5', fontWeight: 'bold' }}>
+              🌿 비틀어진 덩굴줄기 × {GAME_CONFIG.MANSION.REQUIRED_ITEMS.twisted_vine} 
+              <span style={{ color: '#cbd5e1' }}> ({inventory.twisted_vine || 0})</span>
+            </div>
+            <div style={{ color: (inventory.branch_pile || 0) >= 3 ? '#86efac' : '#fca5a5', fontWeight: 'bold' }}>
+              🪵 나뭇가지 더미 × {GAME_CONFIG.MANSION.REQUIRED_ITEMS.branch_pile}
+              <span style={{ color: '#cbd5e1' }}> ({inventory.branch_pile || 0})</span>
+            </div>
           </div>
         </div>,
         document.body
