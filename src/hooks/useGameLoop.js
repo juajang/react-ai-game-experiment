@@ -411,8 +411,8 @@ export const useGameLoop = (fieldSize, adventuringChickenId = null) => {
           tiredness = Math.max(config.TIREDNESS.MIN, tiredness - config.COOP.SLEEP_RECOVERY_RATE);
           health = Math.min(config.HEALTH.MAX, health + config.COOP.HEALTH_RECOVERY_RATE);
           
-          // 수면 완료 체크
-          if (tiredness <= 10 && sleepTime >= config.COOP.MIN_SLEEP_TIME) {
+          // 수면 완료 체크 (피로도가 0이 되면 깨어남)
+          if (tiredness <= 0 && sleepTime >= config.COOP.MIN_SLEEP_TIME) {
             state = 'idle';
             inCoopId = null;
             sleepTime = 0;

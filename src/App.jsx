@@ -436,6 +436,9 @@ export default function ChickenGame() {
     // 피로도가 100이면 모험 불가
     if ((chicken.tiredness || 0) >= 100) return;
     
+    // 자고 있는 닭은 모험 불가
+    if (chicken.state === 'sleeping') return;
+    
     // 닭의 실제 레벨 사용 (기본값 1)
     const level = chicken.level || 1;
     const water = 10 + level * 5; // 15~35
@@ -486,8 +489,8 @@ export default function ChickenGame() {
         const expForNext = c.expForNextLevel || 100;
         const happiness = c.happiness || 0;
         
-        // 레벨업 체크 (행복도 80% 이상일 때만)
-        if (newExp >= expForNext && happiness >= 80) {
+        // 레벨업 체크 (경험치가 충분하면 레벨업)
+        if (newExp >= expForNext) {
           leveledUp = true;
           newLevel = (c.level || 1) + 1;
           // 레벨업 필요 경험치 증가 (기본 100, 1.5배씩 증가)
@@ -495,13 +498,13 @@ export default function ChickenGame() {
           return { 
             ...c, 
             tiredness: adventuringChicken.tiredness,
-            experience: newExp - expForNext,
+            experience: newExp - expForNext, // 초과 경험치는 다음 레벨로 이월
             level: newLevel,
             expForNextLevel: newExpForNextLevel,
           };
         }
         
-        // 경험치가 충분하지만 행복도가 낮으면 경험치만 누적 (레벨업 안함)
+        // 경험치가 부족하면 경험치만 누적
         return { 
           ...c, 
           tiredness: adventuringChicken.tiredness,
@@ -562,15 +565,19 @@ export default function ChickenGame() {
     });
   }, []);
   
-  // 모험 중 경험치 획득 (이동할 때마다)
-  const handleAddExp = useCallback((amount) => {
+  // 모험 중 경험치 획득
+  const handleAddExp = useCallback((amount, isMove = false) => {
     setAdventuringChicken(prev => {
       if (!prev) return null;
-      return { 
+      const update = { 
         ...prev, 
         earnedExp: (prev.earnedExp || 0) + amount,
-        moveCount: (prev.moveCount || 0) + 1,
       };
+      // 이동 시에만 moveCount 증가
+      if (isMove) {
+        update.moveCount = (prev.moveCount || 0) + 1;
+      }
+      return update;
     });
   }, []);
   

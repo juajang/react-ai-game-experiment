@@ -19,6 +19,8 @@ const TILE_TYPES = {
   HOUSE: { char: '⌂', color: '#9e9e9e', bg: '#757575', name: '버려진 민가', passable: true },
   LAUNCH_SITE: { char: '▲', color: '#7e57c2', bg: '#9575cd', name: '발사장', passable: true },
   TOWER: { char: '┃', color: '#42a5f5', bg: '#64b5f6', name: '통신탑', passable: true },
+  FACTORY: { char: '⚙', color: '#ff7043', bg: '#ff8a65', name: '폐공장', passable: true },
+  ABANDONED_LAB: { char: '⚗', color: '#26c6da', bg: '#4dd0e1', name: '버려진 과학기지', passable: true },
 };
 
 // 심 모양의 맵 생성
@@ -209,8 +211,7 @@ const generatePOIs = (map, seed = 42) => {
     }
   };
   
-  // 기본 POI
-  addPOI(centerX, centerY + 2, 'VILLAGE', '마을');
+  // 기본 POI (마을 제거)
   addPOI(centerX - 3, centerY, 'FARM', '농장');
   addPOI(Math.floor(width / 4), Math.floor(height / 3), 'OUTPOST', '북서 전초기지');
   addPOI(Math.floor(width * 3 / 4), Math.floor(height / 3), 'OUTPOST', '북동 전초기지');
@@ -220,6 +221,12 @@ const generatePOIs = (map, seed = 42) => {
   
   // 📡 통신탑 - 발사장과 마을 사이
   addPOI(Math.floor(width * 3 / 5), centerY - 3, 'TOWER', '벼락 맞은 통신탑');
+  
+  // 🏭 폐공장 - 마을 서쪽에 배치 (금속 조각 100% 획득)
+  addPOI(Math.floor(width / 4), centerY + 2, 'FACTORY', '버려진 폐공장');
+  
+  // 🔬 버려진 과학기지 - 발사장 근처 (연료전지 100% 획득)
+  addPOI(Math.floor(width * 3 / 4), centerY + 4, 'ABANDONED_LAB', '버려진 과학기지');
   
   // 🏚️ 버려진 민가들 - 숲속에 드문드문 배치
   const housePositions = [
@@ -237,8 +244,8 @@ const generatePOIs = (map, seed = 42) => {
     }
   });
   
-  // 자원 포인트 - 더 많이 배치
-  for (let i = 0; i < 8; i++) {
+  // 자원 포인트 - 맵 곳곳에 배치
+  for (let i = 0; i < 6; i++) {
     const x = Math.floor(seededRandom(i * 2) * (width - 14)) + 7;
     const y = Math.floor(seededRandom(i * 2 + 1) * (height - 10)) + 5;
     if (isPassableTile(map, x, y)) {
@@ -346,9 +353,11 @@ const WorldMap = ({
   }, [chickens]);
   
   // 타일 렌더링 함수 (useCallback으로 메모이제이션)
+  // 테스트용: 모든 타일 밝힘
   const renderTile = useCallback((x, y) => {
     const posKey = `${x},${y}`;
-    const explored = exploredTiles ? exploredTiles.has(posKey) : true;
+    const explored = true; // 테스트용 - 항상 탐험됨
+    // const explored = exploredTiles ? exploredTiles.has(posKey) : true;
     const baseTile = baseMap[y]?.[x] || 'WATER';
     
     if (!explored) {

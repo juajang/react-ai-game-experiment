@@ -60,12 +60,28 @@ const TILE_DESCRIPTIONS = {
     "발사대 옆에 카운트다운 표지판이 있어요. '3... 2... 1...' 그 다음은 뭐였을까요?",
     "여기서 무언가가 하늘로 날아갔어요. 그 끝에는 뭐가 있을까요?",
   ],
-  // 📡 통신탑 - 금속 조각 아이템 획득 가능
+  // 📡 통신탑 - 안테나 100% 획득
   TOWER: [
-    "벼락 맞은 통신탑 아래서 신기한 금속 조각을 찾았어요… 우주선에 쓸 수 있을지도?",
+    "벼락 맞은 통신탑 아래서 부서진 안테나를 찾았어요! 과학기지에 쓸 수 있을 거예요!",
     "부서진 안테나가 하늘을 가리키고 있어요. 누군가와 연락하려 했던 걸까요?",
     "탑 꼭대기에서 깜빡이던 불빛은 이제 꺼져 있어요. 마지막 신호는 언제였을까요?",
     "통신탑 주변에 케이블이 얽혀있어요. 이게 연결되던 곳은… 지금은 어디에?",
+  ],
+  // 🏭 폐공장 - 금속 조각 100% 획득
+  FACTORY: [
+    "녹슨 기계들 사이에서 반짝이는 금속 조각을 찾았어요! 우주선에 쓸 수 있을지도?",
+    "컨베이어 벨트가 멈춰 있어요. 마지막으로 뭘 만들고 있었을까요?",
+    "공장 굴뚝에서는 더 이상 연기가 나지 않아요. 여긴 정말 오래된 것 같아요.",
+    "기름 냄새가 나요. 닭들은 코를 막으며 조심스럽게 들어갔어요.",
+    "금속 조각들이 여기저기 흩어져 있어요. 닭들에게는 보물 같아요!",
+  ],
+  // 🔬 버려진 과학기지 - 연료전지 100% 획득
+  ABANDONED_LAB: [
+    "연구실 안에서 빛나는 연료 전지를 발견했어요! 우주선에 쓸 수 있어요!",
+    "깨진 시험관과 먼지 쌓인 장비들... 여기서 무슨 연구를 했을까요?",
+    "벽에 붙은 포스터에 '에너지 연구소'라고 적혀 있어요. 닭들의 눈이 반짝여요!",
+    "차가운 금속 캡슐 안에 연료 전지가 보관되어 있었어요. 아직 쓸 수 있을 것 같아요!",
+    "연구 노트가 흩어져 있어요. '무한 에너지의 꿈'이라고 적혀있네요... 꼬꼬?",
   ],
 };
 
@@ -83,6 +99,8 @@ const TILE_NAMES = {
   HOUSE: '버려진 민가',
   LAUNCH_SITE: '발사장',
   TOWER: '통신탑',
+  FACTORY: '폐공장',
+  ABANDONED_LAB: '버려진 과학기지',
 };
 
 // 시드 기반 설명 선택
@@ -189,11 +207,15 @@ const LOOT_TABLE = {
     { item: null, chance: 0.85 },
     { item: 'shovel', chance: 0.15, name: '삽' },
   ],
+  // 🛤️ 길 - 조사 불가 (아무것도 없음)
+  PATH: [
+    { item: null, chance: 1.0 },
+  ],
   FOREST: [
-    { item: null, chance: 0.4 },
-    { item: 'twisted_vine', chance: 0.2, name: '비틀어진 덩굴줄기' },
-    { item: 'branch_pile', chance: 0.3, name: '나뭇가지 더미' },
-    { item: 'shovel', chance: 0.1, name: '삽' },
+    { item: null, chance: 0.3 },
+    { item: 'twisted_vine', chance: 0.15, name: '비틀어진 덩굴줄기' },
+    { item: 'branch_pile', chance: 0.5, name: '나뭇가지 더미' },
+    { item: 'shovel', chance: 0.05, name: '삽' },
   ],
   BEACH: [
     { item: null, chance: 0.75 },
@@ -204,30 +226,35 @@ const LOOT_TABLE = {
     { item: 'shovel', chance: 0.5, name: '삽' },
   ],
   OUTPOST: [
-    { item: null, chance: 0.5 },
-    { item: 'shovel', chance: 0.5, name: '삽' },
+    { item: null, chance: 0.3 },
+    { item: 'fuel_cell', chance: 0.7, name: '연료 전지' },
   ],
   RESOURCE: [
-    { item: null, chance: 0.3 },
-    { item: 'shovel', chance: 0.7, name: '삽' },
+    { item: null, chance: 0.2 },
+    { item: 'metal_scrap', chance: 0.4, name: '신기한 금속 조각' },
+    { item: 'branch_pile', chance: 0.4, name: '나뭇가지 더미' },
   ],
   // 🏚️ 버려진 민가 - 인간의 유품
   HOUSE: [
-    { item: null, chance: 0.4 },
-    { item: 'metal_scrap', chance: 0.3, name: '신기한 금속 조각' },
-    { item: 'shovel', chance: 0.3, name: '삽' },
+    { item: null, chance: 0.2 },
+    { item: 'shovel', chance: 0.5, name: '삽' },
+    { item: 'branch_pile', chance: 0.3, name: '나뭇가지 더미' },
   ],
-  // 🚀 발사장 - 우주 관련 아이템
+  // 🚀 발사장 - 설계도 100% 획득
   LAUNCH_SITE: [
-    { item: null, chance: 0.4 },
-    { item: 'blueprint', chance: 0.4, name: '우주선 설계도 조각' },
-    { item: 'fuel_cell', chance: 0.2, name: '연료 전지' },
+    { item: 'blueprint', chance: 1.0, name: '우주선 설계도 조각' },
   ],
-  // 📡 통신탑 - 금속 조각 획득 가능
+  // 📡 통신탑 - 안테나 100% 획득
   TOWER: [
-    { item: null, chance: 0.3 },
-    { item: 'metal_scrap', chance: 0.5, name: '신기한 금속 조각' },
-    { item: 'antenna', chance: 0.2, name: '부서진 안테나' },
+    { item: 'antenna', chance: 1.0, name: '부서진 안테나' },
+  ],
+  // 🏭 폐공장 - 금속 조각 100% 획득
+  FACTORY: [
+    { item: 'metal_scrap', chance: 1.0, name: '신기한 금속 조각' },
+  ],
+  // 🔬 버려진 과학기지 - 연료전지 100% 획득
+  ABANDONED_LAB: [
+    { item: 'fuel_cell', chance: 1.0, name: '연료 전지' },
   ],
 };
 
@@ -282,7 +309,9 @@ const ExplorationControl = ({
   
   // 현재 위치가 조사되었는지 체크
   const posKey = `${playerPosition.x},${playerPosition.y}`;
-  const canInvestigate = !investigatedTiles.has(posKey);
+  const currentTile = currentPoi?.type || currentTileType;
+  const isPathTile = currentTile === 'PATH';
+  const canInvestigate = !investigatedTiles.has(posKey) && !isPathTile;
   
   // 주사위 굴리기
   const rollDice = useCallback(() => {
@@ -293,11 +322,6 @@ const ExplorationControl = ({
     }
     if (remainingMoves > 0) {
       setMessage("⚠️ 이동을 먼저 완료하세요!");
-      return;
-    }
-    // 피로도 체크
-    if (adventuringChicken.tiredness >= 100) {
-      setMessage("😫 닭이 너무 피곤합니다! 집으로 돌아갑니다...");
       return;
     }
     // 주사위 횟수 체크
@@ -327,7 +351,12 @@ const ExplorationControl = ({
         
         const newRemainingDice = (adventuringChicken.remainingDiceRolls || 1) - 1;
         const newTiredness = Math.min(100, (adventuringChicken.tiredness || 0) + tirednessIncrease);
-        setMessage(`🎲 ${finalResult}칸 이동! (피로도 +${tirednessIncrease}%, 남은 주사위: ${newRemainingDice}회)`);
+        
+        if (newTiredness >= 100) {
+          setMessage(`🎲 ${finalResult}칸 이동! 😫 피로도가 100%! 이동 후 귀환하세요.`);
+        } else {
+          setMessage(`🎲 ${finalResult}칸 이동! (피로도 +${tirednessIncrease}%, 남은 주사위: ${newRemainingDice}회)`);
+        }
       }
     }, 60);
   }, [remainingMoves, isRolling, adventuringChicken, onAddTiredness, onUseDiceRoll]);
@@ -370,9 +399,9 @@ const ExplorationControl = ({
     onPlayerMove?.({ x: newX, y: newY });
     onConsumeWater?.(1);
     
-    // 이동할 때마다 경험치 획득 (3 EXP)
-    const expGain = 3;
-    onAddExp?.(expGain);
+    // 이동할 때마다 경험치 획득 (5 EXP)
+    const expGain = 5;
+    onAddExp?.(expGain, true); // isMove = true
     
     const newRemaining = remainingMoves - 1;
     setRemainingMoves(newRemaining);
@@ -398,6 +427,14 @@ const ExplorationControl = ({
       setMessage("🐔 먼저 닭을 모험에 보내세요!");
       return;
     }
+    
+    // 길에서는 조사 불가
+    const tileType = currentPoi?.type || currentTileType;
+    if (tileType === 'PATH') {
+      setMessage("🛤️ 길에서는 조사할 것이 없어요.");
+      return;
+    }
+    
     if (investigatedTiles.has(posKey)) {
       setMessage("ℹ️ 이미 조사한 지역입니다.");
       return;
@@ -411,9 +448,6 @@ const ExplorationControl = ({
     // 벼 소모 및 조사 완료 처리
     onConsumeRice?.(1);
     onInvestigate?.(posKey);
-    
-    // 현재 위치의 타일 정보
-    const tileType = currentPoi?.type || currentTileType;
     const description = getDescription(tileType, playerPosition.x, playerPosition.y);
     const tileName = currentPoi?.name || TILE_NAMES[tileType] || tileType;
     
@@ -457,11 +491,16 @@ const ExplorationControl = ({
       tileType,
     });
     
-    setMessage(`🔍 ${description}${lootMessage}`);
-  }, [posKey, rice, investigatedTiles, onConsumeRice, onInvestigate, currentPoi, currentTileType, playerPosition, onAddLog, onAddItem, inventory.shovel, adventuringChicken]);
+    // 조사 시 경험치 획득 (10 EXP)
+    const investigateExpGain = 10;
+    onAddExp?.(investigateExpGain);
+    
+    setMessage(`🔍 ${description}${lootMessage} (+${investigateExpGain}EXP)`);
+  }, [posKey, rice, investigatedTiles, onConsumeRice, onInvestigate, currentPoi, currentTileType, playerPosition, onAddLog, onAddItem, inventory.shovel, adventuringChicken, onAddExp]);
 
+  // 주사위 횟수가 남아있으면 굴릴 수 있음 (피로도 100 도달은 귀환 시 처리)
   const canRoll = !isRolling && remainingMoves <= 0 && adventuringChicken && 
-    (adventuringChicken.remainingDiceRolls > 0) && (adventuringChicken.tiredness < 100);
+    (adventuringChicken.remainingDiceRolls > 0);
 
   // Ref로 최신 값 유지 (useEffect 의존성 문제 해결)
   const playerPositionRef = useRef(playerPosition);
@@ -469,6 +508,8 @@ const ExplorationControl = ({
   const adventuringChickenRef = useRef(adventuringChicken);
   const canPassRef = useRef(canPass);
   const onPlayerMoveRef = useRef(onPlayerMove);
+  const onConsumeWaterRef = useRef(onConsumeWater);
+  const onAddExpRef = useRef(onAddExp);
   const pressedKeysRef = useRef(new Set());
   
   useEffect(() => {
@@ -490,6 +531,14 @@ const ExplorationControl = ({
   useEffect(() => {
     onPlayerMoveRef.current = onPlayerMove;
   }, [onPlayerMove]);
+  
+  useEffect(() => {
+    onConsumeWaterRef.current = onConsumeWater;
+  }, [onConsumeWater]);
+  
+  useEffect(() => {
+    onAddExpRef.current = onAddExp;
+  }, [onAddExp]);
 
   // 키보드 화살표 키로 이동 (키를 한번 누르면 한칸만 이동)
   useEffect(() => {
@@ -548,6 +597,12 @@ const ExplorationControl = ({
       
       // 이동 처리
       onPlayerMoveRef.current?.({ x: newX, y: newY });
+      onConsumeWaterRef.current?.(1);
+      
+      // 이동할 때마다 경험치 획득 (5 EXP)
+      const expGain = 5;
+      onAddExpRef.current?.(expGain, true); // isMove = true
+      
       setRemainingMoves(prev => prev - 1);
     };
     
@@ -698,16 +753,14 @@ const ExplorationControl = ({
               className="mt-1 px-1.5 rounded text-center"
               style={{ 
                 backgroundColor: remainingMoves > 0 ? '#ffd54f' : 
-                  (adventuringChicken?.tiredness >= 100 ? '#ef5350' : 
-                   adventuringChicken?.remainingDiceRolls <= 0 ? '#9e9e9e' : '#37474f'),
+                  (adventuringChicken?.remainingDiceRolls <= 0 ? '#9e9e9e' : '#37474f'),
                 color: remainingMoves > 0 ? '#5d4037' : '#fff',
                 fontSize: '9px',
                 fontWeight: 'bold',
               }}
             >
               {!adventuringChicken ? '🐔?' : 
-               adventuringChicken.tiredness >= 100 ? '😫' :
-               adventuringChicken.remainingDiceRolls <= 0 ? '⏳' :
+               adventuringChicken.remainingDiceRolls <= 0 ? '⏳귀환' :
                remainingMoves > 0 ? `${remainingMoves}칸` : '클릭!'}
             </div>
           </div>
@@ -781,21 +834,21 @@ const ExplorationControl = ({
           {/* 조사 버튼 */}
           <button
             onClick={investigate}
-            disabled={!adventuringChicken || !canInvestigate || rice <= 0}
+            disabled={!adventuringChicken || !canInvestigate || rice <= 0 || isPathTile}
             className="rounded font-bold flex flex-col items-center justify-center"
             style={{
-              backgroundColor: adventuringChicken && canInvestigate && rice > 0 ? '#2196f3' : '#455a64',
+              backgroundColor: adventuringChicken && canInvestigate && rice > 0 && !isPathTile ? '#2196f3' : '#455a64',
               color: 'white',
               border: '2px solid #5d4037',
-              cursor: adventuringChicken && canInvestigate && rice > 0 ? 'pointer' : 'not-allowed',
-              opacity: adventuringChicken && canInvestigate && rice > 0 ? 1 : 0.5,
+              cursor: adventuringChicken && canInvestigate && rice > 0 && !isPathTile ? 'pointer' : 'not-allowed',
+              opacity: adventuringChicken && canInvestigate && rice > 0 && !isPathTile ? 1 : 0.5,
               width: '50px',
               height: '50px',
             }}
           >
-            <span style={{ fontSize: '14px' }}>🔍</span>
-            <span style={{ fontSize: '8px', fontWeight: 'bold' }}>조사</span>
-            <span style={{ fontSize: '7px', color: '#90caf9' }}>-1🌾</span>
+            <span style={{ fontSize: '14px' }}>{isPathTile ? '🚫' : '🔍'}</span>
+            <span style={{ fontSize: '8px', fontWeight: 'bold' }}>{isPathTile ? '불가' : '조사'}</span>
+            <span style={{ fontSize: '7px', color: '#90caf9' }}>{isPathTile ? '길' : '-1🌾'}</span>
           </button>
           
           {/* 귀환 버튼 */}
