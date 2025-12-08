@@ -24,7 +24,9 @@ export {
   Mansion,
   MansionPreview,
   ScienceBase,
-  ScienceBasePreview
+  ScienceBasePreview,
+  AutoFeeder,
+  AutoFeederPreview
 } from './buildings';
 
 // 아이템 컴포넌트

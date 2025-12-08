@@ -97,6 +97,7 @@ export const useGameLoop = (fieldSize, adventuringChickenId = null) => {
   const [spaceships, setSpaceships] = useState([]);
   const [mansions, setMansions] = useState([]);
   const [scienceBases, setScienceBases] = useState([]);
+  const [autoFeeders, setAutoFeeders] = useState([]);
   const [coops, setCoops] = useState([]);
   const [poops, setPoops] = useState([]);
   const [coins, setCoins] = useState(100); // 시작 코인
@@ -135,6 +136,10 @@ export const useGameLoop = (fieldSize, adventuringChickenId = null) => {
   useEffect(() => { coopsRef.current = coops; }, [coops]);
   useEffect(() => { poopsRef.current = poops; }, [poops]);
   useEffect(() => { fieldSizeRef.current = fieldSize; }, [fieldSize]);
+  
+  // 자동사료 배분기
+  const autoFeedersRef = useRef(autoFeeders);
+  useEffect(() => { autoFeedersRef.current = autoFeeders; }, [autoFeeders]);
   
   // 모험 중인 닭 ID (상태 업데이트 건너뛰기용)
   const adventuringChickenIdRef = useRef(adventuringChickenId);
@@ -293,6 +298,20 @@ export const useGameLoop = (fieldSize, adventuringChickenId = null) => {
   const moveScienceBase = (scienceBaseId, newX, newY) => {
     setScienceBases(prev => prev.map(sb => 
       sb.id === scienceBaseId ? { ...sb, x: newX, y: newY } : sb
+    ));
+  };
+
+  // 자동사료 배분기 추가 (테스트용: 조건 없음)
+  const addAutoFeeder = (x, y, inventory, consumeItems) => {
+    // 테스트용: 무조건 배치 가능
+    setAutoFeeders(prev => [...prev, { id: Date.now(), x, y, lastFeedTime: 0 }]);
+    return true;
+  };
+  
+  // 자동사료 배분기 이동
+  const moveAutoFeeder = (feederId, newX, newY) => {
+    setAutoFeeders(prev => prev.map(f => 
+      f.id === feederId ? { ...f, x: newX, y: newY } : f
     ));
   };
 
@@ -791,7 +810,39 @@ export const useGameLoop = (fieldSize, adventuringChickenId = null) => {
         setCoins(prev => Math.floor((prev + totalEarnedCoins) * 100) / 100);
       }
       
-      // 8. 게임 상태 체크
+      // 8. 자동사료 배분기 작동
+      const currentAutoFeeders = autoFeedersRef.current;
+      const now = Date.now();
+      currentAutoFeeders.forEach(feeder => {
+        // 3초마다 사료 배분
+        if (now - (feeder.lastFeedTime || 0) >= (config.AUTO_FEEDER?.FEED_INTERVAL || 300) * 10) {
+          // 배분기 아래쪽에 일렬로 사료 생성 (배분기에서 50~120px 떨어진 곳)
+          const feedCount = feeder.feedIndex || 0;
+          const spacing = 25; // 사료 간격
+          const startOffset = 50; // 배분기로부터 최소 거리
+          const lineWidth = 150; // 일렬 배치 너비
+          
+          // 좌우로 번갈아가며 배치 (-75 ~ +75 범위)
+          const xOffset = ((feedCount % 6) - 2.5) * spacing;
+          const yOffset = startOffset + 20 + (Math.floor(feedCount / 6) * 20);
+          
+          const feedX = Math.max(20, Math.min(currentFieldSize.width - 20, feeder.x + xOffset));
+          const feedY = Math.max(20, Math.min(currentFieldSize.height - 20, feeder.y + yOffset));
+          
+          setFeeds(prev => [...prev, {
+            id: Date.now() + Math.random(),
+            x: feedX,
+            y: feedY,
+          }]);
+          
+          // lastFeedTime 및 feedIndex 업데이트
+          setAutoFeeders(prev => prev.map(f => 
+            f.id === feeder.id ? { ...f, lastFeedTime: now, feedIndex: (feedCount + 1) % 12 } : f
+          ));
+        }
+      });
+      
+      // 9. 게임 상태 체크
       const totalChickens = aliveChickens.length;
       const currentGameState = gameStateRef.current;
       const currentHasCleared = hasClearedRef.current;
@@ -888,6 +939,9 @@ export const useGameLoop = (fieldSize, adventuringChickenId = null) => {
     scienceBases,
     addScienceBase,
     moveScienceBase,
+    autoFeeders,
+    addAutoFeeder,
+    moveAutoFeeder,
     addCoop,
     moveCoop,
     removePoop,

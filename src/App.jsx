@@ -1,5 +1,5 @@
 import { useRef, useCallback, useState, useEffect } from 'react';
-import { Chicken, Chick, Juvenile, DeadChicken, Egg, Feed, Flower, FlowerBush, Pond, Windmill, StrawSpaceship, Mansion, ScienceBase, Poop, Field, GameInfo, Coop, ItemPanel, AdventurePanel, StatusBar } from './components';
+import { Chicken, Chick, Juvenile, DeadChicken, Egg, Feed, Flower, FlowerBush, Pond, Windmill, StrawSpaceship, Mansion, ScienceBase, AutoFeeder, Poop, Field, GameInfo, Coop, ItemPanel, AdventurePanel, StatusBar } from './components';
 import { useGameLoop } from './hooks/useGameLoop';
 import { useFieldSize } from './hooks/useFieldSize';
 import { GROWTH_STAGE, GAME_CONFIG, GAME_STATE, FARM_GRADE } from './constants/gameConfig';
@@ -309,6 +309,9 @@ export default function ChickenGame() {
     moveMansion,
     addScienceBase,
     moveScienceBase,
+    autoFeeders,
+    addAutoFeeder,
+    moveAutoFeeder,
     addCoop,
     moveCoop,
     removePoop,
@@ -662,6 +665,8 @@ export default function ChickenGame() {
           moveMansion(movingBuilding.id, movingBuilding.x, movingBuilding.y);
         } else if (movingBuilding.type === 'scienceBase') {
           moveScienceBase(movingBuilding.id, movingBuilding.x, movingBuilding.y);
+        } else if (movingBuilding.type === 'autoFeeder') {
+          moveAutoFeeder(movingBuilding.id, movingBuilding.x, movingBuilding.y);
         }
         setMovingBuilding(null);
       }
@@ -732,6 +737,10 @@ export default function ChickenGame() {
       }
     } else if (selectedItem === 'scienceBase') {
       if (addScienceBase(x, y, inventory, handleConsumeInventoryItem)) {
+        setSelectedItem('feed');
+      }
+    } else if (selectedItem === 'autoFeeder') {
+      if (addAutoFeeder(x, y, inventory, handleConsumeInventoryItem)) {
         setSelectedItem('feed');
       }
     } else if (selectedItem === 'flowerBush') {
@@ -820,6 +829,14 @@ export default function ChickenGame() {
       setMovingBuilding({ type: 'scienceBase', id: scienceBaseId, x: scienceBase.x, y: scienceBase.y });
     }
   }, [scienceBases, gameState]);
+
+  const handleAutoFeederMouseDown = useCallback((feederId) => {
+    if (gameState !== GAME_STATE.PLAYING) return;
+    const feeder = autoFeeders.find(f => f.id === feederId);
+    if (feeder) {
+      setMovingBuilding({ type: 'autoFeeder', id: feederId, x: feeder.x, y: feeder.y });
+    }
+  }, [autoFeeders, gameState]);
 
   const handleSpaceshipClick = useCallback((spaceshipId) => {
     // 발사 애니메이션은 컴포넌트 내부에서 처리됨
@@ -914,7 +931,7 @@ export default function ChickenGame() {
       return `✋ ${chicken?.name || '닭'}을(를) 들고 있어요!`;
     }
     if (movingBuilding) {
-      const nameMap = { coop: '닭집', pond: '연못', flowerBush: '꽃덤불', windmill: '풍차', spaceship: '우주선', mansion: '닭의 성', scienceBase: '과학기지' };
+      const nameMap = { coop: '닭집', pond: '연못', flowerBush: '꽃덤불', windmill: '풍차', spaceship: '우주선', mansion: '닭의 성', scienceBase: '과학기지', autoFeeder: '자동사료 배분기' };
       return `📍 ${nameMap[movingBuilding.type]} 이동 중`;
     }
     if (selectedItem === 'coop') return `🏠 닭집 배치 (💰${GAME_CONFIG.COOP.COST})`;
@@ -1148,6 +1165,26 @@ export default function ChickenGame() {
                 {/* 이동 중인 과학기지 */}
                 {movingBuilding?.type === 'scienceBase' && (
                   <ScienceBase 
+                    x={movingBuilding.x}
+                    y={movingBuilding.y}
+                  />
+                )}
+                
+                {/* 자동사료 배분기들 (이동 중이 아닌 것) */}
+                {autoFeeders
+                  .filter(f => movingBuilding?.type !== 'autoFeeder' || movingBuilding?.id !== f.id)
+                  .map(feeder => (
+                    <AutoFeeder 
+                      key={feeder.id}
+                      x={feeder.x}
+                      y={feeder.y}
+                      onMouseDown={() => handleAutoFeederMouseDown(feeder.id)}
+                    />
+                  ))}
+                
+                {/* 이동 중인 자동사료 배분기 */}
+                {movingBuilding?.type === 'autoFeeder' && (
+                  <AutoFeeder 
                     x={movingBuilding.x}
                     y={movingBuilding.y}
                   />

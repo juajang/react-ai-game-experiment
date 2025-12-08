@@ -150,6 +150,18 @@ export const GAME_CONFIG = {
     EFFECT_RADIUS: 80,               // 효과 범위
   },
   
+  // 자동사료 배분기 관련
+  AUTO_FEEDER: {
+    COST: 100,                       // 100코인
+    REQUIRED_ITEMS: {                // 필요 재료
+      metal_scrap: 1,                // 금속조각 1개
+      branch_pile: 2,                // 나뭇가지 더미 2개
+    },
+    EFFECT_RADIUS: 100,              // 효과 범위
+    FEED_INTERVAL: 300,              // 사료 배분 간격 (3초)
+    FEED_AMOUNT: 1,                  // 배분되는 사료 수
+  },
+  
   // 필드 관련
   FIELD: {
     DEFAULT_WIDTH: 400,

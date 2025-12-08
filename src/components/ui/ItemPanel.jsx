@@ -9,6 +9,7 @@ import { WindmillPreview } from '../buildings/Windmill';
 import { StrawSpaceshipPreview } from '../buildings/StrawSpaceship';
 import { MansionPreview } from '../buildings/Mansion';
 import { ScienceBasePreview } from '../buildings/ScienceBase';
+import { AutoFeederPreview } from '../buildings/AutoFeeder';
 import Coin from './Coin';
 
 // 사료 미리보기
@@ -117,6 +118,14 @@ const ItemPanel = ({
     ([item, count]) => (inventory[item] || 0) >= count
   );
   const canBuildScienceBase = coins >= (GAME_CONFIG.SCIENCE_BASE?.COST || 0) && hasScienceBaseMaterials;
+
+  // 자동사료 배분기 재료 체크 (테스트용: 항상 건설 가능)
+  const autoFeederRequiredItems = GAME_CONFIG.AUTO_FEEDER?.REQUIRED_ITEMS || {};
+  const hasAutoFeederMaterials = Object.entries(autoFeederRequiredItems).every(
+    ([item, count]) => (inventory[item] || 0) >= count
+  );
+  const canBuildAutoFeeder = true; // 테스트용
+  // const canBuildAutoFeeder = coins >= (GAME_CONFIG.AUTO_FEEDER?.COST || 0) && hasAutoFeederMaterials;
 
   const renderItem = (item, isGoldenItem = false) => {
     const canAfford = coins >= item.cost;
@@ -293,6 +302,55 @@ const ItemPanel = ({
             <div style={{ fontSize: '7px', color: '#6b7280', marginTop: '2px', display: 'flex', flexDirection: 'column', gap: '1px' }}>
               <span style={{ color: (inventory.branch_pile || 0) >= 3 ? '#22c55e' : '#ef4444' }}>🪵{inventory.branch_pile || 0}/3</span>
               <span style={{ color: (inventory.antenna || 0) >= 1 ? '#22c55e' : '#ef4444' }}>📡{inventory.antenna || 0}/1</span>
+            </div>
+          </button>
+        </div>
+        
+        {/* 자동사료 배분기 */}
+        <div
+          ref={el => buttonRefs.current['autoFeeder'] = el}
+          onMouseEnter={(e) => {
+            setHoveredItem('autoFeeder');
+            const rect = e.currentTarget.getBoundingClientRect();
+            setTooltipPosition({
+              left: rect.right + 8,
+              top: rect.top,
+            });
+          }}
+          onMouseLeave={() => {
+            setHoveredItem(null);
+            setTooltipPosition(null);
+          }}
+          className="relative w-full"
+        >
+          <button
+            onClick={() => canBuildAutoFeeder && onSelectItem(selectedItem === 'autoFeeder' ? null : 'autoFeeder')}
+            className="flex flex-col items-center p-2 rounded transition-all w-full relative"
+            style={{
+              backgroundColor: selectedItem === 'autoFeeder' ? '#dcfce7' : '#f0fdf4',
+              border: selectedItem === 'autoFeeder' ? '3px solid #22c55e' : '2px solid #4ade80',
+              opacity: canBuildAutoFeeder ? 1 : 0.5,
+              cursor: canBuildAutoFeeder ? 'pointer' : 'not-allowed',
+            }}
+          >
+            {!canBuildAutoFeeder && (
+              <div className="absolute -top-1 -right-1 text-xs">🔧</div>
+            )}
+            {canBuildAutoFeeder && (
+              <div className="absolute -top-1 -right-1 text-xs animate-pulse">✨</div>
+            )}
+            <div className="mb-1"><AutoFeederPreview size={28} /></div>
+            <div style={{ fontSize: '8px', color: '#166534', fontWeight: 'bold' }}>
+              자동사료기
+            </div>
+            <div className="flex items-center gap-0.5 mt-1" style={{ fontSize: '8px', color: '#22c55e' }}>
+              <Coin size={10} />
+              <span>{GAME_CONFIG.AUTO_FEEDER?.COST || 100}</span>
+            </div>
+            {/* 필요 재료 표시 */}
+            <div style={{ fontSize: '7px', color: '#6b7280', marginTop: '2px', display: 'flex', flexDirection: 'column', gap: '1px' }}>
+              <span style={{ color: (inventory.metal_scrap || 0) >= 1 ? '#22c55e' : '#ef4444' }}>⚙️{inventory.metal_scrap || 0}/1</span>
+              <span style={{ color: (inventory.branch_pile || 0) >= 2 ? '#22c55e' : '#ef4444' }}>🪵{inventory.branch_pile || 0}/2</span>
             </div>
           </button>
         </div>
@@ -482,6 +540,49 @@ const ItemPanel = ({
           </div>
           <div style={{ fontSize: '9px', color: '#93c5fd', marginTop: '4px', fontStyle: 'italic' }}>
             닭들이 연구를 시작할 수 있어요! 🐔
+          </div>
+        </div>,
+        document.body
+      )}
+      
+      {hoveredItem === 'autoFeeder' && tooltipPosition && ReactDOM.createPortal(
+        <div 
+          style={{ 
+            position: 'fixed',
+            left: `${tooltipPosition.left}px`,
+            top: `${tooltipPosition.top}px`,
+            backgroundColor: '#1a2e1a',
+            border: '3px solid #4ade80',
+            borderRadius: '8px',
+            padding: '8px 12px',
+            color: '#ffffff',
+            whiteSpace: 'nowrap',
+            zIndex: 999999,
+            pointerEvents: 'none',
+            fontSize: '10px',
+            boxShadow: '0 8px 24px rgba(0,0,0,0.8)',
+            minWidth: '180px',
+          }}
+        >
+          <div style={{ fontWeight: 'bold', marginBottom: '4px', color: '#86efac', fontSize: '11px' }}>
+            🌾 자동사료 배분기 건설 조건
+          </div>
+          <div style={{ marginBottom: '3px' }}>💰 코인: <span style={{ color: '#ffd700', fontWeight: 'bold' }}>{GAME_CONFIG.AUTO_FEEDER?.COST || 100}</span></div>
+          <div style={{ fontSize: '9px', color: '#86efac', marginTop: '4px', borderTop: '2px solid #365536', paddingTop: '4px' }}>
+            필수 재료:
+          </div>
+          <div style={{ fontSize: '9px', paddingLeft: '8px' }}>
+            <div style={{ color: (inventory.metal_scrap || 0) >= 1 ? '#86efac' : '#fca5a5', fontWeight: 'bold' }}>
+              ⚙️ 금속 조각 × {GAME_CONFIG.AUTO_FEEDER?.REQUIRED_ITEMS?.metal_scrap || 1}
+              <span style={{ color: '#cbd5e1' }}> ({inventory.metal_scrap || 0})</span>
+            </div>
+            <div style={{ color: (inventory.branch_pile || 0) >= 2 ? '#86efac' : '#fca5a5', fontWeight: 'bold' }}>
+              🪵 나뭇가지 더미 × {GAME_CONFIG.AUTO_FEEDER?.REQUIRED_ITEMS?.branch_pile || 2}
+              <span style={{ color: '#cbd5e1' }}> ({inventory.branch_pile || 0})</span>
+            </div>
+          </div>
+          <div style={{ fontSize: '9px', color: '#86efac', marginTop: '4px', fontStyle: 'italic' }}>
+            자동으로 사료를 뿌려줘요! 🐔
           </div>
         </div>,
         document.body
