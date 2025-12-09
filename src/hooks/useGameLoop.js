@@ -273,6 +273,13 @@ export const useGameLoop = (fieldSize, adventuringChickenId = null) => {
 
   // 과학기지 추가 (코인 + 재료 필요)
   const addScienceBase = (x, y, inventory, consumeItems) => {
+    const totalChickens = chickensRef.current.length;
+    const isChickenFarmOrAbove = totalChickens >= FARM_GRADE.CHICKEN_FARM.minChickens;
+    
+    if (!isChickenFarmOrAbove) {
+      return false; // 닭 농장 단계 이상 필요
+    }
+    
     const requiredItems = GAME_CONFIG.SCIENCE_BASE?.REQUIRED_ITEMS || {};
     const hasAllMaterials = Object.entries(requiredItems).every(
       ([item, count]) => (inventory[item] || 0) >= count
@@ -303,6 +310,13 @@ export const useGameLoop = (fieldSize, adventuringChickenId = null) => {
 
   // 자동사료 배분기 추가
   const addAutoFeeder = (x, y, inventory, consumeItems) => {
+    const totalChickens = chickensRef.current.length;
+    const isChickenFarmOrAbove = totalChickens >= FARM_GRADE.CHICKEN_FARM.minChickens;
+    
+    if (!isChickenFarmOrAbove) {
+      return false; // 닭 농장 단계 이상 필요
+    }
+    
     const cost = GAME_CONFIG.AUTO_FEEDER?.COST || 100;
     const requiredItems = GAME_CONFIG.AUTO_FEEDER?.REQUIRED_ITEMS || { metal_scrap: 1, branch_pile: 2 };
     

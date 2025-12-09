@@ -112,19 +112,20 @@ const ItemPanel = ({
   );
   const canBuildMansion = coins >= (GAME_CONFIG.MANSION?.COST || 0) && hasMansionMaterials && isGoldenFarm;
 
-  // 과학기지 재료 체크
+  // 과학기지 재료 체크 (닭 농장 단계 이상 필요)
+  const isChickenFarmOrAbove = farmGrade?.level >= FARM_GRADE.CHICKEN_FARM.level;
   const scienceBaseRequiredItems = GAME_CONFIG.SCIENCE_BASE?.REQUIRED_ITEMS || {};
   const hasScienceBaseMaterials = Object.entries(scienceBaseRequiredItems).every(
     ([item, count]) => (inventory[item] || 0) >= count
   );
-  const canBuildScienceBase = coins >= (GAME_CONFIG.SCIENCE_BASE?.COST || 0) && hasScienceBaseMaterials;
+  const canBuildScienceBase = isChickenFarmOrAbove && coins >= (GAME_CONFIG.SCIENCE_BASE?.COST || 0) && hasScienceBaseMaterials;
 
-  // 자동사료 배분기 재료 체크
+  // 자동사료 배분기 재료 체크 (닭 농장 단계 이상 필요)
   const autoFeederRequiredItems = GAME_CONFIG.AUTO_FEEDER?.REQUIRED_ITEMS || {};
   const hasAutoFeederMaterials = Object.entries(autoFeederRequiredItems).every(
     ([item, count]) => (inventory[item] || 0) >= count
   );
-  const canBuildAutoFeeder = coins >= (GAME_CONFIG.AUTO_FEEDER?.COST || 0) && hasAutoFeederMaterials;
+  const canBuildAutoFeeder = isChickenFarmOrAbove && coins >= (GAME_CONFIG.AUTO_FEEDER?.COST || 0) && hasAutoFeederMaterials;
 
   const renderItem = (item, isGoldenItem = false) => {
     const canAfford = coins >= item.cost;
@@ -529,20 +530,23 @@ const ItemPanel = ({
           </div>
           <div style={{ marginBottom: '3px' }}>💰 코인: <span style={{ color: '#ffd700', fontWeight: 'bold' }}>{GAME_CONFIG.SCIENCE_BASE?.COST || 150}</span></div>
           <div style={{ fontSize: '9px', color: '#93c5fd', marginTop: '4px', borderTop: '2px solid #475569', paddingTop: '4px' }}>
-            필수 재료 (숲/통신탑에서 획득):
+            필수 재료 (숲/해변에서 획득):
           </div>
           <div style={{ fontSize: '9px', paddingLeft: '8px' }}>
             <div style={{ color: (inventory.branch_pile || 0) >= 3 ? '#86efac' : '#fca5a5', fontWeight: 'bold' }}>
               🪵 나뭇가지 더미 × {GAME_CONFIG.SCIENCE_BASE?.REQUIRED_ITEMS?.branch_pile || 3}
               <span style={{ color: '#cbd5e1' }}> ({inventory.branch_pile || 0})</span>
             </div>
-            <div style={{ color: (inventory.antenna || 0) >= 1 ? '#86efac' : '#fca5a5', fontWeight: 'bold' }}>
-              📡 부서진 안테나 × {GAME_CONFIG.SCIENCE_BASE?.REQUIRED_ITEMS?.antenna || 1}
-              <span style={{ color: '#cbd5e1' }}> ({inventory.antenna || 0})</span>
+            <div style={{ color: (inventory.shell || 0) >= 3 ? '#86efac' : '#fca5a5', fontWeight: 'bold' }}>
+              {inventory.shell ? '🐚' : '◻️'} 조개껍데기 × {GAME_CONFIG.SCIENCE_BASE?.REQUIRED_ITEMS?.shell || 3}
+              <span style={{ color: '#cbd5e1' }}> ({inventory.shell || 0})</span>
             </div>
           </div>
           <div style={{ fontSize: '9px', color: '#93c5fd', marginTop: '4px', fontStyle: 'italic' }}>
             닭들이 연구를 시작할 수 있어요! 🐔
+          </div>
+          <div style={{ fontSize: '9px', color: isChickenFarmOrAbove ? '#86efac' : '#fca5a5', marginTop: '4px', fontWeight: 'bold' }}>
+            {isChickenFarmOrAbove ? '✓' : '✗'} 닭 농장 이상 (닭 5마리 이상)
           </div>
         </div>,
         document.body
@@ -586,6 +590,9 @@ const ItemPanel = ({
           </div>
           <div style={{ fontSize: '9px', color: '#86efac', marginTop: '4px', fontStyle: 'italic' }}>
             자동으로 사료를 뿌려줘요! 🐔
+          </div>
+          <div style={{ fontSize: '9px', color: isChickenFarmOrAbove ? '#86efac' : '#fca5a5', marginTop: '4px', fontWeight: 'bold' }}>
+            {isChickenFarmOrAbove ? '✓' : '✗'} 닭 농장 이상 (닭 5마리 이상)
           </div>
         </div>,
         document.body

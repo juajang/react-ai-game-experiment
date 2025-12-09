@@ -50,8 +50,8 @@ export const GAME_CONFIG = {
   
   // 알 관련
   EGG: {
-    LAY_CHANCE: 1.5,                 // 알 낳을 확률 감소 (4 → 1.5)
-    LAY_COOLDOWN: 150,               // 쿨다운 증가 (80 → 150)
+    LAY_CHANCE: 0.5,                 // 알 낳을 확률 (0.5%)
+    LAY_COOLDOWN: 350,               // 쿨다운 (350)
     HATCH_TIME: 120,                 // 부화 시간 감소 (150 → 120)
     WARM_DISTANCE: 50,               // 따뜻해지는 거리 증가 (40 → 50)
     WARM_RATE: 1.5,                  // 따뜻해지는 속도 (1 → 1.5)
@@ -104,14 +104,14 @@ export const GAME_CONFIG = {
   
   // 풍차 관련 (황금 농장 전용)
   WINDMILL: {
-    COST: 100,                       // 높은 가격 (황금 농장 전용)
+    COST: 300,                       // 높은 가격 (황금 농장 전용)
     EFFECT_RADIUS: 100,              // 넓은 효과 범위
     ALL_BOOST: 0.1,                  // 모든 스탯 소폭 증가
   },
   
   // 꽃덤불 관련
   FLOWER_BUSH: {
-    COST: 100,                       // 가격 (100원)
+    COST: 300,                       // 가격 (300원)
     EFFECT_RADIUS: 55,               // 효과 범위
     HAPPINESS_BOOST: 0.15,           // 꽃덤불 행복도 효과 (소폭)
   },
@@ -127,7 +127,7 @@ export const GAME_CONFIG = {
   
   // 짚단 우주선 관련
   SPACESHIP: {
-    COST: 500,                       // 높은 가격 (엔드게임 컨텐츠)
+    COST: 1000,                      // 높은 가격 (엔드게임 컨텐츠)
     REQUIRED_ITEMS: {                // 필요 재료
       spaceship_plate: 1,            // 우주선 플레이트 1개 (과학기지에서 제작)
       blueprint: 1,                  // 우주선 설계도 조각 1개
@@ -137,7 +137,7 @@ export const GAME_CONFIG = {
   
   // 닭의 성 관련
   MANSION: {
-    COST: 200,                       // 200코인
+    COST: 1000,                      // 1000코인
     REQUIRED_ITEMS: {                // 필요 재료
       twisted_vine: 1,               // 비틀어진 덩굴줄기 1개
       branch_pile: 3,                // 나뭇가지 더미 3개
@@ -146,17 +146,17 @@ export const GAME_CONFIG = {
   
   // 과학기지 관련
   SCIENCE_BASE: {
-    COST: 150,                       // 150코인
-    REQUIRED_ITEMS: {                // 필요 재료
+    COST: 500,                       // 500코인
+    REQUIRED_ITEMS: {                // 건설 필요 재료
       branch_pile: 3,                // 나뭇가지 더미 3개
-      antenna: 1,                    // 부서진 안테나 1개
+      shell: 3,                      // 조개껍데기 3개
     },
     EFFECT_RADIUS: 80,               // 효과 범위
   },
   
   // 자동사료 배분기 관련
   AUTO_FEEDER: {
-    COST: 100,                       // 100코인
+    COST: 500,                       // 500코인
     REQUIRED_ITEMS: {                // 필요 재료
       metal_scrap: 1,                // 금속조각 1개
       branch_pile: 2,                // 나뭇가지 더미 2개

@@ -218,8 +218,9 @@ const LOOT_TABLE = {
     { item: 'shovel', chance: 0.05, name: '삽' },
   ],
   BEACH: [
-    { item: null, chance: 0.75 },
+    { item: null, chance: 0.25 },
     { item: 'shovel', chance: 0.25, name: '삽' },
+    { item: 'shell', chance: 0.5, name: '조개껍데기' },
   ],
   VILLAGE: [
     { item: null, chance: 0.5 },
@@ -230,9 +231,8 @@ const LOOT_TABLE = {
     { item: 'fuel_cell', chance: 0.7, name: '연료 전지' },
   ],
   RESOURCE: [
-    { item: null, chance: 0.2 },
-    { item: 'metal_scrap', chance: 0.4, name: '신기한 금속 조각' },
-    { item: 'branch_pile', chance: 0.4, name: '나뭇가지 더미' },
+    { item: null, chance: 0.5 },
+    { item: 'metal_scrap', chance: 0.5, name: '신기한 금속 조각' },
   ],
   // 🏚️ 버려진 민가 - 인간의 유품
   HOUSE: [
@@ -471,6 +471,7 @@ const ExplorationControl = ({
         spaceship_plate: '🛸',
         twisted_vine: '🌿',
         branch_pile: '🪵',
+        shell: '🐚',
       };
       
       const emoji = itemEmojis[loot.item] || '🎁';
@@ -528,6 +529,13 @@ const ExplorationControl = ({
   
   useEffect(() => {
     adventuringChickenRef.current = adventuringChicken;
+    
+    // 닭이 귀환하면 주사위 상태 초기화
+    if (!adventuringChicken) {
+      setDiceResult(1);
+      setRemainingMoves(0);
+      setIsRolling(false);
+    }
   }, [adventuringChicken]);
   
   useEffect(() => {

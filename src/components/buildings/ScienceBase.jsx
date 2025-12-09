@@ -6,24 +6,24 @@ const ScienceBase = memo(({ x, y, onClick, onMouseDown, inventory = {}, onConsum
   const [showResearchPanel, setShowResearchPanel] = useState(false);
   const [researchState, setResearchState] = useState('idle'); // idle, researching, complete, done
   const [researchProgress, setResearchProgress] = useState(0);
-  const [insertedItems, setInsertedItems] = useState({ metal_scrap: 0, blueprint: 0 });
+  const [insertedItems, setInsertedItems] = useState({ metal_scrap: 0, antenna: 0 });
   const [panelPosition, setPanelPosition] = useState({ x: 0, y: 0 });
   const buildingRef = useRef(null);
   
   // 이미 연구 완료했는지 확인
   const isResearchDone = researchState === 'done';
   
-  // 필요한 재료
-  const requiredItems = { metal_scrap: 3, blueprint: 1 };
+  // 연구에 필요한 재료
+  const requiredItems = { metal_scrap: 3, antenna: 1 };
   
   // 재료가 충분한지 체크
   const canInsertMetalScrap = (inventory.metal_scrap || 0) > insertedItems.metal_scrap;
-  const canInsertBlueprint = (inventory.blueprint || 0) > insertedItems.blueprint;
+  const canInsertAntenna = (inventory.antenna || 0) > insertedItems.antenna;
   
   // 연구 시작 가능 여부
   const canStartResearch = 
     insertedItems.metal_scrap >= requiredItems.metal_scrap && 
-    insertedItems.blueprint >= requiredItems.blueprint &&
+    insertedItems.antenna >= requiredItems.antenna &&
     researchState === 'idle';
   
   // 아이템 투입
@@ -32,8 +32,8 @@ const ScienceBase = memo(({ x, y, onClick, onMouseDown, inventory = {}, onConsum
     
     if (itemType === 'metal_scrap' && canInsertMetalScrap) {
       setInsertedItems(prev => ({ ...prev, metal_scrap: prev.metal_scrap + 1 }));
-    } else if (itemType === 'blueprint' && canInsertBlueprint) {
-      setInsertedItems(prev => ({ ...prev, blueprint: prev.blueprint + 1 }));
+    } else if (itemType === 'antenna' && canInsertAntenna) {
+      setInsertedItems(prev => ({ ...prev, antenna: prev.antenna + 1 }));
     }
   };
   
@@ -43,8 +43,8 @@ const ScienceBase = memo(({ x, y, onClick, onMouseDown, inventory = {}, onConsum
     
     if (itemType === 'metal_scrap' && insertedItems.metal_scrap > 0) {
       setInsertedItems(prev => ({ ...prev, metal_scrap: prev.metal_scrap - 1 }));
-    } else if (itemType === 'blueprint' && insertedItems.blueprint > 0) {
-      setInsertedItems(prev => ({ ...prev, blueprint: prev.blueprint - 1 }));
+    } else if (itemType === 'antenna' && insertedItems.antenna > 0) {
+      setInsertedItems(prev => ({ ...prev, antenna: prev.antenna - 1 }));
     }
   };
   
@@ -55,7 +55,7 @@ const ScienceBase = memo(({ x, y, onClick, onMouseDown, inventory = {}, onConsum
     // 인벤토리에서 재료 소모
     onConsumeItems?.({
       metal_scrap: requiredItems.metal_scrap,
-      blueprint: requiredItems.blueprint,
+      antenna: requiredItems.antenna,
     });
     
     setResearchState('researching');
@@ -73,7 +73,7 @@ const ScienceBase = memo(({ x, y, onClick, onMouseDown, inventory = {}, onConsum
           setResearchState('complete');
           return 100;
         }
-        return prev + 10; // 10초 = 100% (1초당 10%)
+        return prev + (100 / 30); // 30초 = 100% (1초당 약 3.33%)
       });
     }, 1000);
     
@@ -90,7 +90,7 @@ const ScienceBase = memo(({ x, y, onClick, onMouseDown, inventory = {}, onConsum
     // 연구 완료 상태로 변경 (1회성)
     setResearchState('done');
     setResearchProgress(0);
-    setInsertedItems({ metal_scrap: 0, blueprint: 0 });
+    setInsertedItems({ metal_scrap: 0, antenna: 0 });
     
     // 패널 닫기
     setShowResearchPanel(false);
@@ -175,32 +175,34 @@ const ScienceBase = memo(({ x, y, onClick, onMouseDown, inventory = {}, onConsum
         <ellipse cx="24" cy="14" rx="1.5" ry="4" fill="none" stroke="#fff176" strokeWidth="0.5" />
       </svg>
       
-      {/* 연구 버튼 */}
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          setShowResearchPanel(!showResearchPanel);
-        }}
-        onMouseDown={(e) => e.stopPropagation()}
-        style={{
-          position: 'absolute',
-          bottom: '-8px',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          backgroundColor: researchState === 'done' ? '#6b7280' : researchState === 'researching' ? '#4caf50' : researchState === 'complete' ? '#ffd54f' : '#3b82f6',
-          color: 'white',
-          border: '1px solid #1e3a5f',
-          borderRadius: '3px',
-          padding: '1px 4px',
-          fontSize: '8px',
-          fontWeight: 'bold',
-          cursor: 'pointer',
-          whiteSpace: 'nowrap',
-          zIndex: 20,
-        }}
-      >
-        {researchState === 'done' ? '완료됨' : researchState === 'researching' ? `${researchProgress}%` : researchState === 'complete' ? '수령!' : '연구'}
-      </button>
+      {/* 연구 버튼 (연구중일 때는 표시하지 않음) */}
+      {researchState !== 'researching' && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            setShowResearchPanel(!showResearchPanel);
+          }}
+          onMouseDown={(e) => e.stopPropagation()}
+          style={{
+            position: 'absolute',
+            bottom: '-8px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            backgroundColor: researchState === 'done' ? '#6b7280' : researchState === 'complete' ? '#ffd54f' : '#3b82f6',
+            color: 'white',
+            border: '1px solid #1e3a5f',
+            borderRadius: '3px',
+            padding: '1px 4px',
+            fontSize: '8px',
+            fontWeight: 'bold',
+            cursor: 'pointer',
+            whiteSpace: 'nowrap',
+            zIndex: 20,
+          }}
+        >
+          {researchState === 'done' ? '완료됨' : researchState === 'complete' ? '수령!' : '연구'}
+        </button>
+      )}
       
       {/* 연구 패널 - Portal로 렌더링 (툴팁 스타일) */}
       {showResearchPanel && ReactDOM.createPortal(
@@ -293,7 +295,7 @@ const ScienceBase = memo(({ x, y, onClick, onMouseDown, inventory = {}, onConsum
                 }} />
               </div>
               <div style={{ color: '#90a4ae', fontSize: '9px', marginTop: '4px' }}>
-                {Math.ceil((100 - researchProgress) / 10)}초 남음
+                {Math.ceil((100 - researchProgress) / (100 / 30))}초 남음
               </div>
             </div>
           ) : (
@@ -355,52 +357,52 @@ const ScienceBase = memo(({ x, y, onClick, onMouseDown, inventory = {}, onConsum
                 </div>
               </div>
               
-              {/* 설계도 슬롯 */}
+              {/* 부서진 안테나 슬롯 */}
               <div style={{ 
                 display: 'flex', 
                 alignItems: 'center', 
                 justifyContent: 'space-between',
-                marginBottom: '8px',
+                marginBottom: '6px',
                 padding: '4px',
                 backgroundColor: '#2d2d44',
                 borderRadius: '4px',
               }}>
-                <span style={{ color: '#ce93d8', fontSize: '10px' }}>📜 설계도</span>
+                <span style={{ color: '#90caf9', fontSize: '10px' }}>📡 안테나</span>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                   <button
-                    onClick={() => handleRemoveItem('blueprint')}
-                    disabled={insertedItems.blueprint <= 0}
+                    onClick={() => handleRemoveItem('antenna')}
+                    disabled={insertedItems.antenna <= 0}
                     style={{
                       width: '18px',
                       height: '18px',
-                      backgroundColor: insertedItems.blueprint > 0 ? '#ef4444' : '#4a4a5a',
+                      backgroundColor: insertedItems.antenna > 0 ? '#ef4444' : '#4a4a5a',
                       color: 'white',
                       border: 'none',
                       borderRadius: '3px',
-                      cursor: insertedItems.blueprint > 0 ? 'pointer' : 'not-allowed',
+                      cursor: insertedItems.antenna > 0 ? 'pointer' : 'not-allowed',
                       fontSize: '10px',
                     }}
                   >-</button>
                   <span style={{ 
-                    color: insertedItems.blueprint >= requiredItems.blueprint ? '#4caf50' : '#ffd54f',
+                    color: insertedItems.antenna >= requiredItems.antenna ? '#4caf50' : '#ffd54f',
                     fontSize: '11px',
                     fontWeight: 'bold',
                     minWidth: '30px',
                     textAlign: 'center',
                   }}>
-                    {insertedItems.blueprint}/{requiredItems.blueprint}
+                    {insertedItems.antenna}/{requiredItems.antenna}
                   </span>
                   <button
-                    onClick={() => handleInsertItem('blueprint')}
-                    disabled={!canInsertBlueprint || insertedItems.blueprint >= requiredItems.blueprint}
+                    onClick={() => handleInsertItem('antenna')}
+                    disabled={!canInsertAntenna || insertedItems.antenna >= requiredItems.antenna}
                     style={{
                       width: '18px',
                       height: '18px',
-                      backgroundColor: canInsertBlueprint && insertedItems.blueprint < requiredItems.blueprint ? '#4caf50' : '#4a4a5a',
+                      backgroundColor: canInsertAntenna && insertedItems.antenna < requiredItems.antenna ? '#4caf50' : '#4a4a5a',
                       color: 'white',
                       border: 'none',
                       borderRadius: '3px',
-                      cursor: canInsertBlueprint && insertedItems.blueprint < requiredItems.blueprint ? 'pointer' : 'not-allowed',
+                      cursor: canInsertAntenna && insertedItems.antenna < requiredItems.antenna ? 'pointer' : 'not-allowed',
                       fontSize: '10px',
                     }}
                   >+</button>
@@ -409,7 +411,7 @@ const ScienceBase = memo(({ x, y, onClick, onMouseDown, inventory = {}, onConsum
               
               {/* 보유량 표시 */}
               <div style={{ color: '#6b7280', fontSize: '8px', marginBottom: '8px' }}>
-                보유: ⚙️{inventory.metal_scrap || 0} | 📜{inventory.blueprint || 0}
+                보유: ⚙️{inventory.metal_scrap || 0} | 📡{inventory.antenna || 0}
               </div>
               
               {/* 연구 시작 버튼 */}
@@ -433,7 +435,7 @@ const ScienceBase = memo(({ x, y, onClick, onMouseDown, inventory = {}, onConsum
               
               {/* 결과물 미리보기 */}
               <div style={{ color: '#90a4ae', fontSize: '8px', marginTop: '6px', textAlign: 'center' }}>
-                결과물: 🛸 우주선 플레이트 (10초)
+                결과물: 🛸 우주선 플레이트 (30초)
               </div>
             </>
           )}
