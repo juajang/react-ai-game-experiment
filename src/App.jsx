@@ -1013,7 +1013,7 @@ export default function ChickenGame() {
                 letterSpacing: '3px',
               }}
             >
-              🐔 닭 농장 어드벤처 🗺️
+              🐔 치킨 시뮬레이터 🗺️
             </h1>
             <FarmGradeBadge grade={farmGrade} totalChickens={totalChickenCount} />
           </div>
