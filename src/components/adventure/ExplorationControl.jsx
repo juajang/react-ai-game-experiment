@@ -204,8 +204,9 @@ const Dice3D = ({ value, isRolling, size = 50 }) => {
 // 획득 가능한 아이템 목록
 const LOOT_TABLE = {
   GRASS: [
-    { item: null, chance: 0.85 },
+    { item: null, chance: 0.55 },
     { item: 'shovel', chance: 0.15, name: '삽' },
+    { item: 'branch_pile', chance: 0.3, name: '나뭇가지 더미' },
   ],
   // 🛤️ 길 - 조사 불가 (아무것도 없음)
   PATH: [
@@ -460,9 +461,9 @@ const ExplorationControl = ({
     
     // 숲/해변/초원 조사 시 사망 확률 체크
     const deathChances = {
-      FOREST: 0.15,  // 숲: 15%
-      BEACH: 0.15,   // 해변: 15%
-      GRASS: 0.15,   // 초원: 15%
+      FOREST: 0.07,  // 숲: 7%
+      BEACH: 0.07,   // 해변: 7%
+      GRASS: 0.07,   // 초원: 7%
     };
     
     const deathChance = deathChances[tileType];
