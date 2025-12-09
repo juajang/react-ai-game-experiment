@@ -50,7 +50,7 @@ export const GAME_CONFIG = {
   
   // 알 관련
   EGG: {
-    LAY_CHANCE: 0.5,                 // 알 낳을 확률 (0.5%)
+    LAY_CHANCE: 0.7,                 // 알 낳을 확률 (0.7%)
     LAY_COOLDOWN: 350,               // 쿨다운 (350)
     HATCH_TIME: 120,                 // 부화 시간 감소 (150 → 120)
     WARM_DISTANCE: 50,               // 따뜻해지는 거리 증가 (40 → 50)
@@ -191,7 +191,7 @@ export const GAME_CONFIG = {
   
   // 피로 관련
   TIREDNESS: {
-    INCREASE_RATE: 0.1,              // 천천히 피곤해짐 (0.25 → 0.1)
+    INCREASE_RATE: 0.3,              // 피로도 증가 속도 (0.1 → 0.3)
     TIRED_THRESHOLD: 75,             // 늦게 피곤 상태 (60 → 75)
     EXHAUSTED_THRESHOLD: 90,         // 늦게 탈진 (80 → 90)
     MAX: 100,

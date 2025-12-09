@@ -1,4 +1,4 @@
-import { useRef, useCallback, useState, useEffect } from 'react';
+import { useRef, useCallback, useState, useEffect, useMemo } from 'react';
 import { Chicken, Chick, Juvenile, DeadChicken, Egg, Feed, Flower, FlowerBush, Pond, Windmill, StrawSpaceship, Mansion, ScienceBase, AutoFeeder, Poop, Field, GameInfo, Coop, ItemPanel, AdventurePanel, StatusBar } from './components';
 import { useGameLoop } from './hooks/useGameLoop';
 import { useFieldSize } from './hooks/useFieldSize';
@@ -28,9 +28,29 @@ const AdventureEndOverlay = ({ result, onClose }) => {
   
   const { chickenName, moveCount, earnedExp, reason, leveledUp, newLevel } = result;
   
+  // 사망 메시지 목록
+  const deathMessages = [
+    '닭에게는 좀 심한 세상이네요.',
+    '닭의 발자국은 여기서 희미해졌습니다.',
+    '다음엔 더 멀리 날 수 있을 거예요.',
+  ];
+  
+  // 사망 시 랜덤 메시지 선택 (result가 변경될 때만 한 번 선택)
+  const deathMessage = useMemo(() => {
+    if (reason === 'death') {
+      return deathMessages[Math.floor(Math.random() * deathMessages.length)];
+    }
+    return '';
+  }, [reason, chickenName, moveCount]); // chickenName과 moveCount를 의존성에 추가하여 같은 사망 사건에는 같은 메시지
+  
   let reasonText = '';
   let reasonEmoji = '🏠';
+  
   switch (reason) {
+    case 'death':
+      reasonText = '사망했습니다!';
+      reasonEmoji = '💀';
+      break;
     case 'tiredness':
       reasonText = '피로도가 100%에 도달했습니다!';
       reasonEmoji = '😫';
@@ -62,12 +82,12 @@ const AdventureEndOverlay = ({ result, onClose }) => {
           minWidth: '240px',
         }}
       >
-        {/* 타이틀 */}
+        {/* 타이틀 - 사망 시 "사망했습니다" 표시 */}
         <div 
           className="font-bold mb-2"
-          style={{ color: '#60a5fa', fontSize: '16px' }}
+          style={{ color: reason === 'death' ? '#ef4444' : '#60a5fa', fontSize: '16px' }}
         >
-          🗺️ 모험 종료!
+          {reason === 'death' ? '💀 사망했습니다' : '🗺️ 모험 종료!'}
         </div>
         
         {/* 닭 이름 */}
@@ -83,23 +103,32 @@ const AdventureEndOverlay = ({ result, onClose }) => {
           className="mb-3"
           style={{ color: '#e5e7eb', fontSize: '12px' }}
         >
-          <p className="mb-2" style={{ color: '#9ca3af' }}>{reasonEmoji} {reasonText}</p>
-          <div 
-            className="flex justify-around py-2 px-3 rounded"
-            style={{ backgroundColor: '#374151' }}
-          >
-            <div>
-              <div style={{ color: '#60a5fa', fontSize: '10px' }}>이동</div>
-              <div style={{ fontWeight: 'bold' }}>📍 {moveCount}칸</div>
+          {reason !== 'death' && (
+            <p className="mb-2" style={{ color: '#9ca3af' }}>{reasonEmoji} {reasonText}</p>
+          )}
+          {reason === 'death' && deathMessage && (
+            <p className="mb-2" style={{ color: '#9ca3af', fontSize: '11px', fontStyle: 'italic' }}>
+              {deathMessage}
+            </p>
+          )}
+          {reason !== 'death' && (
+            <div 
+              className="flex justify-around py-2 px-3 rounded"
+              style={{ backgroundColor: '#374151' }}
+            >
+              <div>
+                <div style={{ color: '#60a5fa', fontSize: '10px' }}>이동</div>
+                <div style={{ fontWeight: 'bold' }}>📍 {moveCount}칸</div>
+              </div>
+              <div>
+                <div style={{ color: '#fbbf24', fontSize: '10px' }}>경험치</div>
+                <div style={{ fontWeight: 'bold' }}>⭐ +{earnedExp}</div>
+              </div>
             </div>
-            <div>
-              <div style={{ color: '#fbbf24', fontSize: '10px' }}>경험치</div>
-              <div style={{ fontWeight: 'bold' }}>⭐ +{earnedExp}</div>
-            </div>
-          </div>
+          )}
           
-          {/* 레벨업 표시 */}
-          {leveledUp && (
+          {/* 레벨업 표시 (사망 시 제외) */}
+          {leveledUp && reason !== 'death' && (
             <div 
               className="mt-2 py-1 px-2 rounded"
               style={{ backgroundColor: '#7c3aed', color: '#fff', fontSize: '12px' }}
@@ -499,43 +528,51 @@ export default function ChickenGame() {
     let leveledUp = false;
     let newLevel = currentLevel;
     
-    // 귀환 시 피로도와 경험치를 원래 닭에게 적용
-    setChickens(prev => prev.map(c => {
-      if (c.id === adventuringChicken.id) {
-        const newExp = (c.experience || 0) + earnedExp;
-        const expForNext = c.expForNextLevel || 100;
-        const happiness = c.happiness || 0;
-        
-        // 레벨업 체크 (경험치가 충분하면 레벨업)
-        if (newExp >= expForNext) {
-          leveledUp = true;
-          newLevel = (c.level || 1) + 1;
-          // 레벨업 필요 경험치 증가 (기본 100, 1.5배씩 증가)
-          const newExpForNextLevel = Math.floor(100 * Math.pow(1.5, newLevel - 1));
+    // 사망한 경우 경험치나 레벨업 적용하지 않음, 닭의 건강을 0으로 설정
+    if (reason !== 'death') {
+      // 귀환 시 피로도와 경험치를 원래 닭에게 적용
+      setChickens(prev => prev.map(c => {
+        if (c.id === adventuringChicken.id) {
+          const newExp = (c.experience || 0) + earnedExp;
+          const expForNext = c.expForNextLevel || 100;
+          const happiness = c.happiness || 0;
+          
+          // 레벨업 체크 (경험치가 충분하면 레벨업)
+          if (newExp >= expForNext) {
+            leveledUp = true;
+            newLevel = (c.level || 1) + 1;
+            // 레벨업 필요 경험치 증가 (기본 100, 1.5배씩 증가)
+            const newExpForNextLevel = Math.floor(100 * Math.pow(1.5, newLevel - 1));
+            return { 
+              ...c, 
+              tiredness: adventuringChicken.tiredness,
+              experience: newExp - expForNext, // 초과 경험치는 다음 레벨로 이월
+              level: newLevel,
+              expForNextLevel: newExpForNextLevel,
+            };
+          }
+          
+          // 경험치가 부족하면 경험치만 누적
           return { 
             ...c, 
             tiredness: adventuringChicken.tiredness,
-            experience: newExp - expForNext, // 초과 경험치는 다음 레벨로 이월
-            level: newLevel,
-            expForNextLevel: newExpForNextLevel,
+            experience: newExp,
           };
         }
-        
-        // 경험치가 부족하면 경험치만 누적
-        return { 
-          ...c, 
-          tiredness: adventuringChicken.tiredness,
-          experience: newExp,
-        };
-      }
-      return c;
-    }));
+        return c;
+      }));
+    } else {
+      // 사망한 경우 닭의 건강을 0으로 설정하여 사망 처리
+      setChickens(prev => prev.map(c => 
+        c.id === adventuringChicken.id ? { ...c, health: 0 } : c
+      ));
+    }
     
     // 모험 종료 결과 설정 (오버레이 표시)
     setAdventureEndResult({
       chickenName,
       moveCount,
-      earnedExp,
+      earnedExp: reason === 'death' ? 0 : earnedExp, // 사망 시 경험치 0
       reason,
       leveledUp,
       newLevel,
@@ -1331,6 +1368,12 @@ export default function ChickenGame() {
             onUseDiceRoll={handleUseDiceRoll}
             onResetDiceRolls={handleResetDiceRolls}
             onAddExp={handleAddExp}
+            onKillChicken={(chickenId) => {
+              // 모험 중인 닭의 건강을 0으로 설정하여 사망 처리
+              setChickens(prev => prev.map(c => 
+                c.id === chickenId ? { ...c, health: 0 } : c
+              ));
+            }}
           />
         </div>
       </div>

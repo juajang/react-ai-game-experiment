@@ -305,6 +305,7 @@ const ExplorationControl = ({
   onUseDiceRoll,
   onResetDiceRolls,
   onAddExp,
+  onKillChicken,
 }) => {
   const [diceResult, setDiceResult] = useState(1);
   const [remainingMoves, setRemainingMoves] = useState(0);
@@ -457,6 +458,46 @@ const ExplorationControl = ({
     const description = getDescription(tileType, playerPosition.x, playerPosition.y);
     const tileName = currentPoi?.name || TILE_NAMES[tileType] || tileType;
     
+    // 숲/해변/초원 조사 시 사망 확률 체크
+    const deathChances = {
+      FOREST: 0.15,  // 숲: 15%
+      BEACH: 0.15,   // 해변: 15%
+      GRASS: 0.15,   // 초원: 15%
+    };
+    
+    const deathChance = deathChances[tileType];
+    const isDead = deathChance && Math.random() < deathChance;
+    
+    if (isDead) {
+      // 닭 사망 처리
+      const deathMessages = {
+        FOREST: "숲에서 위험한 야생 동물… 고양이를 만났어요. 눈이 마주친 순간, 이미 끝이었죠.",
+        BEACH: "해변의 모래사장에서 위험한 순간… 위에서 그림자가 드리우길래 보니, 독수리가 점심을 고르는 중이었어요.",
+        GRASS: "초원에서 뜻밖의 사고… 발밑의 풀들이 움직이더니, 뱀이 먼저 인사를 건넸어요.",
+      };
+      
+      const deathMessage = deathMessages[tileType] || "조사 중 사고가 발생했어요...";
+      
+      // 탐험 로그에 추가
+      onAddLog?.({
+        x: playerPosition.x,
+        y: playerPosition.y,
+        name: tileName,
+        description: `💀 ${deathMessage} ${adventuringChicken.name}이(가) 사망했습니다.`,
+        tileType,
+      });
+      
+      setMessage(`💀 ${deathMessage} ${adventuringChicken.name}이(가) 사망했습니다.`);
+      
+      // 닭 죽이기 및 즉시 귀환
+      onKillChicken?.(adventuringChicken.id);
+      setTimeout(() => {
+        onRecallChicken?.('death');
+      }, 1000);
+      
+      return;
+    }
+    
     // 아이템 획득 체크
     const loot = rollLoot(tileType, playerPosition.x, playerPosition.y);
     let lootMessage = '';
@@ -503,7 +544,7 @@ const ExplorationControl = ({
     onAddExp?.(investigateExpGain);
     
     setMessage(`🔍 ${description}${lootMessage} (+${investigateExpGain}EXP)`);
-  }, [posKey, rice, investigatedTiles, onConsumeRice, onInvestigate, currentPoi, currentTileType, playerPosition, onAddLog, onAddItem, inventory.shovel, adventuringChicken, onAddExp]);
+  }, [posKey, rice, investigatedTiles, onConsumeRice, onInvestigate, currentPoi, currentTileType, playerPosition, onAddLog, onAddItem, inventory.shovel, adventuringChicken, onAddExp, onKillChicken, onRecallChicken]);
 
   // 주사위 횟수가 남아있으면 굴릴 수 있음 (피로도 100 도달은 귀환 시 처리)
   const canRoll = !isRolling && remainingMoves <= 0 && adventuringChicken && 
