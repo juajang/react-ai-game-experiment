@@ -205,7 +205,7 @@ export const GAME_CONFIG = {
     HEALTH_RECOVERY_RATE: 1,         // 건강 회복 속도 증가 (0.3 → 1)
     MIN_SLEEP_TIME: 30,              // 최소 수면 시간 감소 (60 → 30)
     ENTER_DISTANCE: 40,              // 닭집 입장 거리 (30 → 40)
-    COST: 35,                        // 가격 인하 (60 → 35)
+    COST: 100,                       // 가격 (100원)
   },
 };
 

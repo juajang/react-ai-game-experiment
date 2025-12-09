@@ -261,6 +261,12 @@ const LOOT_TABLE = {
 // 아이템 획득 함수
 const rollLoot = (tileType, x, y) => {
   const lootTable = LOOT_TABLE[tileType] || LOOT_TABLE.GRASS;
+  
+  // 100% 확률 아이템이 하나만 있는 경우 즉시 반환 (버그 방지)
+  if (lootTable.length === 1 && lootTable[0].chance >= 1.0 && lootTable[0].item) {
+    return lootTable[0];
+  }
+  
   const seed = Math.sin(x * 17 + y * 31) * 10000;
   const rand = (seed - Math.floor(seed) + Math.random()) / 2;
   
