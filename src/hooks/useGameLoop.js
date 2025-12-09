@@ -729,12 +729,13 @@ export const useGameLoop = (fieldSize, adventuringChickenId = null) => {
         // 애니메이션 프레임
         frame = getAnimationFrame(state, frame);
 
-        // 알 낳기 체크 (성체만, 피곤하지 않을 때)
+        // 알 낳기 체크 (성체만, 피곤하지 않을 때, 최대 닭 수 미만일 때만)
         if (stage === GROWTH_STAGE.ADULT && eggCooldown <= 0 && 
             tiredness < config.TIREDNESS.TIRED_THRESHOLD &&
             hunger >= config.EGG.MIN_HUNGER && 
             happiness >= config.EGG.MIN_HAPPINESS && 
             health >= config.EGG.MIN_HEALTH &&
+            currentChickens.length < config.MAX_CHICKENS &&
             Math.random() * 100 < config.EGG.LAY_CHANCE) {
           newEggPositions.push({ x, y: y + 20 });
           eggCooldown = config.EGG.LAY_COOLDOWN;
